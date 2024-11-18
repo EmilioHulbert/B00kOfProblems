@@ -633,18 +633,18 @@ STEPS
 First, check what exactly is at /usr/bin/pip by running:
 
 bash
-Copy code
+
 ls -l /usr/bin/pip
 2. Remove Existing pip Binary (If Safe)
 If you confirm that /usr/bin/pip is a regular file and not a symlink, you can move or remove it, depending on your preference. To back it up (in case you need to restore it later):
 
 bash
-Copy code
+
 sudo mv /usr/bin/pip /usr/bin/pip.backup
 Or, if you're sure you want to remove it:
 
 bash
-Copy code
+
 sudo rm /usr/bin/pip
 
 3. Recreate the Alternative for pip
@@ -655,7 +655,7 @@ After you’ve removed or moved the existing pip binary, you can try running upd
 ## For Python 2:
 ```
 bash
-Copy code
+
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
 ```
 
@@ -679,17 +679,17 @@ pip - auto mode
 
 Run the following command to disable ping replies:
 ```bash
-Copy code
+
 sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
 To make this change permanent (after a reboot), edit the /etc/sysctl.conf file and add the following line:
 
 bash
-Copy code
+
 net.ipv4.icmp_echo_ignore_all = 1
 After saving the file, apply the changes by running:
 
 bash
-Copy code
+
 sudo sysctl -p
 ```
 
@@ -750,7 +750,7 @@ Update Your Package List:
 After adding the key manually, you can update the package list:
 
 bash
-Copy code
+
 sudo apt update
 
 ```
@@ -764,32 +764,32 @@ Since PPAs are primarily for Ubuntu and its derivatives, you may be able to add 
 First, find the actual URL for the PPA. PPAs are usually hosted on Launchpad and follow this structure:
 
 
-Copy code
+
 
 deb http://ppa.launchpad.net/<user>/<repository>/ubuntu <distribution> main
 In your case, the PPA URL would likely be something like:
 
 bash
-Copy code
+
 deb http://ppa.launchpad.net/zhangsongcui3371/fastfetch/ubuntu focal main
 To manually add this, follow these steps:
 
 Open the /etc/apt/sources.list file for editing:
 
 ```bash
-Copy code
+
 sudo nano /etc/apt/sources.list
 Add the PPA at the end of the file:
 
 bash
-Copy code
+
 deb http://ppa.launchpad.net/zhangsongcui3371/fastfetch/ubuntu focal main
 Save and close the file (Ctrl + O, then Ctrl + X).
 
 Add the GPG key for the PPA:
 
 bash
-Copy code
+
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <KEY>
 (You'll need to replace <KEY> with the actual key ID of the PPA.)
 ```
@@ -797,7 +797,7 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <KEY>
 Update your package list:
 
 ```bash
-Copy code
+
 sudo apt update
 2. Use a Different Installation Method (Debian-based Systems)
 If your system is not Ubuntu-based but still Debian-based (like Debian Lory), PPAs might not be the best approach. Instead, consider installing the package from an official source, GitHub, or from the source code itself.
@@ -819,13 +819,13 @@ To find the actual key ID of a PPA, follow these steps:
 Go to the Launchpad PPA page and search for the PPA. In your case, the PPA you are interested in is:
 
 ```bash
-Copy code
+
 ppa:zhangsongcui3371/fastfetch
 You can access the PPA directly by visiting:
 ```
 
 ```bash
-Copy code
+
 https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch
 2. Find the GPG Key Information on the PPA Page
 Once on the PPA page, scroll down to find the Technical details about this PPA section. Here, you will usually find the Signing key and Fingerprint.
@@ -833,7 +833,7 @@ Once on the PPA page, scroll down to find the Technical details about this PPA s
 For example, it will say something like:
 
 vbnet
-Copy code
+
 Signing key: 1024R/XXXXXXXX
 The key ID is the part after the slash (XXXXXXXX in this case).
 
@@ -841,7 +841,7 @@ The key ID is the part after the slash (XXXXXXXX in this case).
 Once you have the key ID (for example, XXXXXXXX), you can add it using the following command:
 
 bash
-Copy code
+
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys XXXXXXXXX
 Make sure to replace XXXXXXXXX with the actual key ID you found on the PPA page.
 
@@ -849,7 +849,7 @@ Example
 If the key ID you found is 9ABCDEF0, then you would run:
 
 bash
-Copy code
+
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9ABCDEF0
 This will add the PPA's GPG key to your system so that the system can verify and trust the packages from that repository.
 
@@ -883,7 +883,7 @@ The warning you're seeing indicates that apt-key is deprecated, and the error me
 *If the keyserver fails to respond, you can try downloading the key directly from the Launchpad page or its link. To do this:*
 
 ```bash
-Copy code
+
 wget -qO - https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xEB65EE19D802F3EB1A13CFE47E2E5CB4D4865F21 | sudo tee /etc/apt/trusted.gpg.d/fastfetch.asc
 Verify and Add the Key:
 
@@ -894,7 +894,7 @@ Update Your Package List:
 After adding the key manually, you can update the package list:
 
 bash
-Copy code
+
 sudo apt update
 ```
 
@@ -902,13 +902,13 @@ sudo apt update
 If you're still facing issues with the keyserver.ubuntu.com connection, try using a different keyserver:
 
 ```bash
-Copy code
+
 sudo apt-key adv --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys EB65EE19D802F3EB1A13CFE47E2E5CB4D4865F21
 Or:
 ```
 
 ```bash
-Copy code
+
 sudo apt-key adv --keyserver hkps://pgp.mit.edu --recv-keys EB65EE19D802F3EB1A13CFE47E2E5CB4D4865F21
 Why This Happens
 Sometimes the default keyserver may experience downtime or other connectivity issues. Using alternate keyservers or manually downloading the key ensures that you can still proceed with adding repositories and installing packages.
@@ -933,12 +933,12 @@ You can create or modify Nano's configuration file (nanorc) to ensure Ctrl + O w
 >Open the Nano configuration file:
 
 ```bash
-Copy code
+
 nano ~/.nanorc
 If you don't see the following line, add it to ensure Ctrl + O is used for saving (though it should be set by default):
 
 bash
-Copy code
+
 bind ^O savefile main
 ```
 
@@ -981,11 +981,11 @@ Allow phpMyAdmin from all IPs (since XAMPP restricts access to localhost by defa
 Open the phpMyAdmin configuration file:
 
 ```bash
-Copy code
+
 sudo nano /opt/lampp/etc/extra/httpd-xampp.conf
 Find the block for phpMyAdmin (usually under Alias /phpmyadmin "/opt/lampp/phpmyadmin"), and change Require local to Require all granted, so it looks like this:
 apache
-Copy code
+
 <Directory "/opt/lampp/phpmyadmin">
     AllowOverride AuthConfig
     Require all granted
@@ -994,12 +994,12 @@ Copy code
 Restart XAMPP: After editing, restart XAMPP to apply the changes:
 ```
 ```bash
-Copy code
+
 sudo /opt/lampp/lampp restart
 Access phpMyAdmin: Now you can access phpMyAdmin through your browser:
 
 bash
-Copy code
+
 http://your-ec2-public-ip/phpmyadmin
 ```
 
@@ -1013,7 +1013,7 @@ In httpd-xampp.conf, instead of Require all granted, restrict access to your own
 
 apache
 
-```Copy code
+```
 
 Require ip your-ip-address
 Password Protection:
@@ -1033,27 +1033,27 @@ Allow remote access in MySQL:
 Open the MySQL config file:
 
 ```bash
-Copy code
+
 sudo nano /opt/lampp/etc/my.cnf
 Find the bind-address line and change it from 127.0.0.1 to 0.0.0.0:
 bash
-Copy code
+
 bind-address = 0.0.0.0
 Grant remote access to MySQL user:
 
 Connect to MySQL:
 bash
-Copy code
+
 sudo /opt/lampp/bin/mysql -u root -p
 Run the following command to allow a specific user to connect from any IP address (replace your_password with your MySQL root password):
 sql
-Copy code
+
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'your_password';
 FLUSH PRIVILEGES;
 Restart MySQL:
 
 bash
-Copy code
+
 sudo /opt/lampp/lampp restart
 ```
 
@@ -1083,11 +1083,11 @@ Allow phpMyAdmin from all IPs (since XAMPP restricts access to localhost by defa
 
 Open the phpMyAdmin configuration file:
 ```bash
-Copy code
+
 sudo nano /opt/lampp/etc/extra/httpd-xampp.conf
 Find the block for phpMyAdmin (usually under Alias /phpmyadmin "/opt/lampp/phpmyadmin"), and change Require local to Require all granted, so it looks like this:
 apache
-Copy code
+
 <Directory "/opt/lampp/phpmyadmin">
     AllowOverride AuthConfig
     Require all granted
@@ -1096,12 +1096,12 @@ Copy code
 Restart XAMPP: After editing, restart XAMPP to apply the changes:
 
 bash
-Copy code
+
 sudo /opt/lampp/lampp restart
 Access phpMyAdmin: Now you can access phpMyAdmin through your browser:
 
 bash
-Copy code
+
 http://your-ec2-public-ip/phpmyadmin
 
 ```
@@ -1113,7 +1113,7 @@ IP Restriction:
 ```
 In httpd-xampp.conf, instead of Require all granted, restrict access to your own IP address:
 apache
-Copy code
+
 Require ip your-ip-address
 Password Protection:
 
@@ -1129,28 +1129,28 @@ Allow remote access in MySQL:
 
 Open the MySQL config file:
 ```bash
-Copy code
+
 sudo nano /opt/lampp/etc/my.cnf
 Find the bind-address line and change it from 127.0.0.1 to 0.0.0.0:
 bash
-Copy code
+
 bind-address = 0.0.0.0
 Grant remote access to MySQL user:
 
 Connect to MySQL:
 bash
 
-Copy code
+
 sudo /opt/lampp/bin/mysql -u root -p
 Run the following command to allow a specific user to connect from any IP address (replace your_password with your MySQL root password):
 sql
-Copy code
+
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'your_password';
 FLUSH PRIVILEGES;
 Restart MySQL:
 
 bash
-Copy code
+
 sudo /opt/lampp/lampp restart
 ```
 
@@ -1161,7 +1161,7 @@ Step 1: Update Your System
 Make sure your system is up to date before installing phpMyAdmin.
 
 ```bash
-Copy code
+
 sudo apt update
 sudo apt upgrade -y
 ```
@@ -1169,7 +1169,7 @@ Step 2: Install LAMP Stack (If not already installed)
 If you haven't installed Apache, MySQL, and PHP yet, do so by running:
 
 ```bash
-Copy code
+
 sudo apt install apache2
 sudo apt install mysql-server
 sudo apt install php libapache2-mod-php php-mysql
@@ -1179,7 +1179,7 @@ Step 3: Install phpMyAdmin
 Install phpMyAdmin using the following command:
 
 ```bash
-Copy code
+
 sudo apt install phpmyadmin
 ```
 
@@ -1194,13 +1194,13 @@ After installation, phpMyAdmin will not be automatically configured. You need to
 Create a symbolic link from phpMyAdmin to your Apache web root directory:
 
 ```bash
-Copy code
+
 sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 ```
 Restart Apache to apply changes:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 Step 5: Configure MySQL to Allow Remote Access (Optional)
@@ -1210,24 +1210,24 @@ If you want to access MySQL remotely, follow these steps:
 Open the MySQL configuration file:
 
 ```bash
-Copy code
+
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 Find the bind-address line and change it to 0.0.0.0:
 
 ini
-Copy code
+
 bind-address = 0.0.0.0
 ```
 Restart MySQL:
 
 ```bash
-Copy code
+
 sudo systemctl restart mysql
 ```
 Create a MySQL user for remote access:
 
 ```sql
-Copy code
+
 CREATE USER 'username'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON *.* TO 'username'@'%';
 FLUSH PRIVILEGES;
@@ -1247,7 +1247,7 @@ Step 7: Access phpMyAdmin
 You can now access phpMyAdmin by going to the following URL in your browser:
 
 ```bash
-Copy code
+
 http://your-ec2-public-ip/phpmyadmin
 Replace your-ec2-public-ip with the public IP address of your EC2 instance.
 ```
@@ -1259,13 +1259,13 @@ For security reasons, it’s a good idea to limit access to phpMyAdmin to certai
 Limit Access (Optional): You can limit phpMyAdmin access to specific IP addresses by editing Apache’s configuration file:
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/conf-available/phpmyadmin.conf
 ```
 Add the following lines inside the <Directory /usr/share/phpmyadmin> section:
 
 ```apache
-Copy code
+
 <Directory /usr/share/phpmyadmin>
     Require ip your-ip-address
     Require all denied
@@ -1287,7 +1287,7 @@ Ensure that the MySQL root user has the correct password set, and the credential
 1.1. Log in to MySQL as root:
 
 ```bash
-Copy code
+
 sudo mysql -u root -p
 ```
 If the root password works here, then you know it's correct.
@@ -1299,7 +1299,7 @@ Open the file /var/www/html/partials/connect.php where the connection is being m
 Example:
 
 ```php
-Copy code
+
 $mysqli = new mysqli("localhost", "root", "your_password", "database_name");
 Replace "your_password" with the actual MySQL root password, and "database_name" with the correct database name.
 ```
@@ -1310,7 +1310,7 @@ It is not recommended to use the root user for web applications. Instead, create
 2.1. Create a new MySQL user:
 
 ```sql
-Copy code
+
 CREATE USER 'your_user'@'localhost' IDENTIFIED BY 'your_password';
 GRANT ALL PRIVILEGES ON your_database.* TO 'your_user'@'localhost';
 FLUSH PRIVILEGES;
@@ -1322,7 +1322,7 @@ Replace 'your_user', 'your_password', and 'your_database' with your desired user
 Modify /var/www/html/partials/connect.php to use the new user:
 
 ```php
-Copy code
+
 $mysqli = new mysqli("localhost", "your_user", "your_password", "your_database");
 ```
 
@@ -1333,12 +1333,12 @@ If you are unsure of the root password or if it's incorrect, you can reset it:
 Log in to MySQL as root:
 
 ```bash
-Copy code
+
 sudo mysql
 Change the root password:
 
 sql
-Copy code
+
 ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
 FLUSH PRIVILEGES;
 Update the password in the PHP script as described earlier.
@@ -1348,7 +1348,7 @@ Step 4: Check MySQL Error Logs
 If the error persists, check MySQL logs for more specific issues:
 
 ```bash
-Copy code
+
 sudo tail -f /var/log/mysql/error.log
 ```
 
@@ -1357,7 +1357,7 @@ Step 5: Test the Connection
 Try testing the database connection with a simple PHP script to ensure the credentials work:
 
 ```php
-Copy code
+
 <?php
 $mysqli = new mysqli("localhost", "your_user", "your_password", "your_database");
 
@@ -1452,13 +1452,13 @@ For Apache:
 Edit the virtual host configuration file for your website:
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/sites-available/000-default.conf
 ```
 Add or update the ServerName and ServerAlias directives to point to your domain:
 
 ```apache
-Copy code
+
 <VirtualHost *:80>
    ServerName yourdomain.com
    ServerAlias www.yourdomain.com
@@ -1470,7 +1470,7 @@ Copy code
 Restart Apache:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 
@@ -1479,14 +1479,14 @@ For NGINX:
 Edit the NGINX configuration file for your site:
 
 ```bash
-Copy code
+
 sudo nano /etc/nginx/sites-available/default
 ```
 
 Update the server_name directive:
 
 ```nginx
-Copy code
+
 server {
     listen 80;
     server_name yourdomain.com www.yourdomain.com;
@@ -1498,7 +1498,7 @@ server {
 Test the NGINX configuration and restart:
 
 ```bash
-Copy code
+
 sudo nginx -t
 sudo systemctl restart nginx
 ```
@@ -1511,7 +1511,7 @@ Install Certbot (if using Apache or NGINX):
 For Apache:
 
 ```bash
-Copy code
+
 sudo apt install certbot python3-certbot-apache
 sudo certbot --apache
 ```
@@ -1519,7 +1519,7 @@ sudo certbot --apache
 For NGINX:
 
 ```bash
-Copy code
+
 sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx
 Certbot will automatically set up your HTTPS configuration and renew the certificate automatically.
@@ -1591,7 +1591,7 @@ Once the DNS records are properly set and propagated, retry generating the SSL c
 Run Certbot again:
 
 ```bash
-Copy code
+
 sudo certbot --apache
 ```
 
@@ -1602,7 +1602,7 @@ Step 4: Review Certbot Logs (If It Fails Again)
 If Certbot still fails, check the logs for more detailed errors:
 
 ```bash
-Copy code
+
 sudo cat /var/log/letsencrypt/letsencrypt.log
 This will provide more information on what went wrong, helping you troubleshoot further.
 ```
@@ -1731,13 +1731,13 @@ Step 1: Enable .htaccess Overrides
 Open your Apache configuration file for editing:
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/apache2.conf
 Find the directory block for your document root (typically /var/www/ or /var/www/html). It will look something like this:
 ```
 
 ```apache
-Copy code
+
 <Directory /var/www/>
     Options Indexes FollowSymLinks
     AllowOverride None
@@ -1748,7 +1748,7 @@ Change AllowOverride None to AllowOverride All to allow .htaccess to take effect
 
 apache
 
-Copy code
+
 <Directory /var/www/>
     Options Indexes FollowSymLinks
     AllowOverride All
@@ -1762,7 +1762,7 @@ Step 2: Restart Apache
 To apply the changes, restart Apache:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 
@@ -1771,7 +1771,7 @@ Step 3: Verify .htaccess Settings
 Now that AllowOverride All is set, the .htaccess file should work. Double-check that the .htaccess file in /var/www/html/ contains the following:
 
 ```apache
-Copy code
+
 Options -Indexes
 ```
 Step 4: Check Permissions (if still not working)
@@ -1781,7 +1781,7 @@ Make sure the .htaccess file and the directories have the correct permissions:
 Set permissions for .htaccess:
 
 ```bash
-Copy code
+
 sudo chmod 644 /var/www/html/.htaccess
 ```
 Ensure the Apache user (usually www-data) has read access to the directory and file.
@@ -1808,7 +1808,7 @@ Step 1: Disable Apache Version and OS Information in HTTP Headers
 Open the Apache configuration file for editing:
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/conf-available/security.conf
 ```
 Look for the following directives in the file. If they aren’t present, you can add them manually:
@@ -1821,7 +1821,7 @@ Update or add the following lines:
 
 apache
 
-Copy code
+
 
 ServerTokens Prod
 
@@ -1838,7 +1838,7 @@ Step 2: Restart Apache to Apply the Changes
 Once you’ve updated the configuration, restart Apache to apply the changes:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 
@@ -1851,7 +1851,7 @@ Visiting an incorrect URL on your site (to trigger a 404 error) and checking tha
 Using browser developer tools or curl to inspect the HTTP headers:
 
 ```bash
-Copy code
+
 curl -I https://nairobi-skates.com
 ```
 You should now see just Server: Apache, without any additional details.
@@ -1867,7 +1867,7 @@ Log in as postgres user (or any other superuser):
 If you're using a Unix-like system (Linux/macOS), log in as the postgres user:
 
 ```bash
-Copy code
+
 sudo -u postgres psql
 ```
 List all databases (optional):
@@ -1875,7 +1875,7 @@ List all databases (optional):
 To see which databases exist, use:
 
 ```sql
-Copy code
+
 \l
 This will list all available databases, including their names and owners.
 ```
@@ -1886,7 +1886,7 @@ Before deleting a database, you need to make sure no one (including yourself) is
 Switch to another database, like postgres:
 
 ```sql
-Copy code
+
 
 \c postgres
 ```
@@ -1895,7 +1895,7 @@ Terminate active connections (if needed):
 If other users or applications are connected to the database, you need to terminate their connections before deleting the database:
 
 ```sql
-Copy code
+
 SELECT pg_terminate_backend(pg_stat_activity.pid)
 FROM pg_stat_activity
 WHERE pg_stat_activity.datname = 'your_database'
@@ -1905,7 +1905,7 @@ Drop the database:
 Once you’re sure no one is connected, you can delete (drop) the database:
 ```
 ```sql
-Copy code
+
 DROP DATABASE your_database_name;
 Replace your_database_name with the actual database name.
 ```
@@ -1914,17 +1914,17 @@ Exit PostgreSQL:
 After you’ve deleted the database, you can exit the psql prompt:
 
 ```bash
-Copy code
+
 \q
 Full Command Example:
 ```
 ```bash
-Copy code
+
 sudo -u postgres psql
 Then inside PostgreSQL:
 ```
 ```sql
-Copy code
+
 \l                                 -- List databases
 \c postgres                        -- Switch to another database
 SELECT pg_terminate_backend(pg_stat_activity.pid)
@@ -1966,7 +1966,7 @@ If this is a new database, make sure that you have properly created the Odoo dat
 Run the following command to initialize the database:
 
 ```bash
-Copy code
+
 ./odoo-bin -d your_database_name -i base --db-filter=your_database_name$
 This should create the necessary tables, including ir_module_module.
 Database Mismatch or Corruption:
@@ -1975,7 +1975,7 @@ There could be an issue with the current database, such as missing tables due to
 Solution:
 Try checking the integrity of the database and see if other core tables are present. You can list the tables in PostgreSQL:
 sql
-Copy code
+
 \dt
 If many core tables are missing, it might be easier to recreate the database and reload the Odoo modules.
 Incorrect Database Being Used:
@@ -1989,7 +1989,7 @@ The base module (base) may not have been installed correctly, or there may have 
 Solution:
 Try reinstalling the base module:
 bash
-Copy code
+
 ./odoo-bin -d your_database_name -u base
 This will update the base module and potentially recreate the missing table.
 Migration/Upgrade Issues:
@@ -2005,7 +2005,7 @@ Check if the correct database is being used (odoo.conf).
 Reinstall or update the base module to ensure schema is correct.
 If necessary, reinitialize the database schema:
 bash
-Copy code
+
 ./odoo-bin -d your_database_name -i base
 Let me know if you need more assistance with troubleshooting!
 ```
@@ -2055,7 +2055,7 @@ Step 1: Check UFW Status
 First, check if UFW is active:
 
 ```bash
-Copy code
+
 sudo ufw status
 ```
 If it's inactive, you can skip the UFW configuration. If it's active, proceed to allow ICMP.
@@ -2065,13 +2065,13 @@ Step 2: Allow ICMP Through UFW
 You can allow ICMP traffic by running this command:
 
 ```bash
-Copy code
+
 sudo ufw allow proto icmp
 ```
 Alternatively, if you want to allow only ping (Echo Requests), you can use:
 
 ```bash
-Copy code
+
 sudo ufw allow icmp
 ```
 
@@ -2080,12 +2080,12 @@ sudo ufw allow icmp
 If you're managing your firewall using iptables rather than UFW, you can allow ICMP by adding a rule:
 
 ```bash
-Copy code
+
 sudo iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 Then save the iptables rules:
 ```
 ```bash
-Copy code
+
 sudo iptables-save > /etc/iptables/rules.v4
 ```
 
@@ -2094,7 +2094,7 @@ sudo iptables-save > /etc/iptables/rules.v4
 After configuring your security group or firewall, try pinging your server again:
 
 ```bash
-Copy code
+
 ping nairobiskates.com
 ```
 If everything is configured correctly, your server should now respond to ping requests.
@@ -2127,7 +2127,7 @@ Example of Connecting:
 If you are using the Elastic IP, your SSH command will always look like this, even after stopping and starting:
 
 ```bash
-Copy code
+
 ssh -i /path/to/your-key.pem ubuntu@your-elastic-ip
 ```
 So, as long as you have the Elastic IP associated with your instance, you won’t need to worry about the IP changing after stopping or starting the instance.
@@ -2159,7 +2159,7 @@ After associating the Elastic IP with your instance:
 Use the Elastic IP for SSH access, like so:
 
 ```bash
-Copy code
+
 ssh -i /path/to/your-key.pem ubuntu@your-elastic-ip
 ```
 If you had not associated the Elastic IP before stopping the instance, you would use the new dynamic public IP when you start it again (until you associate an Elastic IP). However, since you have now associated the Elastic IP, you will use that IP address moving forward.
@@ -2233,20 +2233,20 @@ If you have configured a firewall (like UFW or iptables) on your instance, make 
 UFW: Check the status and rules:
 
 ```bash
-Copy code
+
 sudo ufw status
 ```
 If it's blocking, allow SSH:
 
 ```bash
-Copy code
+
 sudo ufw allow ssh
 ```
 
 iptables: List current rules to check for SSH blocking:
 
 ```bash
-Copy code
+
 sudo iptables -L -n
 ```
 7. Check the Instance's System Logs
@@ -2268,7 +2268,7 @@ Example SSH Command
 Once you have verified everything, use the following command to SSH into your instance (adjust the IP as necessary):
 
 ```bash
-Copy code
+
 ssh -i /path/to/your-key.pem ubuntu@your-elastic-ip
 ```
 If you follow these steps and still encounter issues, please provide any specific errors or behaviors you notice, and we can dig deeper into the problem.
@@ -2308,13 +2308,13 @@ SSH into your VPS server.
 Create a new virtual host configuration for the subdomain:
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/sites-available/store.nairobiskates.com.conf
 ```
 Add the following configuration, replacing with your details:
 
 ```apache
-Copy code
+
 <VirtualHost *:80>
     ServerAdmin admin@nairoibiskates.com
     ServerName store.nairobiskates.com
@@ -2337,11 +2337,11 @@ Step 3: Create the Subdomain Directory
 Create the directory where you'll install WordPress:
 
 ```bash
-Copy code
+
 sudo mkdir /var/www/store
 Set proper permissions:
 bash
-Copy code
+
 sudo chown -R www-data:www-data /var/www/store
 sudo chmod -R 755 /var/www/store
 ```
@@ -2351,11 +2351,11 @@ Step 4: Enable the Subdomain and Restart Apache
 Enable the site:
 
 ```bash
-Copy code
+
 sudo a2ensite store.nairobiskates.com.conf
 Reload Apache:
 bash
-Copy code
+
 sudo systemctl reload apache2
 ```
 Now, you can install WordPress and WooCommerce in the /var/www/store directory just like you would for a regular website, following the steps from the previous guide. Access your store at store.nairobiskates.com!
@@ -2369,7 +2369,7 @@ WooCommerce requires a LAMP environment to run, so let's install the required so
 Open the terminal and run the following commands:
 
 ```bash
-Copy code
+
 sudo apt update && sudo apt upgrade -y
 ```
 1.2 Install Apache
@@ -2377,12 +2377,12 @@ sudo apt update && sudo apt upgrade -y
 Apache will serve your WordPress website.
 
 ```bash
-Copy code
+
 sudo apt install apache2 -y
 Start Apache and enable it to start on boot:
 ```
 ```bash
-Copy code
+
 sudo systemctl start apache2
 sudo systemctl enable apache2
 ```
@@ -2392,25 +2392,25 @@ sudo systemctl enable apache2
 WooCommerce will use MySQL to store data.
 
 ```bash
-Copy code
+
 sudo apt install mysql-server -y
 ```
 Run the MySQL security script to configure settings like removing the anonymous user and setting up root password:
 
 ```bash
-Copy code
+
 sudo mysql_secure_installation
 ```
 Log into MySQL to create a database for WordPress:
 
 ```bash
-Copy code
+
 sudo mysql -u root -p
 ```
 In the MySQL shell, run the following to create a database and user:
 
 ```sql
-Copy code
+
 CREATE DATABASE wordpress;
 CREATE USER 'wordpressuser'@'localhost' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpressuser'@'localhost';
@@ -2422,13 +2422,13 @@ EXIT;
 WooCommerce requires PHP to run. Install PHP and required extensions:
 
 ```bash
-Copy code
+
 sudo apt install php libapache2-mod-php php-mysql php-curl php-json php-cgi php-gd php-mbstring php-xml php-zip -y
 ```
 After installing PHP, restart Apache:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 Step 2: Download and Install WordPress
@@ -2438,7 +2438,7 @@ Step 2: Download and Install WordPress
 Navigate to the Apache root directory and download WordPress:
 
 ```bash
-Copy code
+
 cd /var/www/html/
 sudo wget https://wordpress.org/latest.tar.gz
 sudo tar -xvzf latest.tar.gz
@@ -2451,19 +2451,19 @@ sudo rm -rf wordpress
 Create a configuration file by copying the sample configuration:
 
 ```bash
-Copy code
+
 sudo cp wp-config-sample.php wp-config.php
 ```
 Edit the wp-config.php file:
 
 ```bash
-Copy code
+
 sudo nano wp-config.php
 ```
 Find the database settings and update them with your MySQL database credentials:
 
 ```php
-Copy code
+
 // Replace with your actual database details
 define( 'DB_NAME', 'wordpress' );
 define( 'DB_USER', 'wordpressuser' );
@@ -2477,7 +2477,7 @@ Save the file by pressing CTRL + X, then Y, and Enter.
 Make sure Apache can access the WordPress files:
 
 ```bash
-Copy code
+
 sudo chown -R www-data:www-data /var/www/html/
 sudo chmod -R 755 /var/www/html/
 ```
@@ -2534,7 +2534,7 @@ If you're using a VPS provider like DigitalOcean, they typically provide an opti
 Install Certbot (Let's Encrypt client) and configure SSL:
 
 ```bash
-Copy code
+
 sudo apt install certbot python3-certbot-apache -y
 sudo certbot --apache
 ```
@@ -2545,7 +2545,7 @@ Follow the instructions to configure SSL for your domain.
 Set up basic firewall rules:
 
 ```bash
-Copy code
+
 sudo ufw allow 'Apache Full'
 sudo ufw enable
 ```
@@ -2587,13 +2587,13 @@ If wget is not already installed, you can install it:
 Ubuntu/Debian:
 
 ```bash
-Copy code
+
 sudo apt-get install wget
 ```
 macOS (with Homebrew):
 
 ```bash
-Copy code
+
 brew install wget
 ```
 Step 2: Use wget to download the entire directory
@@ -2601,7 +2601,7 @@ Step 2: Use wget to download the entire directory
 Use the following command to download an entire folder recursively from an FTP server:
 
 ```bash
-Copy code
+
 wget -r --ftp-user=your-username --ftp-password=your-password ftp://ftp.example.com/path/to/directory/
 ```
 
@@ -2616,7 +2616,7 @@ This will download all the contents of the specified folder (including subdirect
 Example:
 
 ```bash
-Copy code
+
 wget -r --ftp-user=username --ftp-password=password ftp://ftp.example.com/files/
 ```
 
@@ -2635,14 +2635,14 @@ Step 1: Install lftp
 Ubuntu/Debian:
 
 ```bash
-Copy code
+
 sudo apt-get install lftp
 ```
 
 macOS (with Homebrew):
 
 ```bash
-Copy code
+
 brew install lftp
 ```
 Step 2: Download Directory Recursively
@@ -2650,20 +2650,20 @@ Step 2: Download Directory Recursively
 Use the following commands:
 
 ```bash
-Copy code
+
 lftp ftp://username:password@ftp.example.com
 ```
 Once connected, use the mirror command to download the entire directory:
 
 ```bash
-Copy code
+
 
 mirror /path/to/remote/folder /path/to/local/folder
 
 Example:
 
 bash
-Copy code
+
 mirror /files/ /local/downloads/
 ```
 Step 3: Exit
@@ -2720,12 +2720,12 @@ To copy a file to an FTP server using the wget command or FTP, you can use eithe
 wget can upload files to an FTP server using the following syntax:
 
 ```bash
-Copy code
+
 wget --ftp-user=your_username --ftp-password=your_password ftp://your_ftp_server_address/path_on_ftp_server/ --method=PUT file_to_upload
 Example:
 
 bash
-Copy code
+
 wget --ftp-user=ftpuser --ftp-password=ftppassword ftp://ftp.example.com/public_html/uploads/ --method=PUT /path/to/local/file.txt
 Explanation:
 
@@ -2773,18 +2773,18 @@ To configure UFW to allow external SSH access and block access to port 80 (HTTP)
 Allow SSH (port 22): This will permit external SSH connections to the machine.
 
 ```bash
-Copy code
+
 sudo ufw allow ssh
 ```
 Or specify the port explicitly:
 
 ```bash
-Copy code
+
 sudo ufw allow 22/tcp
 Deny access to port 80 (HTTP): To block external access to port 80, use:
 ```
 ```bash
-Copy code
+
 sudo ufw deny 80/tcp
 This will prevent external HTTP traffic from reaching your machine.
 ```
@@ -2792,13 +2792,13 @@ Check the rules: Verify the rules to make sure they are applied correctly.
 
 ```
 bash
-Copy code
+
 sudo ufw status
 Enable UFW: If UFW is not already enabled, activate it with:
 ```
 
 ```bash
-Copy code
+
 sudo ufw enable
 Summary:
 SSH (port 22) is allowed for external access.
@@ -2827,7 +2827,7 @@ Option 1: Managing everything through UFW
 First, flush the existing iptables rules to remove any conflicts:
 
 ```bash
-Copy code
+
 sudo iptables -F
 sudo iptables -X
 sudo iptables -Z
@@ -2836,7 +2836,7 @@ This clears all existing iptables rules.
 Next, reset UFW to ensure it's working correctly:
 
 ```bash
-Copy code
+
 sudo ufw reset
 ```
 Now, add the rules again in UFW:
@@ -2844,23 +2844,23 @@ Now, add the rules again in UFW:
 Allow SSH (port 22):
 
 ```bash
-Copy code
+
 sudo ufw allow 22/tcp
 Deny HTTP (port 80):
 
 bash
-Copy code
+
 sudo ufw deny 80/tcp
 Enable UFW:
 ```
 
 ```bash
-Copy code
+
 sudo ufw enable
 Check the UFW status:
 ```
 ```bash
-Copy code
+
 sudo ufw status verbose
 This will configure UFW correctly and ensure that iptables follows UFW rules since there are no conflicting iptables rules left.
 ```
@@ -2873,13 +2873,13 @@ Manually add iptables rules:
 Allow SSH:
 ```
 bash
-Copy code
+
 sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 ```
 Block port 80:
 
 ```bash
-Copy code
+
 sudo iptables -A INPUT -p tcp --dport 80 -j DROP
 ```
 Combine with UFW:
@@ -2889,7 +2889,7 @@ Let UFW manage any other rules as needed. Just ensure iptables doesn’t overrid
 Check current iptables rules:
 
 ```bash
-Copy code
+
 sudo iptables -L -v
 ```
 This will show the currently active iptables rules and allow you to verify that both UFW and iptables are working together properly.
@@ -2911,7 +2911,7 @@ apt purge [package]: This removes the package and its associated configuration f
 In your case, if you run:
 
 bash
-Copy code
+
 
 `sudo apt purge ufw`
 It will remove UFW and delete all its associated configuration files from the system, making sure that no residual configurations interfere with your manual iptables setup.
@@ -2955,14 +2955,14 @@ It looks like you're experiencing an issue where ports, specifically SSH (port 2
 Verify that the SSH service is up and running on your machine:
 
 ```bash
-Copy code
+
 sudo systemctl status ssh
 ```
 
 If it's not running, start it:
 
 ```bash
-Copy code
+
 sudo systemctl start ssh
 ```
 2. Check Port Binding
@@ -2970,13 +2970,13 @@ sudo systemctl start ssh
 Ensure that SSH (port 22) and other services (like HTTP on port 80) are actually bound to the correct ports. You can check this using netstat or ss:
 
 ```bash
-Copy code
+
 sudo netstat -tuln | grep ':22'
 ```
 or
 
 ```bash
-Copy code
+
 sudo ss -tuln | grep ':22'
 ```
 This will tell you if SSH is listening on port 22.
@@ -2986,13 +2986,13 @@ This will tell you if SSH is listening on port 22.
 Even though you disabled ufw, there might be other firewall services like iptables blocking the ports. Check the rules using:
 
 ```bash
-Copy code
+
 sudo iptables -L
 ```
 If you find blocking rules, you can clear them with:
 
 ```bash
-Copy code
+
 sudo iptables -F
 ```
 
@@ -3007,7 +3007,7 @@ ports (e.g., 22 for SSH, 80 for HTTP) are allowed in the firewall/security setti
 If the /etc/hosts.allow or /etc/hosts.deny files are configured to block certain IPs or services, this could explain the filtered ports. Review these files for any rules that could be causing the issue:
 
 ```bash
-Copy code
+
 sudo cat /etc/hosts.allow
 sudo cat /etc/hosts.deny
 ```
@@ -3020,13 +3020,13 @@ If you're on a private network, network equipment like routers or switches may h
 If you're using SELinux or AppArmor, they could be enforcing security policies that block certain ports. To temporarily disable AppArmor:
 
 ```bash
-Copy code
+
 sudo systemctl stop apparmor
 ```
 For SELinux, you can check its status:
 
 ```bash
-Copy code
+
 sudo getenforce
 ```
 If it's enforcing, you can disable it by editing the /etc/selinux/config file and setting SELINUX=disabled, then reboot the system.
@@ -3035,7 +3035,7 @@ If it's enforcing, you can disable it by editing the /etc/selinux/config file an
 Review logs for any errors related to SSH or port filtering:
 
 ```bash
-Copy code
+
 sudo journalctl -xe | grep ssh
 sudo tail -f /var/log/auth.log
 ```
@@ -3048,7 +3048,7 @@ Ensure that you're scanning the correct IP address. Sometimes, network configura
 If the issue persists, try restarting the network services and SSH:
 
 ```bash
-Copy code
+
 sudo systemctl restart networking
 sudo systemctl restart ssh
 ```
@@ -3095,13 +3095,13 @@ The contents of your /etc/hosts file appear to have some syntax issues or format
 Open the file for editing:
 
 ```bash
-Copy code
+
 sudo nano /etc/hosts
 ```
 Replace the contents with a properly formatted version:
 
 plaintext
-Copy code
+
 127.0.0.1   localhost
 127.0.0.1   developer
 
@@ -3117,19 +3117,19 @@ Save the file and exit (Ctrl + O, Enter, Ctrl + X).
 Double-check if SSH is listening on port 22 after restarting the service, to confirm that there are no binding issues:
 
 ```bash
-Copy code
+
 sudo ss -tuln | grep 22
 ```
 You should see output like:
 
 plaintext
-Copy code
+
 LISTEN 0 128 0.0.0.0:22 0.0.0.0:*  
 LISTEN 0 128 [::]:22 [::]:*
 If nothing shows up, try restarting the SSH service:
 
 ```bash
-Copy code
+
 sudo systemctl restart ssh
 ```
 
@@ -3138,14 +3138,14 @@ sudo systemctl restart ssh
 Even though you disabled AppArmor and UFW, iptables might still be blocking the port. List all the current rules:
 
 ```bash
-Copy code
+
 sudo iptables -L -n -v
 ```
 
 If you see rules that block port 22 or other services, you can flush the rules:
 
 ```bash
-Copy code
+
 sudo iptables -F
 ```
 4. Check SSH Configuration (sshd_config)
@@ -3153,18 +3153,18 @@ sudo iptables -F
 Ensure that the SSH daemon is properly configured to listen on port 22 by checking the configuration file:
 
 ```bash
-Copy code
+
 sudo nano /etc/ssh/sshd_config
 ```
 Look for the following line:
 
 plaintext
-Copy code
+
 Port 22
 If it's commented out (#), remove the comment. If you've customized the port, ensure that it's not conflicting with other services. After making changes, restart SSH:
 
 ```bash
-Copy code
+
 sudo systemctl restart ssh
 ```
 5. Use TCPDump to Diagnose Network Issues
@@ -3172,7 +3172,7 @@ sudo systemctl restart ssh
 Use tcpdump to verify if traffic on port 22 is actually reaching your machine:
 
 ```bash
-Copy code
+
 sudo tcpdump -i any port 22
 ```
 Try SSHing into the machine from another host while tcpdump is running. If no packets appear, the traffic is likely being blocked before it reaches your machine (e.g., by a router or firewall outside the machine).
@@ -3185,13 +3185,13 @@ If the issue persists, check whether there are any firewalls at the network leve
 Although AppArmor is stopped, check if other security modules like SELinux are active. If SELinux is enforcing rules, you can check its status:
 
 ```bash
-Copy code
+
 sudo getenforce
 ```
 If it is enforcing, you can temporarily set it to permissive mode:
 
 ```bash
-Copy code
+
 sudo setenforce 0
 ```
 8. Test SSH Locally
@@ -3199,7 +3199,7 @@ sudo setenforce 0
 Try connecting to SSH locally to confirm that the service itself is working:
 
 ```bash
-Copy code
+
 ssh localhost
 ```
 
@@ -3217,18 +3217,18 @@ Make sure Apache is not just bound to the loopback interface (localhost). It sho
 Check the Apache configuration file for the Listen directive:
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/ports.conf
 ```
 Ensure you have the following line:
 
 plaintext
-Copy code
+
 Listen 80
 If there is something like Listen 127.0.0.1:80, this would restrict Apache to only accept connections from localhost. Make sure the IP binding is open to all by having Listen 80. Then restart Apache:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 2. Double-Check Firewall Status
@@ -3236,14 +3236,14 @@ sudo systemctl restart apache2
 Even though you've disabled UFW, verify that no other firewall rules are in place that might be affecting the traffic. Run the following commands to make sure UFW is disabled and iptables is clear:
 
 ```bash
-Copy code
+
 sudo ufw status
 sudo iptables -L -n -v
 ```
 If there are any lingering rules in iptables, you can clear them temporarily for testing:
 
 ```bash
-Copy code
+
 sudo iptables -F
 ```
 
@@ -3252,26 +3252,26 @@ sudo iptables -F
 The message AH00558: apache2: Could not reliably determine the server's fully qualified domain name is a common warning. It suggests that Apache could not resolve the server’s domain name, but this shouldn’t block access. However, you can address it by setting ServerName in the Apache configuration file:
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/apache2.conf
 ```
 
 Add this line at the bottom:
 
 plaintext
-Copy code
+
 ServerName 192.168.1.161
 
 Restart Apache after making this change:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 Additionally, check for any errors in Apache’s error log:
 
 ```bash
-Copy code
+
 sudo tail -f /var/log/apache2/error.log
 ```
 4. Check Network Configuration
@@ -3280,7 +3280,7 @@ Since you can access services from the machine itself but not from other devices
 Check IP Address: Make sure the machine has the correct IP address:
 
 ```bash
-Copy code
+
 ip a
 ```
 Ensure that the IP is correctly configured as 192.168.1.161 and that your network interface is active.
@@ -3288,7 +3288,7 @@ Ensure that the IP is correctly configured as 192.168.1.161 and that your networ
 Check Network Routing: Ensure that the machine can route traffic correctly by inspecting the routing table:
 
 ```bash
-Copy code
+
 ip route
 ```
 You should see a route for the 192.168.1.0/24 network. If this is missing, there could be routing issues preventing communication.
@@ -3296,13 +3296,13 @@ You should see a route for the 192.168.1.0/24 network. If this is missing, there
 Check Gateway: Verify that your default gateway is correctly set, allowing traffic to exit the machine:
 
 ```bash
-Copy code
+
 ip route | grep default
 ```
 Check DNS Resolution: Although your Apache page is accessed via IP, if DNS is not configured correctly, other services might still fail. Test if DNS works by pinging an external site:
 
 ```bash
-Copy code
+
 ping google.com
 ```
 5. Use tcpdump to Monitor Incoming Traffic
@@ -3310,7 +3310,7 @@ ping google.com
 Run tcpdump to monitor if any traffic is coming to your server on port 80 or 22 from another machine. This will help you verify whether packets are reaching your machine:
 
 ```bash
-Copy code
+
 sudo tcpdump -i any port 80 or port 22
 ```
 From another computer, try to access the Apache page (http://192.168.1.161) or SSH into the machine. If you see no packets arriving, the problem might be on the network level (e.g., a router or switch blocking traffic).
@@ -3330,7 +3330,7 @@ NAT: If you’re behind a NAT (Network Address Translation) device, ensure that 
 From another machine on the network, try scanning the ports on your server to see if they are open or filtered:
 
 ```bash
-Copy code
+
 nmap -Pn 192.168.1.161
 ```
 If port 80 or 22 still shows up as filtered, this further confirms a network or firewall issue.
@@ -3340,7 +3340,7 @@ If port 80 or 22 still shows up as filtered, this further confirms a network or 
 Restarting the network services on your machine might help in resetting any potentially misconfigured settings:
 
 ```bash
-Copy code
+
 sudo systemctl restart networking
 ```
 By following these steps, you should be able to identify whether the issue is with your machine’s internal configuration or something external on the network. Let me know what you discover!
@@ -3357,7 +3357,7 @@ Steps to address the issue:
 Since the FORWARD policy is set to DROP, try allowing forwarding by setting the default policy to ACCEPT:
 
 ```bash
-Copy code
+
 sudo iptables -P FORWARD ACCEPT
 ```
 This should allow packets to be forwarded between interfaces, which might fix your issue if Docker networking or routing is involved.
@@ -3367,13 +3367,13 @@ This should allow packets to be forwarded between interfaces, which might fix yo
 Docker can modify your network settings and iptables rules. If you're not using Docker for this specific setup, you might want to stop Docker and see if the issue persists:
 
 ```bash
-Copy code
+
 sudo systemctl stop docker
 ```
 Then, restart your network services:
 
 ```bash
-Copy code
+
 sudo systemctl restart networking
 ```
 After doing this, try accessing your services from an external machine again. If stopping Docker solves the issue, it indicates that Docker’s network isolation was causing interference.
@@ -3383,7 +3383,7 @@ After doing this, try accessing your services from an external machine again. If
 If Docker is needed, you may need to adjust its iptables rules. For example, you can configure Docker not to manipulate iptables by adding the following option to /etc/docker/daemon.json:
 
 ```json
-Copy code
+
 {
   "iptables": false
 }
@@ -3391,7 +3391,7 @@ Copy code
 After making this change, restart Docker:
 
 ```bash
-Copy code
+
 sudo systemctl restart docker
 ```
 This will stop Docker from modifying the iptables rules, which might resolve conflicts with your host system.
@@ -3401,13 +3401,13 @@ This will stop Docker from modifying the iptables rules, which might resolve con
 If you're still experiencing issues, try flushing all the iptables rules temporarily to see if this resolves the problem:
 
 ```bash
-Copy code
+
 sudo iptables -F
 ```
 Then, restart your network services:
 
 ```bash
-Copy code
+
 sudo systemctl restart networking
 ```
 This will remove all existing firewall rules and allow you to test whether the issue lies in the firewall configuration.
@@ -3417,7 +3417,7 @@ This will remove all existing firewall rules and allow you to test whether the i
 After adjusting the firewall, ensure that services like Apache and SSH are binding to all interfaces, not just the local loopback (127.0.0.1). You can use the following command to check:
 
 ```bash
-Copy code
+
 sudo netstat -tuln | grep -E '22|80'
 ```
 You should see lines indicating that both ports 22 (SSH) and 80 (HTTP) are listening on 0.0.0.0, meaning they are accepting connections from any interface.
@@ -3445,13 +3445,13 @@ To allow traffic on specific ports, you need to define rules in UFW. Here's how 
 To ensure you can always access the machine via SSH:
 
 ```bash
-Copy code
+
 sudo ufw allow ssh
 ```
 or
 
 ```bash
-Copy code
+
 sudo ufw allow 22/tcp
 ```
 2. Allow HTTP (Port 80)
@@ -3459,13 +3459,13 @@ sudo ufw allow 22/tcp
 For a web server running on Apache or Nginx, you'll want to allow traffic on port 80:
 
 ```bash
-Copy code
+
 sudo ufw allow http
 ```
 or
 
 ```bash
-Copy code
+
 sudo ufw allow 80/tcp
 ```
 3. Allow HTTPS (Port 443)
@@ -3473,13 +3473,13 @@ sudo ufw allow 80/tcp
 If your server uses HTTPS, you need to allow traffic on port 443:
 
 ```bash
-Copy code
+
 sudo ufw allow https
 ```
 or
 
 ```bash
-Copy code
+
 sudo ufw allow 443/tcp
 ```
 4. Allow Other Custom Ports
@@ -3487,13 +3487,13 @@ sudo ufw allow 443/tcp
 For any other ports you want to open, use the following syntax:
 
 ```bash
-Copy code
+
 sudo ufw allow <port_number>/tcp
 ```
 For example, to allow traffic on port 8080 (common for alternative web services):
 
 ```bash
-Copy code
+
 sudo ufw allow 8080/tcp
 ```
 
@@ -3502,13 +3502,13 @@ sudo ufw allow 8080/tcp
 If you want to restrict access to certain ports to specific IP addresses, you can specify the source IP:
 
 ```bash
-Copy code
+
 sudo ufw allow from <source_ip> to any port <port_number>/tcp
 ```
 For example, if you want to allow SSH (port 22) access only from the IP 192.168.1.100:
 
 ```bash
-Copy code
+
 sudo ufw allow from 192.168.1.100 to any port 22/tcp
 ```
 
@@ -3517,7 +3517,7 @@ sudo ufw allow from 192.168.1.100 to any port 22/tcp
 If you want to allow a range of ports, you can specify the start and end of the range:
 
 ```bash
-Copy code
+
 sudo ufw allow 10000:20000/tcp
 ```
 This example allows traffic on ports from 10000 to 20000 using TCP.
@@ -3527,7 +3527,7 @@ This example allows traffic on ports from 10000 to 20000 using TCP.
 You can also allow services by their service names if UFW recognizes them (such as Apache Full):
 
 ```bash
-Copy code
+
 sudo ufw allow 'Apache Full'
 ```
 This opens both port 80 and 443 (HTTP and HTTPS) for web traffic.
@@ -3537,21 +3537,21 @@ Checking UFW Status and Rules
 After adding the rules, check the current status of UFW and see the list of active rules:
 
 ```bash
-Copy code
+
 sudo ufw status verbose
 Enabling UFW
 ```
 If UFW is disabled, you can enable it (this won’t affect your current rules):
 
 ```bash
-Copy code
+
 sudo ufw enable
 Denying Ports (Optional)
 ```
 If there are specific ports you want to deny (just in case), you can block them explicitly:
 ```
 bash
-Copy code
+
 sudo ufw deny <port_number>/tcp
 ```
 Reload UFW to Apply Changes
@@ -3559,7 +3559,7 @@ Reload UFW to Apply Changes
 After making all changes, reload UFW to ensure they take effect:
 
 ```bash
-Copy code
+
 sudo ufw reload
 ```
 Example: Opening SSH and HTTP Ports
@@ -3567,7 +3567,7 @@ Example: Opening SSH and HTTP Ports
 Let’s say you want to open ports 22 (SSH) and 80 (HTTP). Here’s what you would do:
 
 ```bash
-Copy code
+
 sudo ufw allow ssh
 sudo ufw allow http
 sudo ufw reload
@@ -3587,7 +3587,7 @@ UFW might not be the only firewall running. If there is another firewall service
 Solution: Ensure that UFW is the only active firewall. Check for other firewall services:
 
 ```bash
-Copy code
+
 sudo systemctl status iptables
 sudo systemctl status firewalld
 ```
@@ -3601,14 +3601,14 @@ UFW's default policy for incoming connections might still be set to deny or reje
 Solution: Check and adjust the default UFW policy:
 
 ```bash
-Copy code
+
 sudo ufw status verbose
 ```
 
 If it shows Default: deny (incoming), make sure you've explicitly allowed the desired ports (e.g., SSH, HTTP):
 
 ```bash
-Copy code
+
 sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
 ```
@@ -3620,13 +3620,13 @@ The service running on the port might only be bound to localhost (127.0.0.1) or 
 Solution: Check if the service is properly configured to listen on all interfaces. For instance, if Apache is using Listen 127.0.0.1:80, change it to Listen 0.0.0.0:80 in the config file (/etc/apache2/ports.conf for Apache):
 
 ```bash
-Copy code
+
 sudo nano /etc/apache2/ports.conf
 ```
 Ensure it's bound to the correct address, then restart the service:
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 
@@ -3641,13 +3641,13 @@ There may be conflicting UFW rules causing the port to appear filtered, such as 
 Solution: List all active UFW rules and check for conflicts:
 
 ```bash
-Copy code
+
 sudo ufw status numbered
 ```
 If you find conflicting rules, you can delete the problematic ones:
 
 ```bash
-Copy code
+
 sudo ufw delete <rule_number>
 ```
 6. NAT or Proxy
@@ -3661,7 +3661,7 @@ Solution: Ensure your router or proxy is properly forwarding traffic to the mach
 UFW might not give enough feedback on what’s happening. Enable logging to get more information:
 
 ```bash
-Copy code
+
 sudo ufw logging on
 ```
 Check /var/log/ufw.log for clues on why connections might still be filtered.
@@ -3671,7 +3671,7 @@ Check /var/log/ufw.log for clues on why connections might still be filtered.
 If UFW rules are not working as expected, check if there are conflicting iptables rules:
 
 ```bash
-Copy code
+
 sudo iptables -L -n -v
 ```
 Look for rules that might be blocking traffic.
@@ -3681,7 +3681,7 @@ Look for rules that might be blocking traffic.
 To see if the port is open and listening on your machine, run the following:
 
 ```bash
-Copy code
+
 sudo netstat -tuln | grep <port_number>
 ```
 Replace <port_number> with the port you’re trying to scan (e.g., 22 or 80). This will show if the service is correctly listening.
@@ -3699,14 +3699,14 @@ To delete all numbered UFW rules at once, follow these steps:
 First, check the list of currently active UFW rules with their corresponding numbers:
 
 ```bash
-Copy code
+
 sudo ufw status numbered
 ```
 
 This will display a list of rules with numbers, such as:
 
 bash
-Copy code
+
 [ 1] Allow 22/tcp
 [ 2] Allow 80/tcp
 ...
@@ -3717,20 +3717,20 @@ Unfortunately, UFW does not support a bulk deletion command directly. You'll nee
 Start by running the following command to delete a rule by its number (replace <number> with the actual rule number):
 
 ``bash
-Copy code
+
 sudo ufw delete <number>
 ```
 
 For example:
 
 ```bash
-Copy code
+
 sudo ufw delete 1
 ```
 After each deletion, the numbering will shift, so if you delete rule 1, the next rule becomes the new rule 1. Therefore, always delete rule 1 repeatedly to remove all rules:
 
 ```bash
-Copy code
+
 sudo ufw delete 1
 sudo ufw delete 1
 sudo ufw delete 1
@@ -3741,7 +3741,7 @@ sudo ufw delete 1
 If you want to delete all rules at once and start fresh, you can reset UFW:
 
 ```bash
-Copy code
+
 sudo ufw reset
 ```
 This will remove all rules and set UFW back to its default state (with default policies and no rules).
@@ -3751,7 +3751,7 @@ This will remove all rules and set UFW back to its default state (with default p
 After deleting or resetting the rules, you can check the status to ensure no rules remain:
 
 ```bash
-Copy code
+
 sudo ufw status
 ```
 You should see something like:
@@ -3769,7 +3769,7 @@ delete all the iptables rules, including chains, and ensure that all elements ar
 First, flush all the chains (rules) in the default tables:
 
 ```bash
-Copy code
+
 sudo iptables -F
 sudo iptables -t nat -F
 sudo iptables -t mangle -F
@@ -3780,7 +3780,7 @@ sudo iptables -t raw -F
 Next, delete all user-defined (custom) chains:
 
 ```bash
-Copy code
+
 sudo iptables -X
 sudo iptables -t nat -X
 sudo iptables -t mangle -X
@@ -3791,7 +3791,7 @@ sudo iptables -t raw -X
 To ensure that counters (packet/byte counts) are reset, run:
 
 ```bash
-Copy code
+
 sudo iptables -Z
 sudo iptables -t nat -Z
 sudo iptables -t mangle -Z
@@ -3802,7 +3802,7 @@ sudo iptables -t raw -Z
 After flushing and deleting everything, make sure the default policies are set to ACCEPT to allow all traffic:
 
 ```bash
-Copy code
+
 sudo iptables -P INPUT ACCEPT
 sudo iptables -P FORWARD ACCEPT
 sudo iptables -P OUTPUT ACCEPT
@@ -3812,7 +3812,7 @@ sudo iptables -P OUTPUT ACCEPT
 Finally, verify that everything has been cleared:
 
 ```bash
-Copy code
+
 sudo iptables -L -n -v
 sudo iptables -t nat -L -n -v
 sudo iptables -t mangle -L -n -v
@@ -3847,28 +3847,28 @@ Steps to Fix the Issue:
 Reset UFW to Default Settings: Reset UFW to start fresh and avoid any conflicting rules:
 
 bash
-Copy code
+
 ```
 sudo ufw reset
 ```
 Set UFW Default Policies: Set UFW's default policy to allow incoming traffic or allow specific ports before enabling:
 
 ```bash
-Copy code
+
 sudo ufw default allow incoming
 sudo ufw default allow outgoing
 ```
 If you want to set more restrictive policies:
 
 ```bash
-Copy code
+
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 ```
 Allow Specific Ports or Services: Explicitly allow the ports or services you need:
 
 ```bash
-Copy code
+
 sudo ufw allow 22/tcp   # Allow SSH
 sudo ufw allow 80/tcp   # Allow HTTP
 sudo ufw allow 443/tcp  # Allow HTTPS
@@ -3877,13 +3877,13 @@ sudo ufw allow 8080/tcp # Allow custom ports
 Enable UFW: Now, enable UFW with your new rules:
 
 ```bash
-Copy code
+
 sudo ufw enable
 ```
 Check UFW Status: Confirm the rules and their statuses:
 
 ```bash
-Copy code
+
 sudo ufw status verbose
 ```
 Configure UFW to Avoid Overriding Iptables Rules: If you’ve set custom iptables rules and want UFW to coexist with them:
@@ -3892,7 +3892,7 @@ You may need to modify UFW’s before.rules and before6.rules files to ensure it
 Edit UFW's rules file:
 
 ```bash
-Copy code
+
 sudo nano /etc/ufw/before.rules
 ```
 Add your custom iptables rules above the COMMIT line in this file. This will ensure UFW applies your rules before it sets its own.
@@ -3900,7 +3900,7 @@ Add your custom iptables rules above the COMMIT line in this file. This will ens
 Disable UFW Logging (Optional): If UFW's logging is causing issues or clutter, you can reduce or disable logging:
 
 ```bash
-Copy code
+
 sudo ufw logging off
 ```
 Final Steps:
@@ -3938,13 +3938,13 @@ Instead of embedding iptables -P FORWARD ACCEPT in UFW files, create a script to
 Create a custom shell script to run your iptables rules:
 
 ```bash
-Copy code
+
 sudo nano /etc/iptables-custom-rules.sh
 ```
 Add your custom iptables rules to this script:
 
 ```bash
-Copy code
+
 #!/bin/bash
 # Custom iptables rules
 iptables -P FORWARD ACCEPT
@@ -3953,7 +3953,7 @@ iptables -P FORWARD ACCEPT
 Make the script executable:
 
 ```bash
-Copy code
+
 sudo chmod +x /etc/iptables-custom-rules.sh
 ```
 2. Ensure Custom iptables Rules Run After UFW Loads
@@ -3965,13 +3965,13 @@ Here’s how to create a systemd service for the script:
 Create a new systemd service:
 
 ```bash
-Copy code
+
 sudo nano /etc/systemd/system/iptables-custom-rules.service
 ```
 Add the following content to make the script run after UFW:
 ```
 ini
-Copy code
+
 [Unit]
 Description=Custom iptables rules after UFW
 After=ufw.service
@@ -3986,7 +3986,7 @@ Reload systemd and enable the service:
 ```
 
 ```bash
-Copy code
+
 sudo systemctl daemon-reload
 sudo systemctl enable iptables-custom-rules.service
 sudo systemctl start iptables-custom-rules.service
@@ -3999,7 +3999,7 @@ After rebooting or restarting UFW, your custom rules should be applied after UFW
 Verify by checking the iptables rules:
 
 ```bash
-Copy code
+
 sudo iptables -L -n -v
 ```
 4. Alternative: Modify UFW Default Behavior
@@ -4009,7 +4009,7 @@ If you're using UFW but still need to tweak certain behaviors (like default poli
 To allow forwarding specifically in UFW (as a workaround for the iptables -P FORWARD ACCEPT):
 
 ```bash
-Copy code
+
 sudo ufw default allow routed
 ```
 This allows forwarding traffic without needing to directly modify iptables' default policies.
@@ -4037,19 +4037,19 @@ sudo rm -rf /var/lib/nginx
 Check if Docker is running: Ensure that the Docker daemon is running. You can check its status with the following command:
 ```
 bash
-Copy code
+
 sudo systemctl status docker
 ```
 If it's not running, start it with:
 ```
 bash
-Copy code
+
 sudo systemctl start docker
 ```
 Check Docker socket permissions: If Docker is running but you're still getting the error, it might be a permissions issue. Ensure your user is part of the docker group:
 ```
 bash
-Copy code
+
 sudo usermod -aG docker $USER
 ```
 After running this command, log out and back in, or restart your terminal for the changes to take effect.
@@ -4057,20 +4057,20 @@ After running this command, log out and back in, or restart your terminal for th
 Verify Docker installation: Make sure Docker is correctly installed. You can check the version with:
 
 ```bash
-Copy code
+
 docker --version
 ```
 If Docker is not installed, you can install it using the following commands (for Debian-based systems):
 
 ```bash
-Copy code
+
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
 Check Docker Compose installation: Make sure Docker Compose is installed correctly. You can check its version with:
 
 ```bash
-Copy code
+
 docker-compose --version
 ```
 If it’s not installed, follow the installation instructions from the Docker Compose documentation.
@@ -4094,7 +4094,7 @@ Step 2: Run the SQL Query
 You can run the following SQL query in phpMyAdmin or any SQL client connected to your WordPress database:
 
 ```sql
-Copy code
+
 UPDATE wp_users 
 SET ID = new_user_id 
 WHERE ID = old_user_id;
@@ -4104,7 +4104,7 @@ Example
 If you want to change the user ID from 2 to 5, the query would look like this:
 
 ```sql
-Copy code
+
 UPDATE wp_users 
 SET ID = 5 
 WHERE ID = 2;
@@ -4119,7 +4119,7 @@ wp_usermeta
 For example, to update the user ID in the wp_posts table:
 
 sql
-Copy code
+
 UPDATE wp_posts 
 SET post_author = 5 
 WHERE post_author = 2;
@@ -4171,7 +4171,7 @@ Update the Remote URL:
 Use the token in place of your password:
 
 ```bash
-Copy code
+
 git remote set-url origin https://<YOUR_GITHUB_USERNAME>:<YOUR_PERSONAL_ACCESS_TOKEN>@github.com/lilplucky/cats.git
 ```
 Push or Pull with your Token:
@@ -4179,13 +4179,13 @@ Push or Pull with your Token:
 Now, when you git pull or git push, it will use the token instead of a password:
 
 ```bash
-Copy code
+
 git pull origin main
 git push origin main
 ```
 ## Github Complete Commit
 ```bash
-Copy code
+
 git init
 echo "# Books" >> README.md
 git add *
@@ -4285,11 +4285,11 @@ Open a terminal on your Linux machine.
 Update your package list:
 
 ```bash
-Copy code
+
 sudo apt update
 Install xrdp and an associated desktop environment (like xfce4 if you don’t already have one):
 bash
-Copy code
+
 sudo apt install xrdp xfce4 xfce4-goodies -y
 ```
 
@@ -4298,20 +4298,20 @@ sudo apt install xrdp xfce4 xfce4-goodies -y
 Start and enable xrdp service to launch at boot:
 
 ```bash
-Copy code
+
 sudo systemctl enable xrdp
 sudo systemctl start xrdp
 ```
 Set xfce4 as the default session for xrdp. Edit the file /etc/xrdp/startwm.sh:
 ```
 ```bash
-Copy code
+
 sudo nano /etc/xrdp/startwm.sh
 ```
 Find the lines near the bottom with startwm.sh and replace the last two lines with:
 ```
 bash
-Copy code
+
 startxfce4
 ```
 Save the file (Ctrl + O) and exit (Ctrl + X).
@@ -4321,7 +4321,7 @@ Save the file (Ctrl + O) and exit (Ctrl + X).
 If you have a firewall (like ufw), open port 3389:
 ```
 bash
-Copy code
+
 sudo ufw allow 3389
 ```
 4. Find Your IP Address
@@ -4329,7 +4329,7 @@ sudo ufw allow 3389
 Run the command to get your Linux machine’s IP address:
 
 ```bash
-Copy code
+
 hostname -I
 ```
 5. Connect to Your Linux GUI from Another Computer
@@ -4357,13 +4357,13 @@ Here’s how to disable case sensitivity for MySQL on Linux:
 Open your MySQL configuration file in a text editor. The location of this file can vary, but it’s often found at /etc/mysql/my.cnf or /etc/my.cnf:
 
 ```bash
-Copy code
+
 sudo nano /etc/mysql/my.cnf
 ```
 Add or modify the following line under the [mysqld] section:
 
 ini
-Copy code
+
 ```
 [mysqld]
 lower_case_table_names=1
@@ -4381,7 +4381,7 @@ Setting lower_case_table_names to 1 makes MySQL treat table names as case-insens
 After modifying the configuration, restart the MySQL service to apply the changes:
 
 ```bash
-Copy code
+
 sudo systemctl restart mysql
 ```
 3. Check if Changes Took Effect
@@ -4389,7 +4389,7 @@ sudo systemctl restart mysql
 You can confirm the setting change by logging into MySQL and checking the variable:
 
 ```bash
-Copy code
+
 mysql -u root -p
 SHOW VARIABLES LIKE 'lower_case_table_names';
 ```
@@ -4423,7 +4423,7 @@ The ENOTEMPTY error in your npm installation is due to a problem with renaming a
 Try removing the node_modules directory and package-lock.json file to clear any partially installed or locked files:
 
 ```bash
-Copy code
+
 rm -rf /opt/Electronics-eCommerce-Shop-With-Admin-Dashboard-NextJS-NodeJS/node_modules
 rm /opt/Electronics-eCommerce-Shop-With-Admin-Dashboard-NextJS-NodeJS/package-lock.json
 ```
@@ -4432,7 +4432,7 @@ rm /opt/Electronics-eCommerce-Shop-With-Admin-Dashboard-NextJS-NodeJS/package-lo
 Sometimes npm cache can cause issues. Clear it to ensure a clean install:
 
 ```bash
-Copy code
+
 npm cache clean --force
 ```
 
@@ -4441,7 +4441,7 @@ npm cache clean --force
 Now that node_modules and package-lock.json are removed, reinstall your dependencies:
 
 ```bash
-Copy code
+
 npm install
 ```
 4. Run NPM as a Superuser (If Needed)
@@ -4449,7 +4449,7 @@ npm install
 If you’re running npm as root or in a protected directory, you may need to use sudo:
 
 ```bash
-Copy code
+
 sudo npm install
 ```
 5. (Optional) Update NPM
@@ -4457,7 +4457,7 @@ sudo npm install
 If the problem persists, updating npm might help:
 
 ```bash
-Copy code
+
 npm install -g npm
 ```
 After following these steps, try running the command again. If the issue continues, let me know so we can troubleshoot further!
@@ -4475,7 +4475,7 @@ If you’re using Apache, you can manually create a configuration file for phpMy
 Create the phpMyAdmin Configuration File
 ```
 bash
-Copy code
+
 sudo nano /etc/apache2/conf-available/phpmyadmin.conf
 ```
 Add Configuration for phpMyAdmin
@@ -4483,7 +4483,7 @@ Add Configuration for phpMyAdmin
 Add the following content to the file:
 
 ```apache
-Copy code
+
 Alias /phpmyadmin /usr/share/phpmyadmin
 
 <Directory /usr/share/phpmyadmin>
@@ -4508,13 +4508,13 @@ Enable the phpMyAdmin Configuration
 After saving the file, enable the configuration:
 ```
 bash
-Copy code
+
 sudo a2enconf phpmyadmin
 ```
 Restart Apache
 
 ```bash
-Copy code
+
 sudo systemctl restart apache2
 ```
 For Nginx
@@ -4526,7 +4526,7 @@ Edit the Nginx Configuration
 Open the main Nginx configuration file:
 
 ```bash
-Copy code
+
 sudo nano /etc/nginx/sites-available/default
 ```
 Add a Location Block for phpMyAdmin
@@ -4534,7 +4534,7 @@ Add a Location Block for phpMyAdmin
 Add the following inside the server block:
 
 ```nginx
-Copy code
+
 location /phpmyadmin {
     root /usr/share/;  # Or wherever phpMyAdmin is installed
     index index.php index.html index.htm;
@@ -4553,13 +4553,13 @@ Restart Nginx
 After saving the configuration file, restart Nginx:
 
 ```bash
-Copy code
+
 sudo systemctl restart nginx
 Verify phpMyAdmin Installation Path
 Ensure phpMyAdmin is actually installed at /usr/share/phpmyadmin. If not, locate it with:
 ```
 ```bash
-Copy code
+
 sudo find / -name phpmyadmin
 Use the correct path wherever /usr/share/phpmyadmin appears in the above configurations. This should allow you to access phpMyAdmin from a browser.
 find /var/www/html -name "*.php" -exec grep -H "phpstore" {} \;
@@ -4578,7 +4578,7 @@ The basic syntax for using scp is:
 
 bash
 
-Copy code
+
 
 scp [options] source_file user@remote_host:destination_path
 
@@ -4587,7 +4587,7 @@ scp [options] source_file user@remote_host:destination_path
 To copy a file from your local machine to a remote server, use:
 
 bash
-Copy code
+
 
 
 `scp /path/to/local/file user@remote_host:/path/to/remote/directory`
@@ -4596,7 +4596,7 @@ Example:
 
 bash
 
-Copy code
+
 
 `scp /home/user/file.txt username@192.168.1.10:/home/username/`
 
@@ -4605,13 +4605,13 @@ Copy code
 To copy a file from a remote server to your local machine, use:
 
 bash
-Copy code
+
 `scp user@remote_host:/path/to/remote/file /path/to/local/directory`
 Example:
 
 bash
 
-Copy code
+
 
 scp username@192.168.1.10:/home/username/file.txt /home/user/
 
@@ -4622,13 +4622,13 @@ To copy an entire directory from local to remote (or vice versa), use the -r opt
 Local to Remote:
 
 ```bash
-Copy code
+
 scp -r /path/to/local/directory user@remote_host:/path/to/remote/directory
 ```
 Remote to Local:
 
 ```bash
-Copy code
+
 scp -r user@remote_host:/path/to/remote/directory /path/to/local/directory
 ```
 4. Common Options
@@ -4644,7 +4644,7 @@ Example with Port
 If your SSH server is running on port 2222, you would do:
 
 ```bash
-Copy code
+
 scp -P 2222 /home/user/file.txt username@192.168.1.10:/home/username/
 ```
 
@@ -4716,21 +4716,21 @@ To clone just the hstshijack folder from the GitHub repository, you'll need to u
 Initialize the repository without downloading everything:
 
 ```bash
-Copy code
+
 git init
 git remote add origin https://github.com/bettercap/caplets.git
 ```
 Enable sparse checkout and specify the path you want:
 
 ```bash
-Copy code
+
 git config core.sparseCheckout true
 echo "hstshijack" >> .git/info/sparse-checkout
 ```
 Pull the files with a shallow clone for minimal depth (e.g., depth of 1):
 
 ```bash
-Copy code
+
 git pull --depth=1 origin master
 ```
 This setup clones only the specified folder (hstshijack) with minimal history, saving timll and and space. Let me know if you need more details on adjusting depth or paths!
@@ -4746,11 +4746,11 @@ Below is a guide to installing and configuring WireGuard on Linux, but steps for
 1. Installing WireGuard
 On Linux (Debian/Ubuntu)
 ```bash
-Copy code
+
 sudo apt update
 Install WireGuard:
 bash
-Copy code
+
 sudo apt install wireguard
 ```
 2. Generate Key Pairs
@@ -4760,11 +4760,11 @@ WireGuard requires a key pair for each device.
 Generate a private key:
 
 ```bash
-Copy code
+
 wg genkey > privatekey
 Generate a public key from the private key:
 bash
-Copy code
+
 cat privatekey | wg pubkey > publickey
 Save or note the private and public keys for configuration.
 ```
@@ -4775,11 +4775,11 @@ Server Configuration
 Create a WireGuard interface configuration file (e.g., /etc/wireguard/wg0.conf):
 
 ```bash
-Copy code
+
 sudo nano /etc/wireguard/wg0.conf
 Add the following configuration:
 ini
-Copy code
+
 [Interface]
 Address = 10.0.0.1/24           # Internal IP for the server
 PrivateKey = SERVER_PRIVATE_KEY # Replace with your server's private key
@@ -4795,11 +4795,11 @@ Client Configuration
 On the client, create a WireGuard configuration file (e.g., /etc/wireguard/wg0.conf):
 
 ```bash
-Copy code
+
 sudo nano /etc/wireguard/wg0.conf
 Add the following configuration:
 ini
-Copy code
+
 [Interface]
 Address = 10.0.0.2/24           # Internal IP for the client
 PrivateKey = CLIENT_PRIVATE_KEY # Replace with the client's private key
@@ -4816,12 +4816,12 @@ PersistentKeepalive = 25        # Keep the connection alive
 On both the server and client, start the WireGuard interface:
 
 ```bash
-Copy code
+
 sudo wg-quick up wg0
 To stop the interface:
 ```
 ```bash
-Copy code
+
 sudo wg-quick down wg0
 ```
 
@@ -4830,16 +4830,16 @@ sudo wg-quick down wg0
 Check the status of the WireGuard interface:
 
 ```bash
-Copy code
+
 sudo wg
 Test connectivity:
 Ping the server from the client:
 bash
-Copy code
+
 ping 10.0.0.1
 Or the client from the server:
 bash
-Copy code
+
 ping 10.0.0.2
 ```
 
@@ -4847,7 +4847,7 @@ ping 10.0.0.2
 Enable the service to start on boot:
 
 ```bash
-Copy code
+
 sudo systemctl enable wg-quick@wg0
 ```
 
@@ -4863,29 +4863,29 @@ Enable IP Forwarding
 Check if IP forwarding is enabled:
 
 ```bash
-Copy code
+
 sysctl net.ipv4.ip_forward
 ```
 If it returns 0, enable it:
 ```
 bash
-Copy code
+
 sudo sysctl -w net.ipv4.ip_forward=1
 ```
 Make it persistent across reboots by editing /etc/sysctl.conf:
 
 ```bash
-Copy code
+
 sudo nano /etc/sysctl.conf
 Add or uncomment the line:
 ini
-Copy code
+
 net.ipv4.ip_forward = 1
 ```
 Apply changes:
 
 ```bash
-Copy code
+
 sudo sysctl -p
 ```
 Configure NAT with iptables
@@ -4893,7 +4893,7 @@ Configure NAT with iptables
 Add an iptables rule to masquerade traffic:
 
 ```bash
-Copy code
+
 
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
@@ -4902,7 +4902,7 @@ Replace eth0 with your server's internet-facing interface (you can find it with 
 Make the iptables rule persistent across reboots:
 
 ```bash
-Copy code
+
 sudo apt install iptables-persistent
 sudo netfilter-persistent save
 ```
@@ -4915,7 +4915,7 @@ AllowedIPs: In the client's WireGuard configuration (wg0.conf or equivalent), en
 
 ini
 
-Copy code
+
 
 ```AllowedIPs = 0.0.0.0/0
 
@@ -4924,7 +4924,7 @@ This routes all traffic through the VPN.
 DNS: Add a DNS server in the [Interface] section of the client configuration:
 
 ini
-Copy code
+
 DNS = 8.8.8.8
 Replace 8.8.8.8 with your preferred DNS (e.g., 1.1.1.1 for Cloudflare).
 ```
@@ -4935,14 +4935,14 @@ After making changes, restart the WireGuard service on both the server and the c
 Server:
 
 ```bash
-Copy code
+
 sudo wg-quick down wg0
 sudo wg-quick up wg0
 ```
 Client:
 
 ```bash
-Copy code
+
 sudo wg-quick down wg0
 sudo wg-quick up wg0
 ```
@@ -4952,7 +4952,7 @@ sudo wg-quick up wg0
 On the client, check if you can ping the internet:
 
 ```bash
-Copy code
+
 ping 8.8.8.8
 ```
 If this works but ping google.com doesn't, the issue is DNS.
@@ -4962,15 +4962,14 @@ If DNS isn't working, try flushing the DNS cache on the client:
 Linux:
 
 ```bash
-Copy code
 sudo systemd-resolve --flush-caches
 macOS:
 bash
-Copy code
+
 sudo dscacheutil -flushcache
 Windows:
 cmd
-Copy code
+
 ipconfig /flushdns
 ```
 
@@ -4978,7 +4977,6 @@ ipconfig /flushdns
 On the server, verify the WireGuard connection:
 
 ```bash
-Copy code
 sudo wg
 Ensure that the client’s public key and IP are listed and that packets are being transmitted and received.
 ```
