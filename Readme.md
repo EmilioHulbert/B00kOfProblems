@@ -1,5 +1,170 @@
-# The Personal Book Of Problems
-## How To Backup android apk using adb
+# The Personal Book Of Problems 
+
+## Backing Up Android App Using adb
+
+[Fetched From](https://gist.github.com/AnatomicJC/e773dd55ae60ab0b2d6dd2351eb977c1#file-android-backup-apk-and-datas-md)
+
+# Backup android app, data included, no root needed, with adb
+
+> *Note: This gist may be outdated, thanks to all contributors in comments.*
+
+`adb` is the Android CLI tool with which you can interact with your android device, from your PC
+
+You must enable developer mode (tap 7 times on the build version in parameters) and install adb on your PC.
+
+Don't hesitate to read comments, there is useful tips, thanks guys for this !
+
+## Fetch application APK
+
+To get the list of your installed applications:
+
+```
+adb shell pm list packages -f -3
+```
+
+If you want to fetch all apk of your installed apps:
+
+```
+for APP in $(adb shell pm list packages -3 -f)
+do
+  adb pull $( echo ${APP} | sed "s/^package://" | sed "s/base.apk=/base.apk /").apk
+done
+```
+
+To fetch only one application, based of listed packages results:
+
+```
+adb pull /data/app/org.fedorahosted.freeotp-Rbf2NWw6F-SqSKD7fZ_voQ==/base.apk freeotp.apk
+```
+
+## Backup applications datas
+
+To backup one application, with its apk:
+
+```
+adb backup -apk org.fedorahosted.freeotp -f freeotp.adb
+```
+
+To backup all datas at once:
+
+```
+adb backup -f all -all -apk -nosystem
+```
+
+To backup all datas in separated files:
+
+```
+for APP in $(adb shell pm list packages -3)
+do
+  APP=$( echo ${APP} | sed "s/^package://")
+  adb backup -f ${APP}.backup ${APP}
+done
+```
+
+## Restore Applications
+
+First, you have to install the saved apk with adb:
+
+```
+adb install application.apk
+```
+
+Then restore the datas:
+
+```
+adb restore application.backup
+```
+
+## Extract content of adb backup file
+
+
+You will need the `zlib-flate` binary. You will able to use it by installing the `qpdf` package.
+
+```
+apt install qpdf
+```
+
+Then, to extract your application backup:
+
+```
+dd if=freeotp.adb bs=24 skip=1 | zlib-flate -uncompress | tar xf -
+```
+
+## If adb backup doesn't work 
+
+If you have problems using `adb backup` (empty files, no prompts, other oddness), you can give a try to `bu backup` through `adb shell`. Thanks to @nuttingd comment.
+
+### Backing up
+
+```sh
+adb shell 'bu backup -apk -all -nosystem' > backup.adb
+```
+
+### Restoring
+
+```sh
+adb shell 'bu restore' < backup.adb
+```
+
+## Miscellaneous: remove non-wanted applications
+
+Sometimes, you have already installed (but non wanted) apps when you buy an Android Smartphone. And you can't uninstall these apps. So Bad. And some pre-installed app are not present on PlayStore. WTF.
+
+You can remove them with this command, and root is not needed:
+
+```
+adb shell pm uninstall --user 0 non.wanted.app
+```
+
+You can first disable them, then when you are sure, you can remove them.
+
+To list disabled apps:
+
+```
+adb shell pm list packages -d
+```
+
+Example:
+
+```
+# Google Chrome
+adb shell pm uninstall --user 0 com.android.chrome
+# Gmail
+adb shell pm uninstall --user 0 com.google.android.gm
+# Google Play Films et Séries
+adb shell pm uninstall --user 0 com.google.android.videos
+# Youtube
+adb shell pm uninstall --user 0 com.google.android.youtube
+# Google Play Music
+adb shell pm uninstall --user 0 com.google.android.music
+# Google Hangouts
+adb shell pm uninstall --user 0 com.google.android.talk
+# Google Keep
+adb shell pm uninstall --user 0 com.google.android.keep
+# Google Drive
+adb shell pm uninstall --user 0 com.google.android.apps.docs
+# Google Photos
+adb shell pm uninstall --user 0 com.google.android.apps.photos
+# Google Cloud Print
+adb shell pm uninstall --user 0 com.google.android.apps.cloudprint
+# Google Actualités et météos
+adb shell pm uninstall --user 0 com.google.android.apps.genie.geniewidget
+# Application Google
+adb shell pm uninstall --user 0 com.google.android.googlequicksearchbox
+```
+
+## Resources
+
+https://stackoverflow.com/questions/4032960/how-do-i-get-an-apk-file-from-an-android-device
+https://androidquest.wordpress.com/2014/09/18/backup-applications-on-android-phone-with-adb/
+https://stackoverflow.com/questions/34482042/adb-backup-does-not-work
+https://stackoverflow.com/questions/53634246/android-get-all-installed-packages-using-adb
+https://www.dadall.info/article657/nettoyer-android
+https://etienne.depar.is/a-ecrit/Desinstaller-des-applications-systemes-d-android/index.html
+
+
+
+
 
 [A2ZAPK](https://a2zapk.io/Search/spotify/page/51/user=Z2RVeWdpK0RGTmlRYUowVzZyRzF0dUliRnNYay9meGFLZ3FVSjJTUkJ0UDZFU1cySmtuM3hTck05NUVJQk1yUw==/)
 
@@ -4197,6 +4362,86 @@ git push -u origin development
 
 
 ```
+To commit changes with a new username after setting the Git config, follow these steps:
+
+1. Set the New Username and Email
+
+Update the username and email in your Git configuration:
+
+```bash
+
+git config --global user.name "NewUsername"
+git config --global user.email "newemail@example.com"
+```
+The --global flag applies these settings globally across all repositories.
+
+If you only want to change it for the current repository, omit the --global flag:
+
+```bash
+
+git config user.name "NewUsername"
+git config user.email "newemail@example.com"
+```
+2. Check the Configuration
+
+Confirm the new username and email were updated:
+
+```bash
+
+git config --list
+```
+or
+
+```bash
+
+git config user.name
+git config user.email
+```
+3. Recommit with the New Username
+
+If you've already committed but want the new username to appear, you need to amend the commit or reset and recommit:
+
+Option 1: Amend the Last Commit
+
+To modify the author information on your last commit:
+
+```bash
+
+git commit --amend --reset-author --no-edit
+--reset-author updates the commit with the new username and email.
+--no-edit keeps the commit message unchanged.
+```
+Option 2: Undo and Recommit
+
+If you want to rewrite your commits from scratch:
+
+Unstage Changes
+
+```bash
+
+git reset HEAD~1
+Recommit Changes
+```
+
+```bash
+
+git add .
+git commit -m "Your commit message"
+```
+4. Push the Changes
+
+After recommitting, push your changes:
+
+```bash
+
+git push --force
+Use --force only if the commit history was rewritten (e.g., with --amend or reset).
+```
+5. Verify on GitHub
+
+Check the commit history on GitHub (or your Git server) to confirm the username and email appear correctly.
+
+
 
 ## wpscan
 sudo gem install wpscan
@@ -4899,6 +5144,13 @@ sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 Replace eth0 with your server's internet-facing interface (you can find it with ip a).
 ```
+
+```
+iptables -A FORWARD -i wg0 -o eth0 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -i wg0 -o eth0 -p tcp --dport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+
+```
 Make the iptables rule persistent across reboots:
 
 ```bash
@@ -4980,3 +5232,185 @@ On the server, verify the WireGuard connection:
 sudo wg
 Ensure that the client’s public key and IP are listed and that packets are being transmitted and received.
 ```
+
+## installing sct on linux
+install other libraries for make
+
+```
+In file included from src/xsct.c:7:
+src/xsct.h:10:10: fatal error: X11/extensions/Xrandr.h: No such file or directory
+   10 | #include <X11/extensions/Xrandr.h>
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+make: *** [Makefile:15: xsct] Error 1
+
+```
+>proceed to install
+```
+export PREFIX="/usr/local/sbin/xsct-prefix"
+make install
+```
+
+## eternalblue exploit
+
+
+
+
+
+
+
+proxmox error TASK ERROR: storage 'TRIOPrimary' is not online
+ChatGPT said:
+ChatGPT
+The error TASK ERROR: storage 'TRIOPrimary' is not online in Proxmox indicates that the storage defined as TRIOPrimary is currently unavailable. This issue can occur for several reasons. Here are the steps you can take to troubleshoot and resolve the problem:
+
+1. Verify Storage Accessibility
+Check if the storage is physically or logically accessible:
+If it's a network-based storage (e.g., NFS, SMB, iSCSI), verify that the storage server is powered on and accessible over the network.
+If it's a local disk or drive, confirm that it is properly connected and recognized by the host system.
+Ping the storage server (if applicable):
+bash
+Copy code
+ping <storage_server_IP>
+If it fails, investigate network connectivity issues.
+2. Inspect Proxmox Storage Configuration
+Verify the configuration for TRIOPrimary in /etc/pve/storage.cfg:
+
+bash
+Copy code
+cat /etc/pve/storage.cfg
+Look for any misconfigurations, such as incorrect paths or IP addresses.
+
+Example of an NFS storage configuration:
+
+txt
+Copy code
+nfs: TRIOPrimary
+    path /mnt/pve/TRIOPrimary
+    server <IP_of_storage_server>
+    export /path/to/share
+    options vers=3
+    content images,iso
+Correct any incorrect entries.
+
+3. Test Mounting the Storage Manually
+If the storage is network-based:
+
+Attempt to mount it manually:
+
+bash
+Copy code
+mkdir -p /mnt/test_mount
+mount -t nfs <storage_server_IP>:/path/to/share /mnt/test_mount
+Replace nfs with the appropriate protocol type (e.g., CIFS or iSCSI) and provide the correct server IP and export path.
+
+Check if there are any errors during the manual mount. If so, investigate further.
+
+4. Restart Proxmox Storage Services
+Restart Proxmox-related services to see if the issue resolves:
+bash
+Copy code
+systemctl restart pvestatd
+systemctl restart pvedaemon
+5. Check Logs for Detailed Errors
+Check the system logs for storage-related errors:
+bash
+Copy code
+journalctl -xe
+tail -f /var/log/syslog
+Look for messages related to the TRIOPrimary storage or mounting issues.
+6. Ensure Proper Permissions
+Ensure the user Proxmox is using has the necessary permissions to access the storage (e.g., NFS export permissions or iSCSI initiator permissions).
+7. Reinitialize the Storage
+If the storage path or configuration seems correct, but the issue persists, try disabling and re-enabling the storage in the Proxmox GUI:
+Navigate to Datacenter > Storage > TRIOPrimary.
+Disable the storage and then enable it again.
+8. Verify Network/Firewall Settings
+Ensure there are no firewall or routing issues preventing Proxmox from accessing the storage server. Open required ports for protocols like NFS, iSCSI, or SMB.
+9. Storage Status in Proxmox
+Check the current status of storages in Proxmox using:
+bash
+Copy code
+pvesm status
+Look for the status of TRIOPrimary. It might show error or offline, confirming its inaccessibility.
+10. Reboot the Host
+As a last resort, reboot the Proxmox host to reinitialize all services and remount storages. However, this should only be done during a maintenance window if production is impacted.
+
+
+proxmox error TASK ERROR: storage 'TRIOPrimary' is not online
+ChatGPT said:
+ChatGPT
+The error TASK ERROR: storage 'TRIOPrimary' is not online in Proxmox indicates that the storage defined as TRIOPrimary is currently unavailable. This issue can occur for several reasons. Here are the steps you can take to troubleshoot and resolve the problem:
+
+1. Verify Storage Accessibility
+Check if the storage is physically or logically accessible:
+If it's a network-based storage (e.g., NFS, SMB, iSCSI), verify that the storage server is powered on and accessible over the network.
+If it's a local disk or drive, confirm that it is properly connected and recognized by the host system.
+Ping the storage server (if applicable):
+bash
+Copy code
+ping <storage_server_IP>
+If it fails, investigate network connectivity issues.
+2. Inspect Proxmox Storage Configuration
+Verify the configuration for TRIOPrimary in /etc/pve/storage.cfg:
+
+bash
+Copy code
+cat /etc/pve/storage.cfg
+Look for any misconfigurations, such as incorrect paths or IP addresses.
+
+Example of an NFS storage configuration:
+
+txt
+Copy code
+nfs: TRIOPrimary
+    path /mnt/pve/TRIOPrimary
+    server <IP_of_storage_server>
+    export /path/to/share
+    options vers=3
+    content images,iso
+Correct any incorrect entries.
+
+3. Test Mounting the Storage Manually
+If the storage is network-based:
+
+Attempt to mount it manually:
+
+bash
+Copy code
+mkdir -p /mnt/test_mount
+mount -t nfs <storage_server_IP>:/path/to/share /mnt/test_mount
+Replace nfs with the appropriate protocol type (e.g., CIFS or iSCSI) and provide the correct server IP and export path.
+
+Check if there are any errors during the manual mount. If so, investigate further.
+
+4. Restart Proxmox Storage Services
+Restart Proxmox-related services to see if the issue resolves:
+bash
+Copy code
+systemctl restart pvestatd
+systemctl restart pvedaemon
+5. Check Logs for Detailed Errors
+Check the system logs for storage-related errors:
+bash
+Copy code
+journalctl -xe
+tail -f /var/log/syslog
+Look for messages related to the TRIOPrimary storage or mounting issues.
+6. Ensure Proper Permissions
+Ensure the user Proxmox is using has the necessary permissions to access the storage (e.g., NFS export permissions or iSCSI initiator permissions).
+7. Reinitialize the Storage
+If the storage path or configuration seems correct, but the issue persists, try disabling and re-enabling the storage in the Proxmox GUI:
+Navigate to Datacenter > Storage > TRIOPrimary.
+Disable the storage and then enable it again.
+8. Verify Network/Firewall Settings
+Ensure there are no firewall or routing issues preventing Proxmox from accessing the storage server. Open required ports for protocols like NFS, iSCSI, or SMB.
+9. Storage Status in Proxmox
+Check the current status of storages in Proxmox using:
+bash
+Copy code
+pvesm status
+Look for the status of TRIOPrimary. It might show error or offline, confirming its inaccessibility.
+10. Reboot the Host
+As a last resort, reboot the Proxmox host to reinitialize all services and remount storages. However, this should only be done during a maintenance window if production is impacted.
+
