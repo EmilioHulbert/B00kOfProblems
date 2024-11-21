@@ -5144,13 +5144,6 @@ sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 Replace eth0 with your server's internet-facing interface (you can find it with ip a).
 ```
-
-```
-iptables -A FORWARD -i wg0 -o eth0 -p udp --dport 53 -j ACCEPT
-iptables -A FORWARD -i wg0 -o eth0 -p tcp --dport 53 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
-
-```
 Make the iptables rule persistent across reboots:
 
 ```bash
@@ -5234,7 +5227,8 @@ Ensure that the client’s public key and IP are listed and that packets are bei
 ```
 
 ## installing sct on linux
-install other libraries for make
+
+> install other libraries for make
 
 ```
 In file included from src/xsct.c:7:
@@ -5245,173 +5239,12 @@ compilation terminated.
 make: *** [Makefile:15: xsct] Error 1
 
 ```
->proceed to install
+
+## fix for this
+```sudo apt update
+sudo apt install libxrandr-dev
 ```
-export PREFIX="/usr/local/sbin/xsct-prefix"
-make install
-```
+>Good To Go
 
-## eternalblue exploit
+[sct download/git clone link](https://github.com/faf0/sct)
 
-
-
-
-
-
-
-proxmox error TASK ERROR: storage 'TRIOPrimary' is not online
-ChatGPT said:
-ChatGPT
-The error TASK ERROR: storage 'TRIOPrimary' is not online in Proxmox indicates that the storage defined as TRIOPrimary is currently unavailable. This issue can occur for several reasons. Here are the steps you can take to troubleshoot and resolve the problem:
-
-1. Verify Storage Accessibility
-Check if the storage is physically or logically accessible:
-If it's a network-based storage (e.g., NFS, SMB, iSCSI), verify that the storage server is powered on and accessible over the network.
-If it's a local disk or drive, confirm that it is properly connected and recognized by the host system.
-Ping the storage server (if applicable):
-bash
-Copy code
-ping <storage_server_IP>
-If it fails, investigate network connectivity issues.
-2. Inspect Proxmox Storage Configuration
-Verify the configuration for TRIOPrimary in /etc/pve/storage.cfg:
-
-bash
-Copy code
-cat /etc/pve/storage.cfg
-Look for any misconfigurations, such as incorrect paths or IP addresses.
-
-Example of an NFS storage configuration:
-
-txt
-Copy code
-nfs: TRIOPrimary
-    path /mnt/pve/TRIOPrimary
-    server <IP_of_storage_server>
-    export /path/to/share
-    options vers=3
-    content images,iso
-Correct any incorrect entries.
-
-3. Test Mounting the Storage Manually
-If the storage is network-based:
-
-Attempt to mount it manually:
-
-bash
-Copy code
-mkdir -p /mnt/test_mount
-mount -t nfs <storage_server_IP>:/path/to/share /mnt/test_mount
-Replace nfs with the appropriate protocol type (e.g., CIFS or iSCSI) and provide the correct server IP and export path.
-
-Check if there are any errors during the manual mount. If so, investigate further.
-
-4. Restart Proxmox Storage Services
-Restart Proxmox-related services to see if the issue resolves:
-bash
-Copy code
-systemctl restart pvestatd
-systemctl restart pvedaemon
-5. Check Logs for Detailed Errors
-Check the system logs for storage-related errors:
-bash
-Copy code
-journalctl -xe
-tail -f /var/log/syslog
-Look for messages related to the TRIOPrimary storage or mounting issues.
-6. Ensure Proper Permissions
-Ensure the user Proxmox is using has the necessary permissions to access the storage (e.g., NFS export permissions or iSCSI initiator permissions).
-7. Reinitialize the Storage
-If the storage path or configuration seems correct, but the issue persists, try disabling and re-enabling the storage in the Proxmox GUI:
-Navigate to Datacenter > Storage > TRIOPrimary.
-Disable the storage and then enable it again.
-8. Verify Network/Firewall Settings
-Ensure there are no firewall or routing issues preventing Proxmox from accessing the storage server. Open required ports for protocols like NFS, iSCSI, or SMB.
-9. Storage Status in Proxmox
-Check the current status of storages in Proxmox using:
-bash
-Copy code
-pvesm status
-Look for the status of TRIOPrimary. It might show error or offline, confirming its inaccessibility.
-10. Reboot the Host
-As a last resort, reboot the Proxmox host to reinitialize all services and remount storages. However, this should only be done during a maintenance window if production is impacted.
-
-
-proxmox error TASK ERROR: storage 'TRIOPrimary' is not online
-ChatGPT said:
-ChatGPT
-The error TASK ERROR: storage 'TRIOPrimary' is not online in Proxmox indicates that the storage defined as TRIOPrimary is currently unavailable. This issue can occur for several reasons. Here are the steps you can take to troubleshoot and resolve the problem:
-
-1. Verify Storage Accessibility
-Check if the storage is physically or logically accessible:
-If it's a network-based storage (e.g., NFS, SMB, iSCSI), verify that the storage server is powered on and accessible over the network.
-If it's a local disk or drive, confirm that it is properly connected and recognized by the host system.
-Ping the storage server (if applicable):
-bash
-Copy code
-ping <storage_server_IP>
-If it fails, investigate network connectivity issues.
-2. Inspect Proxmox Storage Configuration
-Verify the configuration for TRIOPrimary in /etc/pve/storage.cfg:
-
-bash
-Copy code
-cat /etc/pve/storage.cfg
-Look for any misconfigurations, such as incorrect paths or IP addresses.
-
-Example of an NFS storage configuration:
-
-txt
-Copy code
-nfs: TRIOPrimary
-    path /mnt/pve/TRIOPrimary
-    server <IP_of_storage_server>
-    export /path/to/share
-    options vers=3
-    content images,iso
-Correct any incorrect entries.
-
-3. Test Mounting the Storage Manually
-If the storage is network-based:
-
-Attempt to mount it manually:
-
-bash
-Copy code
-mkdir -p /mnt/test_mount
-mount -t nfs <storage_server_IP>:/path/to/share /mnt/test_mount
-Replace nfs with the appropriate protocol type (e.g., CIFS or iSCSI) and provide the correct server IP and export path.
-
-Check if there are any errors during the manual mount. If so, investigate further.
-
-4. Restart Proxmox Storage Services
-Restart Proxmox-related services to see if the issue resolves:
-bash
-Copy code
-systemctl restart pvestatd
-systemctl restart pvedaemon
-5. Check Logs for Detailed Errors
-Check the system logs for storage-related errors:
-bash
-Copy code
-journalctl -xe
-tail -f /var/log/syslog
-Look for messages related to the TRIOPrimary storage or mounting issues.
-6. Ensure Proper Permissions
-Ensure the user Proxmox is using has the necessary permissions to access the storage (e.g., NFS export permissions or iSCSI initiator permissions).
-7. Reinitialize the Storage
-If the storage path or configuration seems correct, but the issue persists, try disabling and re-enabling the storage in the Proxmox GUI:
-Navigate to Datacenter > Storage > TRIOPrimary.
-Disable the storage and then enable it again.
-8. Verify Network/Firewall Settings
-Ensure there are no firewall or routing issues preventing Proxmox from accessing the storage server. Open required ports for protocols like NFS, iSCSI, or SMB.
-9. Storage Status in Proxmox
-Check the current status of storages in Proxmox using:
-bash
-Copy code
-pvesm status
-Look for the status of TRIOPrimary. It might show error or offline, confirming its inaccessibility.
-10. Reboot the Host
-As a last resort, reboot the Proxmox host to reinitialize all services and remount storages. However, this should only be done during a maintenance window if production is impacted.
-
-#changed
