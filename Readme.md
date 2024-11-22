@@ -5248,3 +5248,81 @@ sudo apt install libxrandr-dev
 
 [sct download/git clone link](https://github.com/faf0/sct)
 
+
+Here are several alternatives to portmap.io for creating SSH tunnels or forwarding ports:
+
+1. Ngrok
+Overview: Ngrok is a popular service for exposing local servers to the internet, providing both HTTP and TCP tunneling.
+Features: Supports secure tunnels for HTTP, HTTPS, and TCP connections. It provides a public URL that forwards traffic to your local machine.
+Website: https://ngrok.com/
+Usage:
+bash
+Copy code
+ngrok tcp 22  # For SSH tunnel
+2. Serveo
+Overview: Serveo provides a simple, SSH-based tunnel without needing any installation. You can create a reverse SSH tunnel directly from the command line.
+Features: No sign-up required; just use SSH to create the tunnel.
+Website: https://serveo.net/
+Usage:
+bash
+Copy code
+ssh -R 80:localhost:22 serveo.net  # For SSH tunnel
+3. LocalTunnel
+Overview: LocalTunnel allows you to expose your localhost to the public internet via a subdomain.
+Features: Supports HTTP/HTTPS tunnels, provides a random subdomain by default.
+Website: https://localtunnel.github.io/www/
+Usage:
+bash
+Copy code
+npx localtunnel --port 22  # For SSH tunnel
+4. Telebit
+Overview: Telebit offers free, secure tunnels to your local machine, and supports TCP and HTTP tunnels. It's especially good for IoT and development environments.
+Features: Supports both TCP and HTTP tunneling; provides encryption.
+Website: https://telebit.io/
+Usage:
+bash
+Copy code
+telebit tcp 22  # For SSH tunnel
+5. FRP (Fast Reverse Proxy)
+Overview: FRP is an open-source, self-hosted alternative for reverse tunneling. It allows you to expose a local network to the internet.
+Features: Self-hosted solution for private networks; more control but requires server setup.
+Website: https://github.com/fatedier/frp
+Usage:
+Run frps on your public server.
+Run frpc on your local machine.
+6. Tailscale
+Overview: Tailscale uses WireGuard to create secure mesh networks between your devices. It allows remote access to services and devices behind NATs and firewalls.
+Features: Secure, peer-to-peer connection; no need for port forwarding.
+Website: https://tailscale.com/
+Usage: After installation, you can directly access your devices by connecting them via Tailscale's VPN.
+7. PageKite
+Overview: PageKite is a service that lets you expose your local servers (HTTP/SSH) to the world.
+Features: Focuses on HTTP and SSH access; can be self-hosted or used as a service.
+Website: https://pagekite.net/
+Usage:
+bash
+Copy code
+pagekite 22 yourdomain.pagekite.me  # For SSH tunnel
+8. Dynamic DNS (DDNS) Services
+Overview: DDNS services like DuckDNS or No-IP allow you to assign a static hostname to your dynamic IP address, which can be used to access your home server remotely.
+Features: Good for long-term access and automation; requires router configuration for port forwarding.
+DuckDNS: https://www.duckdns.org/
+No-IP: https://www.noip.com/
+9. SSHuttle
+Overview: SSHuttle is a transparent proxy server that works over SSH, making it a versatile and lightweight option for remote access.
+Features: Works by creating a VPN-like environment, tunneling all traffic through SSH.
+Website: https://github.com/sshuttle/sshuttle
+Usage:
+bash
+Copy code
+sshuttle -r user@host 0.0.0.0/0  # Tunnels all traffic via SSH
+10. Remote.it
+Overview: Remote.it is a service that allows you to securely connect to your devices over the internet, without needing a static IP or port forwarding.
+Features: Provides secure remote access; no need to open ports or set up firewalls.
+Website: https://remote.it/
+Summary of Alternatives
+For Quick Use: Ngrok, Serveo, LocalTunnel.
+For Long-Term Use or Custom Setup: FRP, Tailscale, PageKite.
+For Self-Hosting or Full Control: FRP, DuckDNS/No-IP with SSH, SSHuttle.
+Each service has its own pros and cons based on security, performance, and ease of use. You can select one based on your needs (e.g., quick SSH access or long-term stable access with custom configurations).
+ssh -R 80:localhost:3000 serveo.net
