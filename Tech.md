@@ -5464,3 +5464,20 @@ Test your SSL setup with SSL Labs.
 
 ## EXPORT DB USING TERMINAL 
 mysqldump -u username -p database_name > /path/to/destination/database.sql
+
+## MEGACMD INSTALL ON UBUNTU SERVER BECAUSE IT'S BETTER THAN TRASHY MEGATOOLS
+
+sudo apt update
+sudo apt install -y software-properties-common
+sudo add-apt-repository 'deb https://mega.nz/linux/repo/xUbuntu_22.04/ ./'
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1A664B787094A482
+add-apt-repository 'deb https://mega.nz/linux/repo/xUbuntu_22.04/ ./'
+wget -qO - https://mega.nz/keys/MEGA_signing.key | sudo apt-key add -
+wget http://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu70_70.1-2_amd64.deb
+dpkg -i libicu70_70.1-2_amd64.deb 
+apt --fix-broken install
+apt install megacmd
+apt remove megatools
+
+
+
