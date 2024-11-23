@@ -5481,3 +5481,418 @@ apt remove megatools
 
 
 
+## 413 Request Entity Too Large nginx/1.24.0 (Ubuntu) when installing theme 
+sudo nano /etc/php/8.3/fpm/php.ini
+upload_max_filesize = 64M
+post_max_size = 64M
+max_execution_time = 300
+sudo systemctl restart php8.3-fpm
+Step 2: Update Nginx Configuration
+Edit Your Nginx Configuration File: Open the Nginx configuration file for your WordPress site:
+
+bash
+Copy code
+sudo nano /etc/nginx/sites-available/your-site.conf
+Add or Update the client_max_body_size Directive: Inside the server block, add or update:
+
+nginx
+Copy code
+client_max_body_size 64M;
+Replace 64M with a value larger than your theme file size.
+
+Test Nginx Configuration: Verify the configuration is correct:
+
+bash
+Copy code
+sudo nginx -t
+Reload Nginx: Apply the changes by reloading Nginx:
+
+bash
+Copy code
+sudo systemctl reload nginx
+Step 3: Update WordPress Settings
+If you're still having issues after the above steps, WordPress might still limit uploads via its own settings. Check the wp-config.php file:
+
+Edit wp-config.php:
+
+bash
+Copy code
+sudo nano /var/www/html/wp-config.php
+Add the Following Line:
+
+php
+Copy code
+@ini_set( 'upload_max_size' , '64M' );
+@ini_set( 'post_max_size', '64M');
+@ini_set( 'max_execution_time', '300' );
+Step 4: Retry Theme Installation
+Go back to your WordPress admin dashboard and try uploading the theme again.
+
+If the problem persists, let me know!
+
+If you’re still encountering the 413 Request Entity Too Large error, let’s troubleshoot step-by-step to ensure nothing is missed:
+
+1. Double-Check PHP Configuration
+Verify if PHP is correctly configured to allow larger file uploads.
+
+Check the currently active PHP configuration:
+
+bash
+Copy code
+php -i | grep -E "upload_max_filesize|post_max_size"
+Ensure the output shows values larger than your file size (e.g., 64M).
+
+If the settings are incorrect, re-edit the php.ini file:
+
+bash
+Copy code
+sudo nano /etc/php/8.3/fpm/php.ini
+Modify:
+
+ini
+Copy code
+upload_max_filesize = 128M
+post_max_size = 128M
+Restart PHP-FPM:
+
+bash
+Copy code
+sudo systemctl restart php8.3-fpm
+Verify the correct php.ini is loaded for Nginx. Check the PHP info page:
+
+Create a file in /var/www/html/:
+bash
+Copy code
+echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+Visit http://your-site.com/info.php and look for the Loaded Configuration File path.
+Ensure you edited the correct php.ini file.
+2. Double-Check Nginx Configuration
+Verify the client_max_body_size directive is applied.
+
+Open your Nginx site configuration:
+
+bash
+Copy code
+sudo nano /etc/nginx/sites-available/your-site.conf
+Ensure the directive is in the server block:
+
+nginx
+Copy code
+server {
+    client_max_body_size 128M;
+}
+Reload Nginx:
+
+bash
+Copy code
+sudo nginx -t
+sudo systemctl reload nginx
+Check if the directive is correctly applied:
+
+bash
+Copy code
+curl -I -X POST --data-binary @testfile.zip http://your-site.com
+Replace testfile.zip with a file larger than your previous upload limit.
+
+3. Increase FastCGI Buffer Size (Optional)
+If Nginx is still blocking large uploads, increase the FastCGI buffer size.
+
+Edit your Nginx configuration:
+
+bash
+Copy code
+sudo nano /etc/nginx/nginx.conf
+Add these directives inside the http block:
+
+nginx
+Copy code
+http {
+    fastcgi_buffers 8 16k;
+    fastcgi_buffer_size 32k;
+}
+Reload Nginx:
+
+bash
+Copy code
+sudo nginx -t
+sudo systemctl reload nginx
+4. Permissions
+Ensure the upload directory in WordPress has the correct permissions:
+
+bash
+Copy code
+sudo chown -R www-data:www-data /var/www/html/wp-content/uploads
+sudo chmod -R 755 /var/www/html/wp-content/uploads
+5. Debug Logs
+If the issue persists:
+
+Check the Nginx error logs:
+
+bash
+Copy code
+sudo tail -f /var/log/nginx/error.log
+Check PHP-FPM logs:
+
+bash
+Copy code
+sudo tail -f /var/log/php8.3-fpm.log
+6. Test Again
+Retry uploading the theme in WordPress.
+If the issue persists, share the exact error log, and I'll guide you further!
+
+
+
+
+It seems there’s a misunderstanding in how the curl command is being used. Let me clarify and provide the correct command for testing the 413 Request Entity Too Large issue:
+
+Correct Command for Testing File Upload with curl
+To properly simulate a file upload, we need to send a POST request with the file, not a HEAD or improperly formed request. Here's how you can do it:
+
+Place your test file (e.g., testfile.zip) in the current directory or specify its full path.
+Run the following curl command:
+bash
+Copy code
+curl -X POST --data-binary @testfile.zip http://nairobiskates.com
+This will send the file as the request payload to your server.
+
+Expected Results
+If Nginx blocks the request due to size, you’ll receive a 413 Request Entity Too Large error.
+If the request goes through but your WordPress still fails to process it, then the issue lies elsewhere (e.g., WordPress PHP settings or permissions).
+Troubleshooting Steps if Curl Still Fails
+Ensure the DNS is Resolving Properly
+
+It seems there was a DNS resolution issue in your previous command (Could not resolve host). Make sure the domain is properly pointing to your server:
+bash
+Copy code
+ping nairobiskates.com
+You should see a response from your server’s IP.
+Test on an Alternate Port or Direct IP If you suspect DNS or Cloudflare interference, bypass it by testing directly with your server’s IP:
+
+bash
+Copy code
+curl -X POST --data-binary @testfile.zip http://YOUR_SERVER_IP
+Enable Debugging Output To see detailed request and response information:
+
+bash
+Copy code
+curl -v -X POST --data-binary @testfile.zip http://nairobiskates.com
+Let me know what happens when you test again!
+
+
+
+
+
+
+5. NGINX Configuration
+Ensure your NGINX configuration matches Cloudflare’s upload limits. If your server's client_max_body_size is too low, it might still block uploads.
+Solution:
+
+Check both Cloudflare and NGINX settings:
+bash
+Copy code
+sudo nano /etc/nginx/nginx.conf
+Add or adjust:
+nginx
+Copy code
+client_max_body_size 100M;
+Restart NGINX:
+bash
+Copy code
+sudo systemctl restart nginx
+6. Cloudflare Cache or Headers
+Cloudflare may cache errors or cause issues with misconfigured headers.
+Solution:
+
+Purge the Cloudflare cache.
+Verify your NGINX headers configuration is correct.
+If you’re still facing issues after these steps, let me know so we can dig deeper into the specifics of your setup!
+
+2. NGINX Issue
+Even if the file size is small, NGINX might still block the request if its configurations are not aligned with your upload endpoint.
+
+Steps to Fix:
+Set client_max_body_size: Edit your NGINX configuration:
+
+bash
+Copy code
+sudo nano /etc/nginx/sites-available/nairobiskates.com
+Add or update the following in the relevant server block:
+
+nginx
+Copy code
+client_max_body_size 10M;
+Save and restart NGINX:
+
+bash
+Copy code
+sudo systemctl restart nginx
+Test the Endpoint:
+
+Use curl to confirm:
+bash
+Copy code
+curl -F "file=@testfile.zip" http://nairobiskates.com/upload-endpoint
+3. Check WordPress
+If this issue occurs while uploading via WordPress, it might be due to PHP or WordPress settings.
+
+Steps to Fix:
+Increase PHP Limits:
+
+Edit your php.ini file:
+
+bash
+Copy code
+sudo nano /etc/php/8.x/fpm/php.ini
+Update these values:
+
+ini
+Copy code
+upload_max_filesize = 10M
+post_max_size = 10M
+max_execution_time = 300
+Restart PHP and NGINX:
+
+bash
+Copy code
+sudo systemctl restart php8.x-fpm
+sudo systemctl restart nginx
+Check WordPress Settings:
+
+Go to Settings > Media in the WordPress admin panel.
+Ensure the upload directory is correctly set.
+4. Debug with Logs
+If it still doesn’t work, check your logs for more details:
+
+NGINX Logs:
+bash
+Copy code
+sudo tail -f /var/log/nginx/error.log
+PHP-FPM Logs:
+bash
+Copy code
+sudo tail -f /var/log/php8.x-fpm.log
+Summary
+If the file is only 3.1MB, the most likely culprits are:
+
+Cloudflare blocking POST requests (resolve via whitelisting or bypassing Cloudflare).
+NGINX misconfiguration (client_max_body_size).
+PHP or WordPress limits (upload_max_filesize, etc.).
+Try the
+
+Steps to Add These Lines in wp-config.php
+Access Your WordPress Files:
+
+Log into your server using SSH or SFTP.
+Navigate to your WordPress installation directory, typically located at /var/www/html or /var/www/store (for your subdomain setup).
+Edit the wp-config.php File:
+
+Open the wp-config.php file in a text editor:
+bash
+Copy code
+sudo nano /var/www/store/wp-config.php
+Add the Lines:
+
+Place the lines just before the following line at the bottom of the file:
+php
+Copy code
+/* That's all, stop editing! Happy blogging. */
+The updated section should look like this:
+php
+Copy code
+@ini_set( 'upload_max_size' , '64M' );
+@ini_set( 'post_max_size', '64M' );
+@ini_set( 'max_execution_time', '300' );
+
+/* That's all, stop editing! Happy blogging. */
+Save and Exit:
+
+Save the file by pressing Ctrl + O (in nano) and then press Enter.
+Exit the editor with Ctrl + X.
+What These Settings Do
+upload_max_size: Specifies the maximum size of files that can be uploaded.
+post_max_size: Limits the size of all POST data (including file uploads).
+max_execution_time: Increases the time allowed for a script to execute.
+Restart Services (Optional)
+If you're unsure whether these settings are applied, restart your services:
+
+Restart PHP:
+bash
+Copy code
+sudo systemctl restart php8.x-fpm
+Restart NGINX:
+bash
+Copy code
+sudo systemctl restart nginx
+Let me know if the issue persists after applying these changes!
+
+
+
+
+
+
+Steps to Update Global PHP Settings
+Locate Your php.ini File:
+
+Find the active php.ini file by running:
+bash
+Copy code
+php --ini
+Look for a line that says:
+javascript
+Copy code
+Loaded Configuration File: /path/to/php.ini
+Note the path (e.g., /etc/php/8.x/fpm/php.ini).
+Edit the php.ini File:
+
+Open the file using a text editor:
+bash
+Copy code
+sudo nano /etc/php/8.x/fpm/php.ini
+Replace 8.x with your PHP version.
+Update the Settings:
+
+Search for upload_max_filesize and post_max_size by pressing Ctrl + W in nano and typing the setting name.
+Update the values as follows:
+ini
+Copy code
+upload_max_filesize = 64M
+post_max_size = 64M
+max_execution_time = 300
+Save and Exit:
+
+Save the file by pressing Ctrl + O, then Enter.
+Exit with Ctrl + X.
+Restart PHP and NGINX:
+
+Restart the PHP service:
+bash
+Copy code
+sudo systemctl restart php8.x-fpm
+Restart NGINX:
+bash
+Copy code
+sudo systemctl restart nginx
+Verify the Changes:
+
+Check if the new values are applied:
+bash
+Copy code
+php -i | grep -E "upload_max_filesize|post_max_size"
+Alternative for Site-Specific Changes
+If you prefer not to modify the global settings, you can make changes specific to your WordPress site by adding a .user.ini file in your WordPress root directory (/var/www/store). Here's how:
+
+Create the file:
+bash
+Copy code
+sudo nano /var/www/store/.user.ini
+Add the following:
+ini
+Copy code
+upload_max_filesize = 64M
+post_max_size = 64M
+max_execution_time = 300
+Save and exit the file, then restart services:
+bash
+Copy code
+sudo systemctl restart php8.x-fpm
+sudo systemctl restart nginx
