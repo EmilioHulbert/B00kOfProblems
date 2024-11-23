@@ -5249,17 +5249,18 @@ sudo apt install libxrandr-dev
 [sct download/git clone link](https://github.com/faf0/sct)
 
 
-Here are several alternatives to portmap.io for creating SSH tunnels or forwarding ports:
+## Here are several alternatives to portmap.io for creating SSH tunnels or forwarding ports:
 
-1. Ngrok
+> 1. Ngrok
 Overview: Ngrok is a popular service for exposing local servers to the internet, providing both HTTP and TCP tunneling.
 Features: Supports secure tunnels for HTTP, HTTPS, and TCP connections. It provides a public URL that forwards traffic to your local machine.
 Website: https://ngrok.com/
 Usage:
 bash
 Copy code
-ngrok tcp 22  # For SSH tunnel
-2. Serveo
+`ngrok tcp 22  # For SSH tunnel`
+> 2. Serveo
+
 Overview: Serveo provides a simple, SSH-based tunnel without needing any installation. You can create a reverse SSH tunnel directly from the command line.
 Features: No sign-up required; just use SSH to create the tunnel.
 Website: https://serveo.net/
