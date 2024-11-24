@@ -5896,3 +5896,53 @@ bash
 Copy code
 sudo systemctl restart php8.x-fpm
 sudo systemctl restart nginx
+
+## QUICK WINDOWS BATCH CRASH COURSE
+simple batch
+set varname="hello"
+echo %varname%
+set /a numvariable=3
+echo %numvariable%
+title
+@echo off
+echo %programfiles%
+echo %computername%
+echo %random%
+set /p varname=
+set /p varname=enter text:
+set /a caclculator=%num2% + %num3%
+echo line break
+title line break
+echo hello
+echo.
+echo world
+echo hello &echo world append
+rem comment me
+::comment me
+set myvar=good
+if %myvar%==good echo true
+if %myvar%==good (echo true) else (echo false)
+:blockofcode
+:flabel
+echo 123
+echo 32432
+:slabel
+echo 233 453
+cls
+if exist "nd.exe" (echo "yes file exists") else (echo "not exist")
+::openfile
+"filename"
+set name="emilio"
+if not name=="emilio" (echo not him)
+for %%y in (1,2,3,4,5)do echo %%y
+::range
+for /l %%varname in (ll,ul,inc)do (echo something)
+%date% %time%
+rename folder
+ren file
+
+reg query keyname
+
+reg query keyname /v Name
+reg query keyname /v website
+
