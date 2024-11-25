@@ -5946,3 +5946,41 @@ reg query keyname
 reg query keyname /v Name
 reg query keyname /v website
 
+## ssh issues
+Ensuring AllowTcpForwarding and GatewayPorts are enabled on your Raspberry Pi’s SSH server:
+
+bash
+Copy code
+sudo nano /etc/ssh/sshd_config
+Add or verify the following:
+
+plaintext
+Copy code
+AllowTcpForwarding yes
+GatewayPorts yes
+Restart the SSH server:
+
+bash
+Copy code
+sudo systemctl restart sshd
+
+Ensure the Raspberry Pi SSH server is configured to allow public key authentication:
+
+Edit the SSH configuration:
+bash
+Copy code
+sudo nano /etc/ssh/sshd_config
+Verify the following lines are enabled (uncomment if needed):
+plaintext
+Copy code
+PubkeyAuthentication yes
+PasswordAuthentication no
+Restart the SSH service:
+bash
+Copy code
+sudo systemctl restart ssh
+Look for the GatewayPorts directive and set it to yes:
+plaintext
+Copy code
+GatewayPorts yes
+
