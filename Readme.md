@@ -6044,7 +6044,6 @@ Copy code
 sudo chown www-data:www-data /var/www/html/failsafe.php
 sudo chmod 640 /var/www/html/failsafe.php
 
-
 a) Restrict Access to Specific IPs
 Restrict access to the PHP endpoint to only your WireGuard network. Add the following to your Nginx configuration file inside the location / {} block:
 
@@ -6052,4 +6051,65 @@ nginx
 Copy code
 allow 10.0.0.0/24;  # Replace with your WireGuard subnet
 deny all;
+
+
+## SSH SOCKET STOP
+Stopping ssh (via systemctl): ssh.serviceStopping 'ssh.service', but its triggering units are still active:
+ssh.socket
+.
+
+When stopping the SSH service (ssh.service), the ssh.socket unit may remain active. This is because the ssh.socket service is designed to manage incoming SSH connection requests. If you stop the ssh.service, the ssh.socket unit can trigger it again if a connection is attempted.
+
+Here’s how to fully stop the SSH service, including its triggering units:
+
+1. Stop ssh.service and ssh.socket
+Run the following commands in sequence:
+
+bash
+Copy code
+sudo systemctl stop ssh.service
+sudo systemctl stop ssh.socket
+The first command stops the SSH daemon (sshd).
+The second command stops the socket listener (ssh.socket), ensuring no new SSH connections can trigger the service.
+2. Disable Both Services (Optional)
+If you want to ensure they do not start again on reboot, disable both:
+
+bash
+Copy code
+sudo systemctl disable ssh.service
+sudo systemctl disable ssh.socket
+3. Verify Service Status
+To confirm that both the service and the socket are stopped:
+
+bash
+Copy code
+sudo systemctl status ssh.service
+sudo systemctl status ssh.socket
+4. Re-enable and Restart SSH Later
+If you need SSH access again in the future, re-enable and start both services:
+
+bash
+Copy code
+sudo systemctl enable ssh.service
+sudo systemctl enable ssh.socket
+sudo systemctl start ssh.service
+sudo systemctl start ssh.socket
+
+5. Understanding the Role of ssh.socket
+ssh.socket is part of the systemd socket activation mechanism. It listens for incoming SSH connection requests on port 22. When a connection is detected, it activates ssh.service.
+If ssh.socket remains active, it will restart the SSH service when a connection attempt is made.
+
+Advanced: Mask the Services
+If you want to completely block the SSH service and socket from being started by any other process (even manually), you can mask them:
+
+bash
+Copy code
+sudo systemctl mask ssh.service
+sudo systemctl mask ssh.socket
+To unmask:
+
+bash
+Copy code
+sudo systemctl unmask ssh.service
+sudo systemctl unmask ssh.socket
 
