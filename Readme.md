@@ -5984,3 +5984,72 @@ plaintext
 Copy code
 GatewayPorts yes
 
+## failsafe to re-enable ssh
+
+
+<?php
+// failsafe.php
+if ($_GET['action'] === 'start_ssh') {
+    // Execute the command to start SSH service
+    system('sudo systemctl start ssh', $output);
+    echo "SSH service has been started!";
+} else {
+    echo "Invalid action.";
+}
+?>
+
+sudo visudo
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start ssh
+cd /var/www/html
+sudo nano failsafe.php
+curl "http://<Raspberry-Pi-IP>/failsafe.php?action=start_ssh"
+SSH service has been started!
+
+## failsafes.php
+<?php
+// failsafe.php
+
+// Define a simple username and password
+$valid_username = "admin";
+$valid_password = "your_secure_password";
+
+// Get credentials from the request (basic auth)
+if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW']) ||
+    $_SERVER['PHP_AUTH_USER'] !== $valid_username || $_SERVER['PHP_AUTH_PW'] !== $valid_password) {
+    
+    // Prompt the user for credentials
+    header('WWW-Authenticate: Basic realm="Restricted Area"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo "Unauthorized access.";
+    exit;
+}
+
+// If the credentials are correct, proceed
+if ($_GET['action'] === 'start_ssh') {
+    system('sudo systemctl start ssh', $output);
+    echo "SSH service has been started!";
+} else {
+    echo "Invalid action.";
+}
+?>
+
+
+curl -u admin:your_secure_password "http://<Raspberry-Pi-IP>/failsafe.php?action=start_ssh"
+
+c) Set File Permissions
+Ensure only the www-data user can access the PHP script:
+
+bash
+Copy code
+sudo chown www-data:www-data /var/www/html/failsafe.php
+sudo chmod 640 /var/www/html/failsafe.php
+
+
+a) Restrict Access to Specific IPs
+Restrict access to the PHP endpoint to only your WireGuard network. Add the following to your Nginx configuration file inside the location / {} block:
+
+nginx
+Copy code
+allow 10.0.0.0/24;  # Replace with your WireGuard subnet
+deny all;
+
