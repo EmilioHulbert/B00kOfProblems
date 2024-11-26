@@ -6464,3 +6464,8 @@ bash
 Copy code
 git push origin development --force-with-lease
 This option ensures you only force push if the remote branch hasn’t changed since you last fetched.
+
+## insecure.org
+https://archive.org/
+nmap -sP localnet
+www.nessus.org
