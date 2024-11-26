@@ -6113,3 +6113,37 @@ Copy code
 sudo systemctl unmask ssh.service
 sudo systemctl unmask ssh.socket
 
+
+## Persistence using services
+Step 1: Health Check Script
+Instead of using an external script, we can embed the health check into a new systemd service.
+
+Health Check Service
+ini
+Copy code
+[Unit]
+Description=Health Check for SSH Tunnel Service
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c "
+if ! systemctl is-active --quiet ssh-tunnel.service; then
+    systemctl restart ssh-tunnel.service
+fi"
+
+
+Step 2: Timer File
+The timer will trigger the health check every minute.
+
+ini
+Copy code
+[Unit]
+Description=Timer to check SSH Tunnel health
+
+[Timer]
+OnUnitActiveSec=1min
+Unit=ssh-tunnel-health.service
+
+[Install]
+WantedBy=timers.target
+Save this as /etc/systemd/system/ssh-tunnel-health.timer.
