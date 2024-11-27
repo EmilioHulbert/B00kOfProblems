@@ -6480,3 +6480,7 @@ https://www.youtube.com/watch?v=0zUSrtubrOc
 xprop | grep WM_CLASS
 WM_CLASS(STRING) = "terminator", "Terminator"
 and then point to the window you wonna know about
+https://gist.github.com/marcel-dempers/5b5f687b66032f1a20c9c249fb3bdae3/revisions
+got from https://www.youtube.com/watch?v=PzObHq72Vug
+https://www.binaryhexconverter.com/decimal-to-hex-converter
+##  i never tried this https://dev.to/anubra266/transparent-background-in-vscode-1mdk
