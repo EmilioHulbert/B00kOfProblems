@@ -6469,3 +6469,13 @@ This option ensures you only force push if the remote branch hasn’t changed si
 https://archive.org/
 nmap -sP localnet
 www.nessus.org
+
+## journalctl 
+journalctl -u sname -f
+
+##  htb old tricks
+https://www.youtube.com/watch?v=0zUSrtubrOc
+
+## get window clas for windows you want to make transparent 
+xprop | grep WM_CLASS
+WM_CLASS(STRING) = "terminator", "Terminator"
