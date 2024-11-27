@@ -6479,3 +6479,4 @@ https://www.youtube.com/watch?v=0zUSrtubrOc
 ## get window clas for windows you want to make transparent 
 xprop | grep WM_CLASS
 WM_CLASS(STRING) = "terminator", "Terminator"
+and then point to the window you wonna know about
