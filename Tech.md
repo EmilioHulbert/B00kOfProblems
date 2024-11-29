@@ -6486,3 +6486,7 @@ https://www.binaryhexconverter.com/decimal-to-hex-converter
 ##  i never tried this https://dev.to/anubra266/transparent-background-in-vscode-1mdk
 
 ## anydesk linux
+can connect remotely to another machine
+
+## Change hostname on linux
+change /etc/hosts and /etc/hostname edit them to the names you wish
