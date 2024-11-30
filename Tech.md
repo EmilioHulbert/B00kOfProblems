@@ -6490,3 +6490,14 @@ can connect remotely to another machine
 
 ## Change hostname on linux
 change /etc/hosts and /etc/hostname edit them to the names you wish
+
+## su pass on terminal
+
+
+## kill some user session
+ps -t pts/0
+  PID TTY      TIME CMD
+12345 pts/0    00:00:00 bash
+kill -9 12345
+w
+logout
