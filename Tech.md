@@ -6501,3 +6501,13 @@ ps -t pts/0
 kill -9 12345
 w
 logout
+
+## eexc winbox using wine
+
+[Desktop Entry]
+Name=Winbox
+Comment=
+Type=Application
+Terminal=False
+Exec=wine /home/user/Downloads/winbox.exe
+Icon=gnome-panel-launcher
