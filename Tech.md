@@ -6621,3 +6621,17 @@ If rsyslog is not installed, the most effective way to silence cron logs would b
 Using systemd to prevent cron from writing to logs (StandardOutput=null and StandardError=null).
 Disabling PAM-based session logs for cron (no_warn option in /etc/pam.d/cron).
 These steps should stop unwanted logs from appearing in the system logs or journal while keeping cron jobs quiet. Let me know if you need further clarification!
+
+## text to md5 on terminal
+
+fetched from https://askubuntu.com/questions/53846/how-to-get-the-md5-hash-of-a-string-directly-in-the-terminal
+~$ echo -n Welcome | md5sum
+83218ac34c1834c26781fe4bde918ee4  -
+85
+
+Very simple, it accepts stdin, so
+
+md5sum <<<"my string"
+To avoid the trailing newline added by the shell:
+
+printf '%s' "my string" | md5sum
