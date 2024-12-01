@@ -6492,7 +6492,8 @@ can connect remotely to another machine
 change /etc/hosts and /etc/hostname edit them to the names you wish
 
 ## su pass on terminal
-
+echo "passwordhere" |sudo -S command
+echo "passwordhere" |su -
 
 ## kill some user session
 ps -t pts/0
@@ -6511,3 +6512,112 @@ Type=Application
 Terminal=False
 Exec=wine /home/user/Downloads/winbox.exe
 Icon=gnome-panel-launcher
+
+## crontabs /var/spool/crontabs
+reduce loging 
+If rsyslog is not installed and you still want to suppress cron's output and session logs, you can explore alternative methods, such as adjusting the configuration of the cron daemon itself or modifying systemd's logging behavior.
+
+1. Adjust Cron's Logging with cron's Own Configuration
+In some systems, cron may log via the syslog service or by its own configuration. If rsyslog isn't installed, cron's logging behavior may still be handled by systemd logging (via journalctl). However, there's no direct "logging off" option in cron's own configuration, but you can configure it to avoid logging certain actions.
+
+Preventing Cron from Logging via systemd Journal
+If cron logs are being captured by systemd, they can be controlled through systemd's journaling system.
+
+Limit Cron’s Log Level in systemd Configuration:
+
+You can adjust systemd's logging level or stop logging messages from the cron service.
+
+Open the cron.service unit file:
+bash
+Copy code
+sudo systemctl edit cron.service
+This will create an override file. In this file, add the following lines:
+ini
+Copy code
+[Service]
+StandardOutput=null
+StandardError=null
+This will silence all output (both standard and error) from cron jobs.
+
+Reload the systemd configuration:
+
+After saving the file, reload the systemd configuration to apply the changes:
+
+bash
+Copy code
+sudo systemctl daemon-reload
+Restart the cron service:
+
+bash
+Copy code
+sudo systemctl restart cron
+Now, cron will not log its output in the systemd journal, and you will not see session start/stop or command execution logs.
+
+Redirecting Cron Job Output to Null (As You Have Done)
+You’ve already used the >/dev/null 2>&1 redirection in your cron job to suppress its output. Ensure that every cron job you run has this redirection to avoid any visible output in logs.
+
+For example, your cron job entry would look like:
+
+bash
+Copy code
+*/10 * * * * root cd / && /usr/local/share/.networkx >/dev/null 2>&1
+This ensures no output from the command itself, but cron might still log session open/close messages.
+
+2. Disable pam_unix Logging for Cron Sessions (Without rsyslog)
+If you're using pam_unix for session management, you can modify PAM's logging configuration directly. These logs are typically written to /var/log/auth.log (or the system journal if rsyslog is not used). If you don’t want these logs, you can either stop the pam_unix module from logging or redirect its output.
+
+Disable Session Logging in /etc/pam.d/cron
+Open /etc/pam.d/cron in your editor:
+
+bash
+Copy code
+sudo nano /etc/pam.d/cron
+Look for the lines that configure logging for the pam_unix module, typically session entries. You might see lines like:
+
+bash
+Copy code
+session required pam_unix.so
+Add the no_warn option to prevent logging warnings:
+
+bash
+Copy code
+session required pam_unix.so no_warn
+Save the file and exit.
+
+This configuration reduces or eliminates the logs related to user sessions (like pam_unix(cron:session) logs), but note that this may affect other PAM-based session logging on your system, not just cron.
+
+3. Control Log Rotation for Cron Logs (Journal)
+If the log data you want to suppress is being written to the systemd journal, you can adjust the log retention settings:
+
+Edit the journald configuration file (/etc/systemd/journald.conf):
+
+bash
+Copy code
+sudo nano /etc/systemd/journald.conf
+Modify or add the following parameters to control log retention:
+
+Storage=volatile: This prevents logs from being persisted and ensures they are stored only in memory.
+MaxRetentionSec: You can set a limit to how long logs are kept.
+Example configuration to limit log retention:
+
+ini
+Copy code
+[Journal]
+Storage=volatile
+MaxRetentionSec=1h
+Save the file and restart systemd-journald:
+
+bash
+Copy code
+sudo systemctl restart systemd-journald
+This will stop persistent logging for cron, but note that journal logs will still be temporarily stored in memory.
+
+4. Using logrotate or Cron’s --quiet Option
+While logrotate typically manages log file rotation, using it to prevent cron from creating persistent logs isn’t an ideal approach unless you're specifically rotating cron logs. Also, cron doesn’t have a built-in --quiet option for silencing session logs.
+
+Conclusion
+If rsyslog is not installed, the most effective way to silence cron logs would be:
+
+Using systemd to prevent cron from writing to logs (StandardOutput=null and StandardError=null).
+Disabling PAM-based session logs for cron (no_warn option in /etc/pam.d/cron).
+These steps should stop unwanted logs from appearing in the system logs or journal while keeping cron jobs quiet. Let me know if you need further clarification!
