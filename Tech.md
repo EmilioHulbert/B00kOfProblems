@@ -6635,3 +6635,39 @@ md5sum <<<"my string"
 To avoid the trailing newline added by the shell:
 
 printf '%s' "my string" | md5sum
+
+## reinstall bluetooth icon on parrot 
+1. Check if the Bluetooth service is running
+Ensure that the Bluetooth service is active. Open a terminal and run the following command to check the status of the Bluetooth service:
+
+bash
+Copy code
+sudo systemctl status bluetooth
+If the Bluetooth service is inactive, start it with:
+
+bash
+Copy code
+sudo systemctl start bluetooth
+To make sure it starts automatically on boot:
+
+bash
+Copy code
+sudo systemctl enable bluetooth
+2. Install or reinstall Bluetooth-related packages
+Sometimes the necessary Bluetooth packages might be missing or corrupted. Reinstall them with the following commands:
+
+bash
+Copy code
+sudo apt update
+sudo apt install --reinstall blueman bluez
+Blueman is the graphical Bluetooth manager.
+Bluez is the Bluetooth protocol stack.
+After installing or reinstalling, check if the icon reappears.
+
+3. Check for the bluetooth-applet
+Make sure the Bluetooth applet is running. It might have been disabled, removed, or failed to launch. To manually start it, open a terminal and run:
+
+bash
+Copy code
+bluetooth-applet &
+If it works, you can add it to startup applications so that it runs automatically when you log in. In 
