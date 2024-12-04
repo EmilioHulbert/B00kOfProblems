@@ -6671,3 +6671,29 @@ bash
 Copy code
 bluetooth-applet &
 If it works, you can add it to startup applications so that it runs automatically when you log in. In 
+
+## diffrent audio device in linux
+how will i tweak linux so that i can select specific audio device for firefox and a diffrent for vlc.vlc to use nobel 2040 and firefox to use my pods as i google something
+ChatGPT said:
+ChatGPT
+
+To set up specific audio devices for different applications in Linux, you can use tools like PulseAudio or PipeWire (a more modern alternative). Here's a step-by-step guide on how to achieve your goal of routing Firefox to use your earbuds (e.g., "my pods") and VLC to use your Noble 2040 headphones:
+Step 1: Ensure PulseAudio or PipeWire Is Installed
+
+Most Linux distributions come with PulseAudio installed by default, but PipeWire is becoming more popular and is the default in some distributions (e.g., Fedora). Make sure you have one of these audio servers installed.
+
+    PulseAudio: If you need to install it, use:
+
+sudo apt install pulseaudio pavucontrol
+
+PipeWire: For PipeWire, use:
+
+    sudo apt install pipewire pavucontrol
+
+Step 2: Open PulseAudio Volume Control
+
+Use pavucontrol, a graphical tool that lets you manage audio streams. This tool is essential for assigning different audio outputs to individual applications.
+
+    Run pavucontrol:
+
+pavucontrol
