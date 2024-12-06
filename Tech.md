@@ -6697,3 +6697,30 @@ Use pavucontrol, a graphical tool that lets you manage audio streams. This tool 
     Run pavucontrol:
 
 pavucontrol
+
+## install turtle module on linux
+https://www.geeksforgeeks.org/how-to-install-turtle-in-python-on-linux/
+
+## Ensure Your Virtual Environment Has Access to System Packages If you need tkinter to be available in your virtual environment, you can create the virtual environment with access to system packages:
+
+python3 -m venv --system-site-packages myenv
+## tkinter module
+apt install python3-tk
+
+## Testing internet speed using iperf
+server 
+
+iperf -s 
+
+or
+
+iperf -s -u
+
+client
+
+iperf -c 
+
+or 
+
+iperf -c -u
+
