@@ -6724,3 +6724,57 @@ or
 
 iperf -c -u
 
+## fix wine32 installation error
+┌─[✗]─[root@ZERXIS]─[~]
+└──╼ #apt-get install wine32:i386
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Some packages could not be installed. This may mean that you have
+requested an impossible situation or if you are using the unstable
+distribution that some required packages have not yet been created
+or been moved out of Incoming.
+The following information may help to resolve the situation:
+
+The following packages have unmet dependencies:
+ libdbus-1-3:i386 : Depends: libsystemd0:i386
+ libgphoto2-6:i386 : Depends: libcurl4:i386 (>= 7.16.2) but it is not going to be installed
+ libgstreamer1.0-0:i386 : Depends: libdw1:i386 (>= 0.126) but it is not going to be installed
+ libpulse0:i386 : Depends: libsystemd0:i386
+ libusb-1.0-0:i386 : Depends: libudev1:i386 (>= 183) but it is not going to be installed
+ libwine:i386 : Depends: libudev1:i386 (>= 183) but it is not going to be installed
+                Recommends: libcups2:i386 (>= 1.4.0) but it is not installable
+                Recommends: libgl1:i386 but it is not installable
+                Recommends: libgssapi-krb5-2:i386 (>= 1.6.dfsg.2) but it is not installable
+                Recommends: libkrb5-3:i386 (>= 1.6.dfsg.2) but it is not installable
+                Recommends: libosmesa6:i386 (>= 10.2~) but it is not installable
+                Recommends: libsdl2-2.0-0:i386 (>= 2.0.12) but it is not installable
+                Recommends: libgl1-mesa-dri:i386 but it is not going to be installed
+                Recommends: libasound2-plugins:i386 but it is not installable
+                Recommends: gstreamer1.0-plugins-good:i386 but it is not installable
+E: Unable to correct problems, you have held broken packages.
+┌─[✗]─[root@ZERXIS]─[~]
+└──╼ #
+
+try
+apt-get update
+apt-get install -f
+dpkg --add-architecture i386
+apt-get update
+6. Try installing dependencies manually:
+You can attempt to install the missing dependencies individually:
+
+bash
+Copy code
+apt-get install libsystemd0:i386 libcurl4:i386 libdw1:i386 libudev1:i386
+7. Check for held packages:
+The error message also mentions "held broken packages." You can check if any packages are held back by running:
+
+bash
+Copy code
+apt-mark showhold
+If there are any held packages, you can unhold them with:
+
+bash
+Copy code
+apt-mark unhold <package_name>
