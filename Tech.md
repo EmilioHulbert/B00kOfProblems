@@ -6780,3 +6780,7 @@ bash
 Copy code
 
 apt-mark unhold <package_name>
+
+## sort order
+
+sort -n
