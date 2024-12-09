@@ -6776,5 +6776,7 @@ apt-mark showhold
 If there are any held packages, you can unhold them with:
 
 bash
+
 Copy code
+
 apt-mark unhold <package_name>
