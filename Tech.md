@@ -5478,6 +5478,9 @@ dpkg -i libicu70_70.1-2_amd64.deb
 apt --fix-broken install
 apt install megacmd
 apt remove megatools
+https://mega.io/cmd#download
+wget https://mega.nz/linux/repo/Debian_12/amd64/megacmd-Debian_12_amd64.deb && sudo apt install "$PWD/megacmd-Debian_12_amd64.deb"
+
 
 
 
