@@ -6790,3 +6790,6 @@ sort -n
 
 ## delete github remote branch
 git push origin --delete branch_name
+or
+locally
+git branch -d branch_name
