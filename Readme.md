@@ -6787,3 +6787,6 @@ apt-mark unhold <package_name>
 ## sort order
 
 sort -n
+
+## delete github remote branch
+git push origin --delete branch_name
