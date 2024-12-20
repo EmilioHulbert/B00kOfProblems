@@ -8568,3 +8568,51 @@ By following these steps, you should have completely removed Nginx from your sys
 
 └──╼ #sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
+## view chromes user history
+1. Location of Chrome User Data
+Chrome profiles are stored in:
+
+javascript
+Copy code
+~/.config/google-chrome/
+Each profile has a subfolder:
+
+Default: The main profile.
+Profile 1, Profile 2, etc.: Additional profiles.
+Inside each profile directory, browsing history is stored in the History SQLite database file.
+
+Inspect the History File
+If you find the History file, analyze it using SQLite:
+
+Install SQLite browser:
+bash
+Copy code
+sudo apt install sqlite3
+Open the history database:
+bash
+Copy code
+sqlite3 ~/.config/google-chrome/Default/History
+Query browsing history:
+sql
+Copy code
+SELECT url, title, last_visit_time FROM urls ORDER BY last_visit_time DESC;
+
+Convert last_visit_time to Human-Readable Format
+Chrome stores last_visit_time as the number of microseconds since January 1, 1601 (UTC). To convert it:
+
+Use SQLite functions:
+sql
+Copy code
+SELECT url, title, datetime(last_visit_time / 1000000 - 11644473600, 'unixepoch') AS last_visit
+FROM urls
+ORDER BY last_visit DESC;
+
+ If the File Is Still Locked
+Check if another process is using the History file:
+bash
+Copy code
+lsof | grep History
+Kill any processes using the file:
+bash
+Copy code
+kill -9 <PID>
