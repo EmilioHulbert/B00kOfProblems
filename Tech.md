@@ -8742,3 +8742,24 @@ Start the service immediately:
 bash
 Copy code
 sudo systemctl start dhclient-eth0.service
+
+## while loop create dirs
+ls | while read -r i; do
+  mkdir "new/$i"
+done
+
+OR 
+
+IFS=$'\n'
+for i in $(ls); do
+  mkdir "new/$i"
+done
+unset IFS
+
+OR
+
+find . -maxdepth 1 -type d ! -name 'new' -exec mkdir -p new/{} \;
+
+OR 
+
+ls | xargs -d '\n' -I {} mkdir -p "new/{}"
