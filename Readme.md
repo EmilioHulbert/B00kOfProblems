@@ -6793,3 +6793,27 @@ git push origin --delete branch_name
 or
 locally
 git branch -d branch_name
+
+
+## delete file inside tar archive without need to extract
+
+If your file is already in the .tar format (not compressed), you can directly use the --delete flag to remove the folder or files from the archive.
+
+Steps to Delete a Folder Inside myopt.tar:
+List the Contents of the Archive (to confirm the path):
+
+bash
+Copy code
+tar -tf myopt.tar | grep microsoft
+Delete the Folder or Specific Files: Use the --delete flag to remove the folder or files:
+
+bash
+Copy code
+tar --delete -f myopt.tar opt/microsoft/
+Replace opt/microsoft/ with the exact path you want to delete.
+If you're deleting specific files, provide their full paths.
+Verify the Deletion: Check the archive contents again to confirm the deletion:
+
+bash
+Copy code
+tar -tf myopt.tar | grep microsoft
