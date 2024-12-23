@@ -8791,3 +8791,6 @@ Be cautious with this command, as it overwrites the remote repository with your 
 
 ## git staging so that i alters remotely too
 git add -A
+
+## repack deb files
+sudo apt-get install dpkg-repack
