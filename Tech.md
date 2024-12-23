@@ -8788,3 +8788,6 @@ bash
 Copy code
 git push origin <branch-name> --force
 Be cautious with this command, as it overwrites the remote repository with your local state and might affect collaborators.
+
+## git staging so that i alters remotely too
+git add -A
