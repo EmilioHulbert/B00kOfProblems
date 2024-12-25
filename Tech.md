@@ -8794,3 +8794,15 @@ git add -A
 
 ## repack deb files
 sudo apt-get install dpkg-repack
+
+## replacements in files
+find . -type f -exec sed -i 's/allannjuguna/emiliohulbert/g; s/zerofrost/lilplucky/g' {} +
+
+## check files without modifying
+find . -type f -exec grep -E 'allannjuguna|zerofrost' {} +
+
+## ignoring github files
+git rm --cached .hugo_build.lock
+echo ".hugo_build.lock" >> .gitignore
+git add .gitignore
+git commit -m "Ignore .hugo_build.lock file"
