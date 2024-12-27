@@ -8806,3 +8806,12 @@ git rm --cached .hugo_build.lock
 echo ".hugo_build.lock" >> .gitignore
 git add .gitignore
 git commit -m "Ignore .hugo_build.lock file"
+
+## github error sideband packets
+error: RPC failed; curl 56 Recv failure: Connection reset by peer
+error: 226 bytes of body are still expected
+fetch-pack: unexpected disconnect while reading sideband packet
+fatal: early EOF
+fatal: fetch-pack: invalid index-pack output
+
+git config --global http.postBuffer 524288000
