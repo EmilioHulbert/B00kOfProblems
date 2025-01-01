@@ -8815,3 +8815,12 @@ fatal: early EOF
 fatal: fetch-pack: invalid index-pack output
 
 git config --global http.postBuffer 524288000
+
+## fix vbox host only adapter
+[root@ZERXIS]─[/dev]
+└──╼ #modprobe vboxdrv
+┌─[root@ZERXIS]─[/dev]
+└──╼ #modprobe vboxnetadp
+┌─[root@ZERXIS]─[/dev]
+└──╼ #modprobe vboxnetflt
+#ls /dev/vboxnetctl
