@@ -8824,3 +8824,7 @@ git config --global http.postBuffer 524288000
 ┌─[root@ZERXIS]─[/dev]
 └──╼ #modprobe vboxnetflt
 #ls /dev/vboxnetctl
+
+## reset systemd timers
+sudo systemctl reset-failed xdesktop-health.timer
+sudo systemctl restart xdesktop-health.timer
