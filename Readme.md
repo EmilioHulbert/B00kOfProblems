@@ -8904,3 +8904,29 @@ In summary, while screen doesn't inherently prevent .bash_history from storing c
 
 
 You said:
+
+Set up iptables rules:
+
+Assuming your WireGuard interface is named wg0, and your server's LAN interface is eth0 (adjust these as needed):
+
+Accept forwarding traffic between interfaces:
+
+bash
+Copy code
+iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
+iptables -A FORWARD -i eth0 -o wg0 -j ACCEPT
+NAT (Network Address Translation) for outgoing traffic (if you're using the server to route traffic to the internet):
+
+bash
+Copy code
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+This will NAT the outgoing traffic, so the source IP address is the server's IP address, rather than the client’s.
+
+Save iptables rules (to ensure they persist after reboot):
+
+On most systems, you can save the rules with:
+
+bash
+Copy code
+iptables-save > /etc/iptables/rules.v4
+On some distributions, you may use a different method to save the rules, such as service iptables save or systemctl enable iptables.
