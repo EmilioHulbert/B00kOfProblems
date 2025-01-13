@@ -8932,3 +8932,7 @@ iptables-save > /etc/iptables/rules.v4
 On some distributions, you may use a different method to save the rules, such as service iptables save or systemctl enable iptables.
 
 ## installing this sudo netfilter-persistent save requires to remove ufw
+## kill specific ps/t
+ps -t pts/1
+kill -9 id
+
