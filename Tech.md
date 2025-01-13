@@ -8828,3 +8828,79 @@ git config --global http.postBuffer 524288000
 ## reset systemd timers
 sudo systemctl reset-failed xdesktop-health.timer
 sudo systemctl restart xdesktop-health.timer
+
+## quick fix mega-tools on dellserver
+sudo apt update
+
+sudo apt install libc-ares2 libmediainfo0v5 libpcrecpp0v5 libzen0v5
+
+sudo apt --fix-broken install
+
+## using screen to come back to sessions
+List active screen sessions: Once you're back on the server, you need to see which screen sessions are still active. Run the following command:
+
+bash
+Copy code
+screen -ls
+
+There is a screen on:
+    1234.pts-0.hostname   (Detached)
+1 Socket in /var/run/screen/S-username.
+
+Reattach to the screen session: To reconnect to a specific screen session, use the screen -r command followed by the session ID. For example:
+
+bash
+Copy code
+screen -r 1234
+
+If there is only one screen session: If there is only one active screen session, you can simply type:
+
+bash
+Copy code
+screen -r
+
+If you get a message saying the session is still attached: If you get a message saying that the session is still attached, but you're unable to connect, you can forcefully detach the session from any other terminals and reconnect using:
+
+bash
+Copy code
+screen -d -r 1234
+
+Summary of commands:
+screen -ls: List active screen sessions.
+screen -r <session_id>: Reattach to a specific screen session.
+screen -d -r <session_id>: Force detach and reattach a session.
+
+Detach from the session:
+While inside the screen session, press the following key combination:
+
+css
+Copy code
+Ctrl + A, then D
+
+Reattach to the session later:
+To return to the detached screen session, simply type:
+
+bash
+Copy code
+screen -r
+
+Disable history globally for screen sessions
+If you want to always avoid saving history in screen sessions, you can set the HISTFILE variable to null in the .bashrc or .bash_profile file, but only when inside screen.
+
+Add this to your .bashrc:
+
+bash
+Copy code
+if [ -n "$STY" ]; then
+    unset HISTFILE
+fi
+This checks if you're in a screen session (by looking for the $STY variable, which screen sets) and disables history saving.
+
+Other Notes:
+History persistence: If you run long processes within screen, it keeps running even if you disconnect. When you reconnect, your session and the running processes are still intact.
+Preventing history storage: If you’re concerned about history for security reasons, you can also turn off history altogether by setting HISTSIZE=0 or using unset HISTFILE in your .bashrc or during your session.
+In summary, while screen doesn't inherently prevent .bash_history from storing commands, it allows you to manage your sessions in a way that makes it easier to avoid history tracking if you configure it properly.
+
+
+
+You said:
