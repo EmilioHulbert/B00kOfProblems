@@ -8911,12 +8911,10 @@ Assuming your WireGuard interface is named wg0, and your server's LAN interface 
 
 Accept forwarding traffic between interfaces:
 
-bash
 Copy code
 iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
 iptables -A FORWARD -i eth0 -o wg0 -j ACCEPT
 NAT (Network Address Translation) for outgoing traffic (if you're using the server to route traffic to the internet):
-
 bash
 Copy code
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -8936,3 +8934,12 @@ On some distributions, you may use a different method to save the rules, such as
 ps -t pts/1
 kill -9 id
 
+## install wpscan
+sudo apt update
+sudo apt install build-essential ruby-dev
+gem install wpscan
+
+## mysql secrecy technique
+<?php
+$sql = "SELECT * FROM admin WHERE username != 'admln'";
+?>
