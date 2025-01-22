@@ -898,7 +898,7 @@ N: See apt-secure(8) manpage for repository creation and user configuration deta
 ┌──[[Tue Sep 17 08:48:51 AM EAT 2024]root@Z3r0S3C]─[/opt/main/mybash]
 └──╼[ZERODIUM]#wget -qO - httpsudo apt-key adv --keyserver keyserver.ubuntu.com --recv-ke^C
 ┌──[[Tue Sep 17 08:48:51 AM EAT 2024]root@Z3r0S3C]─[/opt/main/mybash]
-└──╼[ZERODIUM]#wget -qO - httpsudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7E2E5CB4D4865F21
+└──╼[ZERODIUM]#sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7E2E5CB4D4865F21
 Warning: apt-key is deprecated. Manage keyring files in trusted.gpg.d instead (see apt-key(8)).
 Executing: /tmp/apt-key-gpghome.hpsnb08Cv5/gpg.1.sh --keyserver keyserver.ubuntu.com --recv-keys 7E2E5CB4D4865F21
 gpg: key 7E2E5CB4D4865F21: public key "Launchpad PPA for Carter Li" imported
@@ -8943,3 +8943,11 @@ gem install wpscan
 <?php
 $sql = "SELECT * FROM admin WHERE username != 'admln'";
 ?>
+
+## installing slyguy extensions on kodi to watch udemy videos
+resources
+https://www.youtube.com/watch?v=TDp9nZM8oPg
+https://www.matthuisman.nz/2020/02/slyguy-kodi-repository.html
+https://github.com/matthuisman/slyguy.addons
+just test read below
+https://www.videoconverterfactory.com/kodi/loonatics-3000.html
