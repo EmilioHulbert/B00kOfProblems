@@ -8951,3 +8951,6 @@ https://www.matthuisman.nz/2020/02/slyguy-kodi-repository.html
 https://github.com/matthuisman/slyguy.addons
 just test read below
 https://www.videoconverterfactory.com/kodi/loonatics-3000.html
+
+## fix for parrot 2025 gpgp keys
+https://deb.parrot.sh/parrot/pool/main/p/parrot-archive-keyring/parrot-archive-keyring_2024.12_all.deb
