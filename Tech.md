@@ -8954,3 +8954,11 @@ https://www.videoconverterfactory.com/kodi/loonatics-3000.html
 
 ## fix for parrot 2025 gpgp keys
 https://deb.parrot.sh/parrot/pool/main/p/parrot-archive-keyring/parrot-archive-keyring_2024.12_all.deb
+
+## google chrome
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+
+## devilspie calculations
+#https://www.binaryhexconverter.com/decimal-to-hex-converter
+# percentage * 255 / 100 , then take number and put in url above
+# take 2 chars and add then after 0x
