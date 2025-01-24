@@ -8962,3 +8962,6 @@ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 #https://www.binaryhexconverter.com/decimal-to-hex-converter
 # percentage * 255 / 100 , then take number and put in url above
 # take 2 chars and add then after 0x
+
+## replace even links using sed 
+find . -type f -exec sed -i 's|https://afsholdings.co.ke/wp-content/uploads/2024/02/cropped-8fae47ac-3b7f-4b9b-98b1-0028412db9d6-1.jpg|../assets/images/afs-logo.png|g' {} +
