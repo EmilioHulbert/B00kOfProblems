@@ -8965,3 +8965,10 @@ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 
 ## replace even links using sed 
 find . -type f -exec sed -i 's|https://afsholdings.co.ke/wp-content/uploads/2024/02/cropped-8fae47ac-3b7f-4b9b-98b1-0028412db9d6-1.jpg|../assets/images/afs-logo.png|g' {} +
+
+## fix crispy forms modules
+
+
+As of django-crispy-forms 2.0 the template packs are now in separate packages.
+
+You will need to pip install crispy-bootstrap4 and add crispy_bootstrap4 to your list of INSTALLED_APPS.
