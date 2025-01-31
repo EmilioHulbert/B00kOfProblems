@@ -9008,3 +9008,6 @@ Copy
 pkill chrome
 This will kill any running Chrome processes. After that, reopen Chrome, and it should prompt you to unlock the keyring.
 Give these a try, and the issue should be resolved without needing to dea
+
+## learn python online
+https://www.online-python.com/#google_vignette
