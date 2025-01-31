@@ -8972,3 +8972,39 @@ find . -type f -exec sed -i 's|https://afsholdings.co.ke/wp-content/uploads/2024
 As of django-crispy-forms 2.0 the template packs are now in separate packages.
 
 You will need to pip install crispy-bootstrap4 and add crispy_bootstrap4 to your list of INSTALLED_APPS.
+
+## fix keyring issue chrome
+keyring:
+
+rm -rf ~/.gnome/keyrings/login.keyring
+Restart gnome-keyring-daemon:
+
+After deleting the keyring, you can restart the keyring daemon with:
+bash
+Copy
+pkill gnome-keyring-daemon
+gnome-keyring-daemon --start
+Create a new keyring:
+
+Now, when you open Chrome, it should create a new keyring automatically.
+
+Start the keyring daemon manually:
+
+bash
+Copy
+gnome-keyring-daemon --start
+Check if the daemon is running:
+
+You can verify if the daemon is running by using:
+bash
+Copy
+pgrep gnome-keyring-daemon
+If it returns a process ID (PID), it means it's running.
+Force Chrome to unlock the keyring:
+
+If the issue persists, run:
+bash
+Copy
+pkill chrome
+This will kill any running Chrome processes. After that, reopen Chrome, and it should prompt you to unlock the keyring.
+Give these a try, and the issue should be resolved without needing to dea
