@@ -9011,3 +9011,37 @@ Give these a try, and the issue should be resolved without needing to dea
 
 ## learn python online
 https://www.online-python.com/#google_vignette
+## some py
+random.randrange()
+print(bool(False))
+print(bool("")) #empty string is false
+boolean data type that can store true or false
+fruits.insert(4, "watermelon") #insert after index 4
+.append at end of list
+fruits.extend(fruits2)
+,ewnivw
+.pop(2)
+.sort(reverse=True)
+fruits2 = [expression for item in iterable if condition]
+set objects dont support indexing only access via loops
+set1.add("kiwi")
+set have no defines order
+no duplicate keys also as sets also
+dict.uodate({})
+carsiwishiown ={}
+carsidonotown=carsiown.copy()
+paramaeter var listed in func when we create the func
+value passed when we call the arg when calling func is the argument
+*args holds extra arguments passed to the func
+**kwargs creates dictionary
+default word args
+class is object instructor
+construct objects we can use within our programs
+help outline blueprint of how specific object is going to be like what func its gonna have properties methods 
+all classes have __init function takes default arg self
+classs Car:
+    def __init__(self, hp):
+        self.horsepower = hp
+car1 = Car(856)
+print(car1.horsepower)
+objects are functions that belong to that object
