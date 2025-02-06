@@ -9045,3 +9045,12 @@ classs Car:
 car1 = Car(856)
 print(car1.horsepower)
 objects are functions that belong to that object
+
+## Trigger display on linux via ssh
+export DISPLAY=:0
+xset dpms force on
+[] On windows
+powershell -Command "(Add-Type '[DllImport(\"user32.dll\")]public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);' -Name User32 -Pas)::SendMessage([intptr](-1), 0x0112, 0xF170, -1)"
+
+
+
