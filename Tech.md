@@ -9052,5 +9052,111 @@ xset dpms force on
 [] On windows
 powershell -Command "(Add-Type '[DllImport(\"user32.dll\")]public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);' -Name User32 -Pas)::SendMessage([intptr](-1), 0x0112, 0xF170, -1)"
 
+## suspend/login issue fix
+sudo systemctl restart lightdm
+. Check Logs for Errors
+Check logs for errors related to suspend and session login:
 
+bash
+Copy
+Edit
+journalctl -b -1 -e
+(Shows logs from the previous boot before the issue happened.)
 
+To specifically check suspend errors:
+
+bash
+Copy
+Edit
+journalctl -k | grep -i suspend
+3. Disable Lock Screen on Resume (Workaround)
+If this only happens after waking up from suspend, try disabling the lock screen on resume:
+
+bash
+Copy
+Edit
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+If you're using light-locker, disable it:
+
+bash
+Copy
+Edit
+sudo systemctl stop light-locker
+sudo systemctl disable light-locker
+. Disable "Deep" Suspend Mode
+Some laptops have issues with deep suspend. Try switching to s2idle instead:
+
+bash
+Copy
+Edit
+echo freeze | sudo tee /sys/power/mem_sleep
+To make it permanent:
+
+bash
+Copy
+Edit
+sudo nano /etc/default/grub
+Find the line:
+
+ini
+Copy
+Edit
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+Change it to:
+
+ini
+Copy
+Edit
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=s2idle"
+Save and update GRUB:
+
+bash
+Copy
+Edit
+sudo update-grub
+6. Check Xorg Logs
+If your session hangs, check Xorg logs for errors:
+
+bash
+Copy
+Edit
+cat ~/.xsession-errors
+Or check the system-wide Xorg log:
+
+bash
+Copy
+Edit
+cat /var/log/Xorg.0.log | grep -i "error"
+If DPMS settings were changed, reset them:
+
+bash
+Copy
+Edit
+xset dpms 600 1200 1800
+xset -dpms
+Then, re-enable defaults:
+
+bash
+Copy
+Edit
+xset +dpms
+3. Reset Xorg Configuration
+Try resetting Xorg settings in case they were affected:
+
+bash
+Copy
+Edit
+rm -rf ~/.Xauthority ~/.xsession-errors ~/.ICEauthority
+Then reboot.
+The command:
+
+bash
+Copy
+Edit
+xset dpms force on
+is used to wake up the display on a Linux system that has Display Power Management Signaling (DPMS) enabled.
+
+Breakdown of What It Does
+xset → A command-line utility for controlling X server settings.
+dpms → Stands for Display Power Management Signaling, which controls when the screen turns off due to inactivity.
+force on → Forces the screen back on if it's turned off or in standby mode.
