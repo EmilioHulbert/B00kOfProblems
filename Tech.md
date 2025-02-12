@@ -9159,4 +9159,13 @@ is used to wake up the display on a Linux system that has Display Power Manageme
 Breakdown of What It Does
 xset → A command-line utility for controlling X server settings.
 dpms → Stands for Display Power Management Signaling, which controls when the screen turns off due to inactivity.
-force on → Forces the screen back on if it's turned off or in standby mode.
+force on → Forces the screen back on if it's turned off or in standby mode.y
+
+## alter table values
+ALTER TABLE tblemployees
+ADD Gender VARCHAR(10),
+ADD Dob DATE,
+ADD Phonenumber VARCHAR(15),
+ADD Country VARCHAR(50),
+ADD Address VARCHAR(255),
+ADD City VARCHAR(50);
