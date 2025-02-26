@@ -9176,3 +9176,6 @@ ffmpeg -i "Latest DanceHall Mixt-Tape [Official Video ] Stepping Edition.mp4" -v
 ## install kite extension on vscode
 codium --install-extension kiteco.kite
 
+## powershell access from linux
+Enter-PSSession -HostName <Windows-IP> -UserName <Windows-Username> -SSHTransport
+
