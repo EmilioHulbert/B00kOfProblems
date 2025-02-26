@@ -9172,3 +9172,7 @@ ADD City VARCHAR(50);
 
 
 ffmpeg -i "Latest DanceHall Mixt-Tape [Official Video ] Stepping Edition.mp4" -vcodec libx264 -acodec aac test.mp4
+
+## install kite extension on vscode
+codium --install-extension kiteco.kite
+
