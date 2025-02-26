@@ -9179,3 +9179,8 @@ codium --install-extension kiteco.kite
 ## powershell access from linux
 Enter-PSSession -HostName <Windows-IP> -UserName <Windows-Username> -SSHTransport
 
+## login window fix in parrot os 
+ vi /etc/lightdm/lightdm-gtk-greeter.conf
+ edit background option/uncomment
+ sudo systemctl restart lightdm
+
