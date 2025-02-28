@@ -9184,3 +9184,11 @@ Enter-PSSession -HostName <Windows-IP> -UserName <Windows-Username> -SSHTranspor
  edit background option/uncomment
  sudo systemctl restart lightdm
 
+##tty bg image 
+sudo apt-get install fbterm fbi
+( sleep 1; cat /dev/fb0 > nifty-background.fbimg ) & fbi -t 2 -1 --noverbose -a nifty-background.png
+From then on, whenever you want to run fbterm, you can start it like so (you may want to create a little wrapper script):
+
+export FBTERM_BACKGROUND_IMAGE=1
+cat nifty-background.fbimg > /dev/fb0; fbterm
+[source]('https://askubuntu.com/questions/701874/how-can-i-customize-a-full-screen-console-background-tty')
