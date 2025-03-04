@@ -9192,3 +9192,20 @@ From then on, whenever you want to run fbterm, you can start it like so (you may
 export FBTERM_BACKGROUND_IMAGE=1
 cat nifty-background.fbimg > /dev/fb0; fbterm
 [source]('https://askubuntu.com/questions/701874/how-can-i-customize-a-full-screen-console-background-tty')
+
+## wordpress fix error 404 on theme templates
+edit .htaccess file
+<IfModule mod_security.c>
+SecRuleEngine Off
+SecFilterInheritance Off
+SecFilterEngine Off
+SecFilterScanPOST Off
+</IfModule>
+
+then 
+replace
+#try_files $uri $uri/ =404;
+with
+try_files $uri $uri/ /index.php?$args;
+and make sure root has /var/www/html/wordpress
+
