@@ -9212,3 +9212,6 @@ and make sure root has /var/www/html/wordpress
 ## pdf compressor
 gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=output.pdf input.pdf
 
+## multi rename files after finding them 
+find . -type f -name "*.txt.txt" -exec bash -c 'mv "$0" "${0%.txt.txt}.txt"' {} \;
+
