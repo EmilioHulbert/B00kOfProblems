@@ -9209,3 +9209,6 @@ with
 try_files $uri $uri/ /index.php?$args;
 and make sure root has /var/www/html/wordpress
 
+## pdf compressor
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=output.pdf input.pdf
+
