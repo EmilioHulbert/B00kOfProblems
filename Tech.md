@@ -9215,3 +9215,42 @@ gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQ
 ## multi rename files after finding them 
 find . -type f -name "*.txt.txt" -exec bash -c 'mv "$0" "${0%.txt.txt}.txt"' {} \;
 
+## some vim configs
+1. Open Vim and Edit the Configuration File
+Run the following command in your terminal:
+
+sh
+Copy
+Edit
+vim ~/.vimrc
+2. Add the Following Line
+Insert the following command in the .vimrc file:
+
+vim
+Copy
+Edit
+set number
+3. Save and Exit
+Press ESC, then type:
+
+ruby
+Copy
+Edit
+:wq
+and hit Enter.
+
+4. Verify
+Reopen Vim and check if the line numbers appear. If you want relative line numbers instead, add:
+
+vim
+Copy
+Edit
+set relativenumber
+For both absolute and relative numbers:
+
+vim
+Copy
+Edit
+set number
+set relativenumber
+
