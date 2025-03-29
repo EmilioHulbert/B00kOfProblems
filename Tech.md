@@ -9254,3 +9254,54 @@ Edit
 set number
 set relativenumber
 
+To enable line numbers globally for all users in Vim, you need to modify the system-wide Vim configuration file. Follow these steps:
+
+1. Edit the Global Vim Configuration File
+Open Vim’s global configuration file (/etc/vim/vimrc or /etc/vimrc, depending on your system):
+
+sh
+Copy
+Edit
+sudo vim /etc/vim/vimrc
+or
+
+sh
+Copy
+Edit
+sudo vim /etc/vimrc
+2. Add the Line Number Setting
+Scroll to the end of the file and add:
+
+vim
+Copy
+Edit
+set number
+If you want relative line numbers globally, add:
+
+vim
+Copy
+Edit
+set relativenumber
+For both absolute and relative numbering:
+
+vim
+Copy
+Edit
+set number
+set relativenumber
+3. Save and Exit
+Press ESC, then type:
+
+ruby
+Copy
+Edit
+:wq
+and hit Enter.
+
+4. Verify the Changes
+Open Vim as any user and check if the line numbers are enabled:
+
+sh
+Copy
+Edit
+vim somefile.txt
