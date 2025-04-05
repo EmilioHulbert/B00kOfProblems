@@ -1,4 +1,4 @@
-# The Personal Book Of Problems 
+
 
 ## Backing Up Android App Using adb
 
@@ -9305,3 +9305,76 @@ sh
 Copy
 Edit
 vim somefile.txt
+
+## Adding printer to parrot os /Linux machine
+1. Install Required Packages
+First, install HPLIP and dependencies:
+
+bash
+Copy
+Edit
+sudo apt update
+sudo apt install hplip hplip-gui cups system-config-printer
+Ensure CUPS is running:
+
+bash
+Copy
+Edit
+sudo systemctl start cups
+sudo systemctl enable cups
+2. Connect the Printer
+USB Connection: Plug the printer into your PC.
+
+Network Connection (Ethernet):
+
+Print the Configuration Page by holding the Go button on the printer.
+
+Find the IP Address in the printout.
+
+3. Add the Printer
+Option 1: Using HP Setup (GUI)
+Run:
+
+bash
+Copy
+Edit
+hp-setup
+Follow the wizard to detect and install the printer.
+
+Option 2: Using CUPS Web Interface
+Open a browser and go to:
+
+arduino
+Copy
+Edit
+http://localhost:631
+Click Administration > Add Printer.
+
+Select HP LaserJet P2055dn (USB) or enter the IP Address (if networked).
+
+Choose the driver: HP LaserJet P2055dn, hpcups or HP LaserJet P2055dn, Postscript.
+
+Click Add Printer, configure settings, and Print a Test Page.
+
+4. Verify Printer Setup
+Check if the printer is installed:
+
+bash
+Copy
+Edit
+lpstat -p
+Print a test page via CLI:
+
+bash
+Copy
+Edit
+lp -d "HP_LaserJet_P2055dn" /usr/share/cups/data/testprint
+5. Troubleshooting
+If the printer isn't detected, restart HPLIP:
+
+bash
+Copy
+Edit
+sudo hp-plugin
+sudo hp-check -r
+sudo systemctl restart cups
