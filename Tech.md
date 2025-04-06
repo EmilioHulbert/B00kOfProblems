@@ -9382,4 +9382,8 @@ sudo systemctl restart cups
 ## installing goaccess for server monitoring
 apt update&& apt install goaccess
 goaccess /var/log/nginx/leave.afsholdingsgroup.access.log --log-forma=COMBINED -o report.html
+** using goaccess in realtime steps
+goaccess /var/log/nginx/leave.afsholdingsgroup.access.log --log-format=COMBINED --real-time-html -o /var/www/html/report.html
+goaccess /var/log/nginx/leave.afsholdingsgroup.access.log --log-format=COMBINED --real-time-html --ws-url=wss://nairobiskates.com:7890 -o /var/www/html/report.html
+goaccess --real-time-html --daemonize  --log-format=COMBINED --log-file=/var/log/nginx/leave.afsholdingsgroup.access.log  --ws-url=wss://nairobiskates.com:7890 -o /var/www/html/report.html
 
