@@ -9378,3 +9378,8 @@ Edit
 sudo hp-plugin
 sudo hp-check -r
 sudo systemctl restart cups
+
+## installing goaccess for server monitoring
+apt update&& apt install goaccess
+goaccess /var/log/nginx/leave.afsholdingsgroup.access.log --log-forma=COMBINED -o report.html
+
