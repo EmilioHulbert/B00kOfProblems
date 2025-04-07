@@ -9538,3 +9538,8 @@ map $http_upgrade $connection_upgrade {
     '' close;
 }
 
+** referenced from **
+![Link1 to page](https://bytes.fyi/real-time-goaccess-reports-with-nginx/)
+![Link2 to Nginx Auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
+
+** service file for the autoboot **
