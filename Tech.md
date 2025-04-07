@@ -9387,3 +9387,154 @@ goaccess /var/log/nginx/leave.afsholdingsgroup.access.log --log-format=COMBINED 
 goaccess /var/log/nginx/leave.afsholdingsgroup.access.log --log-format=COMBINED --real-time-html --ws-url=wss://nairobiskates.com:7890 -o /var/www/html/report.html
 goaccess --real-time-html --daemonize  --log-format=COMBINED --log-file=/var/log/nginx/leave.afsholdingsgroup.access.log  --ws-url=wss://nairobiskates.com:7890 -o /var/www/html/report.html
 
+
+## realtime goaccess website traffic monitor tool
+goaccess -f /var/log/nginx/myproject.access.log --real-time-html --ws-url=wss://nairobiskates.com:443/ws -o /var/www/html/report.html --port=7890 
+          --origin=https://nairobiskates.com
+
+
+## goaccess realtime server socket method
+goaccess -f /var/log/nginx/myproject.access.log --real-time-html --ws-url=wss://nairobiskates.com:443/ws -o /var/www/html/report.html --port=7890 
+** full nairobiskates config file 
+#server {
+#   listen 80;
+#   server_name 127.0.0.1 localhost;
+
+    # Redirect all HTTP requests to HTTPS
+#   return 301 https://$host$request_uri;
+#}
+server {
+    listen 80;
+    server_name  127.0.0.1 localhost;
+
+    root /var/www/html;
+    index index.php index.html index.htm;
+
+    access_log /var/log/nginx/myproject.access.log;
+    error_log /var/log/nginx/myproject.error.log;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;  # Support for pretty URLs
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;  # Path to PHP-FPM socket (may vary depending on your PHP version)
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+
+}
+
+upstream gwsocket {
+    server 127.0.0.1:7890;
+}
+
+
+server {
+    location /report.html {
+        auth_basic "Login Required";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+    }
+
+  location /ws {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_pass http://gwsocket;
+        proxy_buffering off;
+        proxy_read_timeout 7d;
+    }
+    #listen 443 ssl;
+    server_name www.nairobiskates.com;
+
+    root /var/www/html;
+    index index.php index.html index.htm;
+
+    access_log /var/log/nginx/myproject.access.log;
+    error_log /var/log/nginx/myproject.error.log;
+
+    # SSL Configuration
+    #ssl_certificate /etc/ssl/certs/your_domain.crt;     # Path to your SSL certificate
+    #ssl_certificate_key /etc/ssl/private/your_domain.key; # Path to your SSL certificate key
+    #ssl_protocols TLSv1.2 TLSv1.3;                       # Enable secure protocols
+    #ssl_ciphers HIGH:!aNULL:!MD5;                        # Strong SSL cipher suite
+
+    # Security Enhancements
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;  # Support for pretty URLs
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;  # Path to PHP-FPM socket (may vary depending on your PHP version)
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.nairobiskates.com-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/www.nairobiskates.com-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+
+
+server {
+    if ($host = www.nairobiskates.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name www.nairobiskates.com;
+    return 404; # managed by Certbot
+
+
+}
+
+## what was appended
+upstream gwsocket {
+    server 127.0.0.1:7890;
+}
+ location /report.html {
+        auth_basic "Login Required";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+    }
+
+  location /ws {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_pass http://gwsocket;
+        proxy_buffering off;
+        proxy_read_timeout 7d;
+    }
+
+## appended to nairobiskates nginx.conf file
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
