@@ -9394,7 +9394,7 @@ goaccess -f /var/log/nginx/myproject.access.log --real-time-html --ws-url=wss://
 
 
 ## goaccess realtime server socket method
-goaccess -f /var/log/nginx/myproject.access.log --real-time-html --ws-url=wss://nairobiskates.com:443/ws -o /var/www/html/report.html --port=7890 
+goaccess -f /var/log/nginx/myproject.access.log --real-time-html --ws-url=wss://nairobiskates.com:443/ws -o /var/www/html/report.html --port=7890 --daemonize
 ** full nairobiskates config file 
 #server {
 #   listen 80;
@@ -9543,3 +9543,37 @@ map $http_upgrade $connection_upgrade {
 ![Link2 to Nginx Auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
 
 ** service file for the autoboot **
+[Unit]
+Description=GoAccess real-time web log analysis
+After=network.target
+
+[Service]
+Type=simple
+
+ExecStart=/usr/bin/goaccess -f /var/log/nginx/leave.afsholdingsgroup.access.log --real-time-html --ws-url=wss://nairobiskates.com:443/ws -o /var/www/html/report.html --port=7890 
+
+ExecStop=/bin/kill -9 ${MAINPID}
+WorkingDirectory=/tmp
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=strict
+SystemCallFilter=~@clock @cpu-emulation @debug @keyring @memlock @module \
+                  @mount @obsolete @privileged @reboot @resources @setuid \
+                  @swap @raw-io
+
+ReadOnlyPaths=/
+ReadWritePaths=/var/www
+ReadWritePaths=/var/www/html/
+
+PrivateDevices=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+
+[Install]
+WantedBy=multi-user.target
+
+
+** view logs for all sites **
+$ sudo zcat /var/log/nginx/access.log.*.gz | sudo goaccess /var/log/nginx/access.log - -o /var/www/ansonvandoren.com/html/report.html --log-format=COMBINED --real-time-html --ws-url=wss://ansonvandoren.com/ws --port 7890 --keep-db-files --load-from-disk --daemonize -db-path=/home/myuser/goaccess/
