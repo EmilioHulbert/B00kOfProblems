@@ -9571,14 +9571,29 @@ PrivateDevices=yes
 ProtectKernelModules=yes
 ProtectKernelTunables=yes
 
-[Install]
+[Install] 
 WantedBy=multi-user.target
 
 
 ** view logs for all sites **
 $ sudo zcat /var/log/nginx/access.log.*.gz | sudo goaccess /var/log/nginx/access.log - -o /var/www/ansonvandoren.com/html/report.html --log-format=COMBINED --real-time-html --ws-url=wss://ansonvandoren.com/ws --port 7890 --keep-db-files --load-from-disk --daemonize -db-path=/home/myuser/goaccess/
 ## bypass mysql root and blank password safety protection
+** you need to explicitly set the password to be blank
+sudo mariadb
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('');
+SELECT user, host, plugin FROM mysql.user WHERE user = 'root';
+sudo systemctl restart mariadb
+You're using mysql_native_password plugin ✅
+
+MariaDB needs the password explicitly set, even if it's empty (''), for it to work with PHP or over TCP.
+
+The PASSWORD() function in SET PASSWORD is what correctly hashes the blank password for MariaDB.
+
+
+## disable all password security measures below as shown below if need be
+
 Re-enable blank password support (not safe for production)
+
 In MariaDB config:
 
 bash
