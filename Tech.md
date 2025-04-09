@@ -9577,3 +9577,29 @@ WantedBy=multi-user.target
 
 ** view logs for all sites **
 $ sudo zcat /var/log/nginx/access.log.*.gz | sudo goaccess /var/log/nginx/access.log - -o /var/www/ansonvandoren.com/html/report.html --log-format=COMBINED --real-time-html --ws-url=wss://ansonvandoren.com/ws --port 7890 --keep-db-files --load-from-disk --daemonize -db-path=/home/myuser/goaccess/
+## bypass mysql root and blank password safety protection
+Re-enable blank password support (not safe for production)
+In MariaDB config:
+
+bash
+Copy
+Edit
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+Under [mysqld] add:
+
+ini
+Copy
+Edit
+skip-grant-tables
+Then restart:
+
+bash
+Copy
+Edit
+sudo systemctl restart mariadb
+
+## other maybe neccesary checks
+SELECT user, host, plugin FROM mysql.user WHERE user = 'root';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
+FLUSH PRIVILEGES;
+
