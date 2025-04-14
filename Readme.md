@@ -9618,3 +9618,6 @@ SELECT user, host, plugin FROM mysql.user WHERE user = 'root';
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
 FLUSH PRIVILEGES;
 
+## skip first line when using awk to print stuff
+awk 'NR > 1 { print $1 }' filename
+
