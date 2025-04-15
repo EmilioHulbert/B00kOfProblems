@@ -9683,3 +9683,120 @@ sudo systemctl status cockpit.service
 Copy
 https://admin.nairobiskates.com
 and log in to Cockpit or Webmin.
+
+## nginx reverse proxies solved
+for proxmox only
+server {
+    listen 80;
+    server_name  127.0.0.1 localhost;
+
+    access_log /var/log/nginx/myproject.access.log;
+    error_log /var/log/nginx/myproject.error.log;
+
+
+location / {
+        proxy_pass https://localhost:8006/;
+        proxy_ssl_verify off;  # ignore Proxmox self-signed cert
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+   
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;  # Path to PHP-FPM socket (may vary depending on your PHP version)
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+}
+
+
+server {
+    listen 8443 ssl;
+    server_name localhost;
+
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    location / {
+        proxy_pass https://localhost:8006/;
+        proxy_ssl_verify off;  # ignore Proxmox self-signed cert
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+for proxmox plus other sites
+
+server {
+    listen 80;
+    server_name tiny-seahorse-96.telebit.io;
+    access_log /var/log/nginx/myproject.access.log;
+
+    error_log /var/log/nginx/myproject.error.log;
+
+root /var/www/html;
+    index index.php index.html index.htm;
+    location / {
+        try_files $uri $uri/ /index.php?$args;  # Support for pretty URLs
+    }
+
+location /proxmox/ {
+        proxy_pass https://localhost:8006/;
+        proxy_ssl_verify off;  # ignore Proxmox self-signed cert
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+   
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;  # Path to PHP-FPM socket (may vary depending on your PHP version)
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+}
+
+
+server {
+    listen 8443 ssl;
+    server_name localhost;
+
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    location / {
+        proxy_pass https://localhost:8006/;
+        proxy_ssl_verify off;  # ignore Proxmox self-signed cert
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
