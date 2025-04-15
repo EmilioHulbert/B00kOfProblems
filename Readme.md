@@ -9621,3 +9621,65 @@ FLUSH PRIVILEGES;
 ## skip first line when using awk to print stuff
 awk 'NR > 1 { print $1 }' filename
 ## execute the very last command !! 
+
+## installing cockpit administrative access on a system
+How to access Cockpit or Webmin via your domain hosting multiple sites:
+Use a subdomain
+Create a subdomain like admin.nairobiskates.com or panel.nairobiskates.com pointing to your server’s IP.
+
+In your DNS provider, add an A record:
+
+
+Copy
+admin.nairobiskates.com  A  <your-server-ip>
+Configure reverse proxy
+Since Cockpit (default port 9090) or Webmin (default port 10000) run on non-standard ports, and your web server (e.g., Apache or Nginx) likely listens on ports 80/443, you can set up a reverse proxy so that requests to https://admin.nairobiskates.com get forwarded to Cockpit or Webmin.
+
+Example with Nginx for Cockpit:
+
+nginx
+
+Copy
+server {
+    listen 443 ssl;
+    server_name admin.nairobiskates.com;
+
+    ssl_certificate /path/to/fullchain.pem;
+    ssl_certificate_key /path/to/privkey.pem;
+    
+    location / {
+    proxy_pass https://localhost:9090/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_ssl_verify off;
+}
+}
+Firewall and security
+Make sure ports 9090 or 10000 are blocked from public access if you use reverse proxy.
+Use strong passwords and consider IP whitelisting or VPN access.
+Enable HTTPS with valid certificates (Let’s Encrypt works well).
+Access
+After DNS and proxy setup, you can access:
+Enable it by linking to sites-enabled and reload Nginx:
+
+bash
+
+Copy
+ln -s /etc/nginx/sites-available/admin.nairobiskates.com /etc/nginx/sites-enabled/
+nginx -t
+systemctl reload nginx
+sudo certbot --nginx -d admin.nairobiskates.com
+sudo apt update
+sudo apt install sscg
+sudo apt install --reinstall cockpit cockpit-system cockpit-bridge
+sudo systemctl restart cockpit
+sudo systemctl status cockpit.socket
+sudo systemctl status cockpit.service
+
+Copy
+https://admin.nairobiskates.com
+and log in to Cockpit or Webmin.
