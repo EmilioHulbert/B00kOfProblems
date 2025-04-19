@@ -10028,3 +10028,9 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 
 
+## some main configs for wireguard forwarding
+
+  iptables -A INPUT -p udp --dport 51820 -j ACCEPT
+  iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
+ 
