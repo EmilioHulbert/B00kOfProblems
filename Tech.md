@@ -9985,4 +9985,46 @@ sudo systemctl enable uploadserver
 sudo systemctl start uploadserver
 sudo systemctl status uploadserver
 
+## final for put and get with flask
+from flask import Flask, request, send_from_directory, abort
+import os
+
+UPLOAD_FOLDER = '/var/www/html/miniproject/uploads'
+BASE_URL = 'https://nairobiskates.com/uploads'
+# Make sure the upload folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app = Flask(__name__)
+
+@app.route('/uploads/<filename>', methods=['PUT', 'GET'])
+def upload_file(filename):
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    # safe_path = os.path.normpath(filepath).lstrip("/")
+    # full_path = os.path.join(UPLOAD_FOLDER, safe_path)
+
+    if request.method == 'PUT':
+        try:  
+            with open(filepath, 'wb') as f:
+                f.write(request.get_data())
+            #return f'Uploaded to {filepath}\n', 200 ##diacarded
+            return f'Uploaded to {BASE_URL}/{filename}\n', 200 ##return file path
+
+        except Exception as e:
+            return f'Error saving file: {str(e)}\n', 500
+
+    elif request.method == 'GET':
+        if os.path.exists(filepath):
+            
+            filename = os.path.basename(filepath)
+            # return send_from_directory(UPLOAD_FOLDER, filename)
+            return send_from_directory(UPLOAD_FOLDER, filename)
+        else:
+            return abort(404)
+
+    return abort(405)
+
+        
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
 
