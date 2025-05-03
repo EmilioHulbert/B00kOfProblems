@@ -10033,4 +10033,12 @@ if __name__ == '__main__':
   iptables -A INPUT -p udp --dport 51820 -j ACCEPT
   iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
   iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
- 
+
+## fix nugging error messages on boot in parrot os
+** enable sgx in bios **
+#remac
+#GRUB_CMDLINE_LINUX_DEFAULT='quiet splash resume=UUID=1fdb4317-7925-4369-8060-933dbf2f6f34 acpi=off'
+#remac end
+GRUB_CMDLINE_LINUX_DEFAULT='quiet splash resume=UUID=1fdb4317-7925-4369-8060-933dbf2f6f34 loglevel=3'
+
+
