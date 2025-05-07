@@ -10041,4 +10041,32 @@ if __name__ == '__main__':
 #remac end
 GRUB_CMDLINE_LINUX_DEFAULT='quiet splash resume=UUID=1fdb4317-7925-4369-8060-933dbf2f6f34 loglevel=3'
 
+## fix chrome not loading after changing hostname
+Because you recently changed your hostname (from ZERXIS to Intel5), Chrome thinks your user profile is locked by another machine, even though it's still on the same system. Chrome uses the hostname in a lock file to prevent simultaneous access to the same profile from different machines — a precaution against profile corruption.
+✅ Here's how to fix it:
+
+You can delete the lock file safely if you are sure Chrome isn't running elsewhere:
+
+    Make sure Chrome is not running:
+
+pkill chrome
+
+Remove the lock file:
+
+rm ~/.config/google-chrome/SingletonLock
+
+(Optional) Remove other related singleton files:
+These can also interfere:
+
+rm ~/.config/google-chrome/SingletonSocket
+rm ~/.config/google-chrome/SingletonCookie
+
+Start Chrome again:
+
+    google-chrome
+
+This will unlock the profile and allow Chrome to launch normally with your new hostname.
+
+Would you like a small script to automate this in case it happens again?
+
 
