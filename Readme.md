@@ -10069,4 +10069,91 @@ This will unlock the profile and allow Chrome to launch normally with your new h
 
 Would you like a small script to automate this in case it happens again?
 
+## mikrotik access from tenda network
+ Solution: Allow Access to MikroTik from the Tenda Network
+Step-by-step in MikroTik Winbox or WebFig:
+🔧 Step 1: Add a Firewall Rule to Accept Input from Tenda Network
+Go to:
+IP → Firewall → Filter Rules
+
+Click "+" to add a new rule
+
+Chain: input
+
+Src. Address: 192.168.0.0/24
+
+Dst. Address: 192.168.0.100
+
+Protocol: tcp
+
+Dst. Port: 80, 8291 (if you want Web and Winbox access)
+
+Action: accept
+
+Move this rule above any drop rules in the input chain
+
+💡 You can just allow all access from 192.168.0.0/24 to input if you trust that network.
+
+🔧 Step 2: Allow Ping/Other Services (Optional)
+If you want to ping the MikroTik from Tenda side:
+
+Add another rule:
+
+Chain: input
+
+Src. Address: 192.168.0.0/24
+
+Protocol: icmp
+
+Action: accept
+
+🔄 Step 3: Confirm NAT Masquerading Still Works
+In case internet stops working for MikroTik clients:
+
+Check IP → Firewall → NAT
+
+Make sure there's a rule like:
+
+vbnet
+Copy
+Edit
+Chain: srcnat
+Out Interface: ether1 (or whatever is your WAN)
+Action: masquerade
+✅ After Fix: You Should Be Able To...
+Access MikroTik at 192.168.0.100 from Tenda-connected devices
+
+Ping or Winbox into MikroTik from upstream devices
+
+🖥️ MikroTik Firewall Rules (Terminal)
+✅ 1. Allow HTTP (Web Interface) & Winbox from Tenda Network
+bash
+Copy
+Edit
+/ip firewall filter add chain=input src-address=192.168.0.0/24 dst-address=192.168.0.100 protocol=tcp dst-port=80,8291 action=accept comment="Allow Web & Winbox from Tenda LAN"
+✅ 2. Allow ICMP (ping)
+bash
+Copy
+Edit
+/ip firewall filter add chain=input src-address=192.168.0.0/24 dst-address=192.168.0.100 protocol=icmp action=accept comment="Allow ping from Tenda LAN"
+✅ 3. (Optional) Allow All Input from Tenda (less secure)
+If you trust all devices on the Tenda network:
+
+bash
+Copy
+Edit
+/ip firewall filter add chain=input src-address=192.168.0.0/24 action=accept comment="Allow all input from Tenda LAN"
+Place this above any "drop input" rule. You can move it up like this:
+
+bash
+Copy
+Edit
+/ip firewall filter move [find comment="Allow all input from Tenda LAN"] destination=0
+🧱 4. Keep Your Default Drop Rule at the Bottom
+Make sure there's a rule like this at the bottom:
+
+bash
+Copy
+Edit
+/ip firewall filter add chain=input action=drop comment="Drop everything else"
 
