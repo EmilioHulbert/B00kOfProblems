@@ -10156,4 +10156,6 @@ bash
 Copy
 Edit
 /ip firewall filter add chain=input action=drop comment="Drop everything else"
-
+## trick to play chrome no internet game endlessly
+open console in  browser and add 
+Runner.prototype.gameOver = () => {}
