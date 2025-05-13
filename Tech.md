@@ -10158,4 +10158,71 @@ Edit
 /ip firewall filter add chain=input action=drop comment="Drop everything else"
 ## trick to play chrome no internet game endlessly
 open console in  browser and add 
+
 Runner.prototype.gameOver = () => {}
+
+## some libre office tricks
+270d then alt x is shorthand
+1f5fa altx world map
+
+## fix git large commit files
+🔥 Only One Way to Fix This Without Touching development: Rewrite Just the Clean Branch's History
+We now must rewrite the history of cleaned-branch to completely erase the file.
+
+This will NOT affect development, no force push is needed there.
+
+✅ Let’s Do It — Final Safe Solution
+1. 📦 Install git-filter-repo
+If you don’t have it yet:
+
+bash
+Copy
+Edit
+# Ubuntu/Debian
+sudo apt install git-filter-repo
+
+# macOS
+brew install git-filter-repo
+
+# Python (last resort)
+pip install git-filter-repo
+2. 🧼 Rewrite history to remove the large file (from only cleaned-branch)
+You're already on cleaned-branch. Now run:
+
+bash
+Copy
+Edit
+git filter-repo --path "Python & Django | The Complete Django Web Development Course/django_app/venv3/lib/python3.11/site-packages/playwright/driver/node" --invert-paths
+This fully deletes that file from all commits in this branch.
+
+3. 🔒 Add .gitignore (just in case it’s missing again)
+bash
+Copy
+Edit
+echo "venv/" >> .gitignore
+git add .gitignore
+git commit -m "Ensure venv is ignored"
+4. 🚀 Push the cleaned branch
+Now this push will succeed:
+
+bash
+Copy
+Edit
+git push origin cleaned-branch
+✅ After This
+Your cleaned-branch will be LFS- and GitHub-compliant ✅
+
+Your original development branch remains untouched ✅
+
+You can merge cleaned-branch into development via a pull request or GitHub UI ✅
+
+🧼 Extra Tip: Clean Up LFS Tracking
+Run this to stop tracking files you don’t want in LFS:
+
+bash
+Copy
+Edit
+git lfs untrack "Python & Django | The Complete Django Web Development Course/django_app/venv3/lib/python3.11/site-packages/playwright/driver/node"
+git add .gitattributes
+git commit -m "Untrack unnecessary LFS files"
+
