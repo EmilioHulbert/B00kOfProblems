@@ -10273,3 +10273,6 @@ hw.gpu.mode=off
 hw.accelerometer=yes
 hw.vulkan.enabled=no
 
+if  still crashing then add
+fastboot.forceColdBoot=yes
+
