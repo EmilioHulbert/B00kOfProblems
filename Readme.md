@@ -10231,3 +10231,35 @@ find . -type f -exec sed -i 's/\/home\/user\/Desktop\/venv/\/home\/user\/Desktop
 
 ## view real error service messages on linux
 journalctl -xeu django.service --no-pager
+
+## django proxy service
+[Unit]
+Description=Django autorun service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/user/Desktop/django_app/src
+ExecStart=/home/user/Desktop/django_app/venv3/bin/python manage.py runserver 0.0.0.0:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+## django nginx proxy
+server {
+    listen 80;
+    server_name djangohost.local;
+
+    access_log /var/log/nginx/djangohost.access.log;
+    error_log /var/log/nginx/djangohost.error.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
