@@ -10265,3 +10265,11 @@ server {
 
  ## netcat simple listen and serve shell
  netcat  -p 1234 -L sh -l
+ ## fix android studio issues not cold booting
+edit
+subl ~/.android/avd/Pixel_8.avd/config.ini
+hw.gpu.enabled=no
+hw.gpu.mode=off
+hw.accelerometer=yes
+hw.vulkan.enabled=no
+
