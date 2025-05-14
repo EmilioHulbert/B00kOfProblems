@@ -10228,3 +10228,6 @@ git commit -m "Untrack unnecessary LFS files"
 
 ## cool django paths change
 find . -type f -exec sed -i 's/\/home\/user\/Desktop\/venv/\/home\/user\/Desktop\/django_app\/venv3/g; ' {} +
+
+## view real error service messages on linux
+journalctl -xeu django.service --no-pager
