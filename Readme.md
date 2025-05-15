@@ -10282,3 +10282,7 @@ export http_proxy=http://127.0.0.1:8080
 export https_proxy=http://127.0.0.1:8080
 curl -i google.com
 
+
+## host os venv fixed
+find . -type f -exec sed -i 's/\/home\/hulbert\/Desktop\/venv/\/home\/hulbert\/.venv/g; ' {} +
+
