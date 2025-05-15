@@ -10276,3 +10276,9 @@ hw.vulkan.enabled=no
 if  still crashing then add
 fastboot.forceColdBoot=yes
 
+
+##use proxy
+export http_proxy=http://127.0.0.1:8080
+export https_proxy=http://127.0.0.1:8080
+curl -i google.com
+
