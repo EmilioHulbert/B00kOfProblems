@@ -10286,3 +10286,16 @@ curl -i google.com
 ## host os venv fixed
 find . -type f -exec sed -i 's/\/home\/hulbert\/Desktop\/venv/\/home\/hulbert\/.venv/g; ' {} +
 
+
+## file max upload size error
+<html>
+<head><title>413 Request Entity Too Large</title></head>
+<body>
+<center><h1>413 Request Entity Too Large</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>
+root@ubuntu-4gb-nbg1-1:/opt# 
+
+solution
+
