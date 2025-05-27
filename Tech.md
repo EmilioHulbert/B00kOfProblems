@@ -10300,3 +10300,9 @@ root@ubuntu-4gb-nbg1-1:/opt#
 solution
 
 apend client_max_body_size 400M; to proxy part in config file
+
+## chck debian version
+cat /etc/debian_version
+cat /etc/os-release #check version_id
+lsb_release -a #release
+
