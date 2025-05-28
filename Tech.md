@@ -10305,4 +10305,6 @@ apend client_max_body_size 400M; to proxy part in config file
 cat /etc/debian_version
 cat /etc/os-release #check version_id
 lsb_release -a #release
+## google chrome debugging ports and selenium
+google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-dev-profile
 
