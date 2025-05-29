@@ -10308,3 +10308,28 @@ lsb_release -a #release
 ## google chrome debugging ports and selenium
 google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-dev-profile
 
+## python 3.12 installation
+sudo apt update
+sudo apt install -y build-essential libssl-dev zlib1g-dev libncurses5-dev libbz2-dev \
+libreadline-dev libsqlite3-dev wget curl llvm libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+
+cd /usr/src
+sudo wget https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tgz
+sudo tar xzf Python-3.12.0.tgz
+cd Python-3.12.0
+./configure
+make -j$(nproc)
+sudo make altinstall
+/usr/local/bin/python3.12 --version
+ls /usr/local/lib/python3.12
+ Final Step: Use with Poetry
+bash
+poetry env use /usr/local/bin/python3.12
+poetry install
+
+## cleaning process
+sudo make clean
+sudo rm -rf /usr/local/bin/python3.12
+sudo rm -rf /usr/local/lib/python3.12
+sudo make clean
+
