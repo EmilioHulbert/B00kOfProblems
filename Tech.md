@@ -10333,3 +10333,8 @@ sudo rm -rf /usr/local/bin/python3.12
 sudo rm -rf /usr/local/lib/python3.12
 sudo make clean
 
+
+##get back poetry shell
+poetry self add poetry-plugin-shell
+poetry shell
+
