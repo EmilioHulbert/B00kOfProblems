@@ -10344,3 +10344,110 @@ yarn build
 serve -s build/
 
 
+## postgres commands 
+-- Log in as postgres
+psql -U postgres -d myprojectdb
+
+-- 1. Make sure the schema is owned by your user
+ALTER SCHEMA public OWNER TO myprojectuser;
+
+-- 2. Give full access to your user
+GRANT ALL ON SCHEMA public TO myprojectuser;
+
+-- 3. Grant create privileges (already probably done, but repeat)
+GRANT CREATE, USAGE ON SCHEMA public TO myprojectuser;
+
+-- 4. Apply default privileges (critical!)
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT ALL ON TABLES TO myprojectuser;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT ALL ON SEQUENCES TO myprojectuser;
+
+-- (optional but good practice)
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT ALL ON FUNCTIONS TO myprojectuser;
+
+
+Common gotcha: User permissions
+Despite changing schema ownership and granting permissions, make sure the myprojectuser has full rights to create tables in the schema.
+
+Check this in psql with:
+
+sql
+Copy
+Edit
+\dn+ public
+And
+
+sql
+Copy
+Edit
+\dp public.*
+Also, to explicitly grant all privileges on the schema and all tables (if any exist) to the user:
+
+sql
+Copy
+Edit
+GRANT ALL PRIVILEGES ON SCHEMA public TO myprojectuser;
+If tables already exist, consider:
+
+sql
+Copy
+Edit
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myprojectuser;
+
+CREATE TABLE test_perm (id serial PRIMARY KEY);
+DROP TABLE test_perm;
+
+ALTER USER myprojectuser WITH PASSWORD 'new_secure_password';
+psql -U myprojectuser -h localhost -d myprojectdb
+
+Grant privileges explicitly on the schema:
+
+You did GRANT ALL ON SCHEMA public TO myprojectuser; which is good, but also run:
+
+sql
+Copy
+Edit
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myprojectuser;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO myprojectuser;
+SELECT schema_owner FROM information_schema.schemata WHERE schema_name = 'public';
+SELECT tablename, tableowner FROM pg_tables WHERE schemaname = 'public';
+SELECT sequencename, sequenceowner FROM pg_sequences WHERE schemaname = 'public';
+
+-- Change the DB owner
+ALTER DATABASE myprojectdb OWNER TO myprojectuser;
+
+-- Connect to the DB
+\c myprojectdb
+
+-- Change the schema owner
+ALTER SCHEMA public OWNER TO myprojectuser;
+SELECT current_user;
+SHOW search_path;
+\du+ myprojectuser
+
+
+
+-- Give ALL privileges on schema public
+GRANT ALL ON SCHEMA public TO myprojectuser;
+
+-- Give usage & creation rights (redundant but safe)
+GRANT USAGE ON SCHEMA public TO myprojectuser;
+GRANT CREATE ON SCHEMA public TO myprojectuser;
+
+-- Optional but helpful in dev
+ALTER SCHEMA public OWNER TO myprojectuser;
+
+-- Optional: give ownership of all tables if any exist already
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'ALTER TABLE public.' || quote_ident(r.tablename) || ' OWNER TO myprojectuser';
+    END LOOP;
+END;
+$$;
+
