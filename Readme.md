@@ -10338,3 +10338,9 @@ pip install poetry
 poetry self add poetry-plugin-shell
 poetry shell
 
+## running nodejs projects
+npm install -g serve
+yarn build
+serve -s build/
+
+
