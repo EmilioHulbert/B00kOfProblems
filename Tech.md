@@ -10742,4 +10742,12 @@ server {
     return 404; # managed by Certbot
 
 
+
+
+##clone specific folder in github
+git clone --filter=blob:none --no-checkout https://github.com/berzerk0/Probable-Wordlists.git
+cd Probable-Wordlists
+git sparse-checkout init --cone
+git sparse-checkout set Real-Passwords/WPA-Length
+git checkout
 }
