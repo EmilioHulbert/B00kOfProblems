@@ -10805,3 +10805,41 @@ Copy
 Edit
 systemctl restart pveproxy
 systemctl restart pvedaemon}
+
+## remove PAT FROM GIT HISTORY
+✅ 1. Remove the Token from Git History
+GitHub saw the token in this commit:
+
+bash
+Copy
+Edit
+commit: bad40ccff42ae68623b6af90b00d79f538971d7c
+paths:
+  - scripts/scripts/autocommit/autocommit.sh:8
+  - scripts/scripts/udemycommit/udemycommit.sh:6
+Use the git filter-repo (recommended) or BFG tool.
+
+🔹 Option A: Using git filter-repo (recommended by GitHub)
+Install it (if you don’t have it):
+
+bash
+Copy
+Edit
+brew install git-filter-repo  # macOS
+sudo apt install git-filter-repo  # Ubuntu/Debian
+Remove the token from the repository history:
+
+bash
+Copy
+Edit
+git filter-repo --path scripts/scripts/autocommit/autocommit.sh --path scripts/scripts/udemycommit/udemycommit.sh --invert-paths
+Or, if you want to surgically remove the token line:
+
+bash
+Copy
+Edit
+git filter-repo --replace-text <(echo 'your_token_here==>REMOVED')
+## NEVER USE -f because it will OVERWRITE commits remotely
+
+
+
