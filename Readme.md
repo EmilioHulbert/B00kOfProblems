@@ -10750,4 +10750,58 @@ cd Probable-Wordlists
 git sparse-checkout init --cone
 git sparse-checkout set Real-Passwords/WPA-Length
 git checkout
-}
+
+
+## Transparent root for bashrc file
+
+#PS1='$ '
+PS1="\[\033[0;31m\]\342\224\214\342\224\200\$([[ \$? != 0 ]] && echo \"[\[\033[0;37m\]\342\234\227\[\033[0;31m\]]\342\224\200\")[$(if [[ ${EUID} == 0 ]]; then echo '\[\033[01;31m\]root\[\033[01;33m\]@\[\033[01;96m\]\h'; else echo '\[\033[0;39m\]Transparent-Root-\u\[\033[01;33m\]@\[\033[01;96m\]\h'; fi)\[\033[0;31m\]]\342\224\200[\[\033[0;32m\]\w\[\033[0;31m\]]\n\[\033[0;31m\]\342\224\224\342\224\200\342\224\200\342\225\274 \[\033[0m\]\[\e[01;33m\]\\$\[\e[0m\]"
+export _SUDO_WRAPPER_RUNNING=0
+LOGFILE="/var/log/sudo_command_log.txt"
+
+trap '
+  if [[ $EUID -ne 0 && $_SUDO_WRAPPER_RUNNING -eq 0 ]]; then
+    export _SUDO_WRAPPER_RUNNING=1
+
+    # Extract the command name (first word)
+    cmd=$(echo "$BASH_COMMAND" | awk "{print \$1}")
+
+    # Log the command
+    echo "$(date "+%Y-%m-%d %H:%M:%S") [$(whoami)] $BASH_COMMAND" >> "$LOGFILE"
+
+    # List of builtins to run without sudo
+    case "$cmd" in
+      cd|export|alias|unalias|unset|pushd|popd|source|.)
+        # Run the builtin command directly in current shell
+        builtin $BASH_COMMAND
+        ;;
+      *)
+        # Run other commands with sudo
+        sudo bash -c "$BASH_COMMAND"
+        ;;
+    esac
+
+    export _SUDO_WRAPPER_RUNNING=0
+    kill -SIGINT $$
+  fi
+' DEBUG
+
+## add proxmox shell terminal timeout
+3. Extend or Disable Timeout (Advanced Server Config)
+You can try to increase session timeout settings:
+
+Edit /etc/default/pveproxy and /etc/pve/datacenter.cfg:
+
+Add or modify:
+
+yaml
+Copy
+Edit
+session_timeout: 3600
+Then restart services:
+
+bash
+Copy
+Edit
+systemctl restart pveproxy
+systemctl restart pvedaemon}
