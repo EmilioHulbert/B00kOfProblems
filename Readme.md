@@ -10842,4 +10842,92 @@ git filter-repo --replace-text <(echo 'your_token_here==>REMOVED')
 ## NEVER USE -f because it will OVERWRITE commits remotely
 
 
+✅ Step-by-Step Recovery After Monitor Mode
+Kill conflicting processes (optional but helpful):
 
+bash
+Copy
+Edit
+airmon-ng check kill
+Take the interface down:
+
+bash
+Copy
+Edit
+ip link set wlp1s0 down
+Set it back to managed mode:
+
+bash
+Copy
+Edit
+iwconfig wlp1s0 mode managed
+Bring the interface up again:
+
+bash
+Copy
+Edit
+ip link set wlp1s0 up
+Restart networking services:
+
+bash
+Copy
+Edit
+systemctl start NetworkManager
+systemctl start wpa_supplicant
+Try connecting to your Wi-Fi again:
+
+bash
+Copy
+Edit
+nmcli device wifi rescan
+nmcli device wifi list
+nmcli device connect wlp1s0
+Common Pitfall from Your Error
+Your error shows:
+
+pgsql
+Copy
+Edit
+Error: Connection activation failed: No suitable device found for this connection (device enp0s31f6 not available because profile is not compatible with device (mismatching interface name)).
+You're trying to activate a Wi-Fi profile (200-GT) on a wired interface (enp0s31f6) — not your wireless interface (wlp1s0).
+
+To fix this, use:
+
+bash
+Copy
+Edit
+nmcli con up 200-GT ifname wlp1s0
+Or better yet, rebind it cleanly:
+
+bash
+Copy
+Edit
+nmcli con show   # Find the correct Wi-Fi profile name
+nmcli con up id "200-GT" ifname wlp1s0
+Optional: Fully Reset Network Interfaces (in case of persistent bugs)
+bash
+Copy
+Edit
+nmcli networking off
+nmcli networking on
+or even
+
+bash
+Copy
+Edit
+systemctl restart NetworkManager
+Prevent This in the Future
+When you finish using airmon-ng / airodump-ng, run:
+
+bash
+Copy
+Edit
+airmon-ng stop wlp1s0mon
+This automatically restores the interface name and mode.
+
+Then restart networking services if needed:
+
+bash
+Copy
+Edit
+systemctl restart NetworkManager
