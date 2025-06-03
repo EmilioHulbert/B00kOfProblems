@@ -10931,3 +10931,19 @@ bash
 Copy
 Edit
 systemctl restart NetworkManager
+
+## proper reverse tunnel service file 
+[Unit]
+Description=Reverse SSH Tunnel to Cloud
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=root
+Environment="AUTOSSH_GATETIME=0"
+ExecStart=/usr/bin/autossh -M 0 -N -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -R 8887:localhost:9090 root@ip.address
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
