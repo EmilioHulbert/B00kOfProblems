@@ -10947,3 +10947,6 @@ RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
+
+##quick disk usage commandline view
+apt install stacer ncdu
