@@ -10950,3 +10950,22 @@ WantedBy=multi-user.target
 
 ##quick disk usage commandline view
 apt install stacer ncdu
+
+
+## netplan configuration
+root@leave:/home/afs# cat /etc/netplan/50-cloud-init.yaml 
+network:
+  version: 2
+  ethernets:
+    ens18:
+      dhcp4: false
+      addresses:
+        - 192.168.0.150/24
+      gateway4: 192.168.0.1
+      nameservers:
+        addresses: [192.168.0.1]
+
+root@leave:/home/afs# 
+sudo netplan apply
+ip a
+
