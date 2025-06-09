@@ -10969,3 +10969,6 @@ root@leave:/home/afs#
 sudo netplan apply
 ip a
 
+
+# edit a file remotely using vim
+vim scp://user@remote.ip:/path/to/file
