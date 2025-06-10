@@ -11116,6 +11116,11 @@ location /uploads/ {
 
 
 server {
+    #Remac, for future use
+    #location ~* \.(php|jsp|asp|aspx|sh|py|pl|cgi|exe)$ {
+    #return 403;
+    #}
+
     if ($host = www.nairobiskates.com) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
