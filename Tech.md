@@ -11137,3 +11137,6 @@ server {
 root@ubuntu-4gb-nbg1-1:/etc/nginx/conf.d# 
 
 
+## mysqldump dump no pass req if pass is ''
+mysqldump employeeleavedb > d.sql
+
