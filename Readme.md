@@ -11145,3 +11145,80 @@ or create .my.cnf file in ~
 user=root
 password=YourStrongPassword
 
+
+Thanks for checking! Based on your mega-ls output:
+
+bash
+Copy
+Edit
+server-backups/etc/ld.so.cache
+server-backups/etc/ld.so.conf
+server-backups/etc/ld.so.conf.d/
+It looks like your backup does not include /etc/ld.so.preload, which is actually a good thing in this case — because that file being missing is much safer than having it point to a broken .so.
+
+✅ What This Means
+You can safely restore the /etc/ld.so.preload file as an empty file or remove it entirely. This will stop the broken cerez.so from being injected into every process.
+
+🛠 What You Should Do (from rescue/recovery shell):
+🔧 Option 1: Remove /etc/ld.so.preload
+bash
+Copy
+Edit
+rm -f /etc/ld.so.preload
+🔧 Option 2: Truncate it (make it empty)
+bash
+Copy
+Edit
+> /etc/ld.so.preload
+Either way, this disables the preloading of sysutils.so, which is causing segmentation faults.
+
+✅ Bonus: Restore Related Config Files (Optional)
+You can also restore /etc/ld.so.conf and /etc/ld.so.conf.d/ from your backup if you suspect further library loading issues:
+
+bash
+Copy
+Edit
+cp -a /path/to/server-backups/etc/ld.so.conf /etc/
+cp -a /path/to/server-backups/etc/ld.so.conf.d /etc/
+Then run:
+
+bash
+Copy
+Edit
+ldconfig
+To rebuild the dynamic linker cache (ld.so.cache).
+
+✅ Final Step: Reboot
+Once you've fixed or removed /etc/ld.so.preload, just reboot:
+
+bash
+Copy
+Edit
+reboot
+Your system should now boot cleanly and allow you to use commands like ls, cat, sudo, etc., normally again.
+
+🛡 To Clean Up the Damage (Optional)
+After recovering:
+
+🔍 Delete any traces of:
+
+/lib/sysutils.so
+
+/etc/cerez.cfg
+
+The cerez/ project directory if it's not needed anymore
+
+🧼 Run:
+
+bash
+Copy
+Edit
+ldconfig
+🧪 Verify core binaries work:
+
+bash
+Copy
+Edit
+ls /
+whoami
+sudo echo test
