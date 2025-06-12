@@ -11222,3 +11222,25 @@ Edit
 ls /
 whoami
 sudo echo test
+
+## working with opensuse
+1. Update repositories and refresh metadata (optional but recommended):
+zypper refresh
+
+2. Install autossh:
+zypper install autossh
+
+3. Verify installation:
+which autossh
+autossh -V
+
+Troubleshooting
+If zypper says autossh is not found:
+
+Make sure the openSUSE OSS or SUSE PackageHub repo is enabled.
+Check available repos:
+zypper repos
+If needed, add the appropriate repo. For example, for openSUSE Leap 15.6:
+zypper ar https://download.opensuse.org/distribution/leap/15.6/repo/oss/ openSUSE-OSS
+zypper refresh
+zypper install autossh
