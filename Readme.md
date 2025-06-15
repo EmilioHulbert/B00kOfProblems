@@ -11244,3 +11244,191 @@ If needed, add the appropriate repo. For example, for openSUSE Leap 15.6:
 zypper ar https://download.opensuse.org/distribution/leap/15.6/repo/oss/ openSUSE-OSS
 zypper refresh
 zypper install autossh
+
+#installing kernel headers in opensuse
+
+✅ 1. Install kernel headers
+bash
+Copy
+Edit
+sudo zypper install kernel-default-devel
+This package installs the headers matching your running kernel (assuming your kernel is up to date with the package repository).
+
+✅ 2. Check for matching kernel version
+To confirm you’re installing headers for the exact running kernel:
+
+bash
+Copy
+Edit
+rpm -q kernel-default kernel-default-devel
+You should see matching versions like:
+
+cpp
+Copy
+Edit
+kernel-default-6.4.0-150600.23.42.x86_64
+kernel-default-devel-6.4.0-150600.23.42.x86_64
+
+## gcc and others 
+sudo zypper install kernel-source make gcc dkms
+Package Purpose
+kernel-source   Full kernel source code, not just headers. (Good if building custom modules or digging into the kernel.)
+make    Essential build tool.
+gcc C compiler.
+dkms    Manages kernel modules automatically across kernel updates.
+
+## install exact kernel version
+🥈 Option 2: Downgrade kernel-default-devel to match current running kernel
+If you don’t want to reboot, install the matching kernel-default-devel version manually:
+
+bash
+Copy
+Edit
+sudo zypper install --oldpackage kernel-default-devel-6.4.0-150600.23.42.2
+✅ Tip: Keep Kernel & Devel in Sync
+Always make sure:
+
+bash
+Copy
+Edit
+uname -r       # running kernel
+rpm -q kernel-default-devel
+…show the same version number, or make will fail.
+
+✅ 1. Check all installed kernel-default-devel packages
+Run:
+
+bash
+Copy
+Edit
+rpm -qa | grep kernel-default-devel
+Expected output:
+
+bash
+Copy
+Edit
+kernel-default-devel-6.4.0-150600.23.50.1.x86_64
+kernel-default-devel-6.4.0-150600.23.42.2.x86_64
+✅ 2. Remove the newer one
+Now remove the one you don’t want:
+
+bash
+Copy
+Edit
+sudo zypper remove kernel-default-devel-6.4.0-150600.23.50.1
+✅ 3. Lock the version (optional but smart)
+Prevent zypper from re-upgrading it accidentally in the future:
+
+bash
+Copy
+Edit
+sudo zypper addlock kernel-default-devel
+You can unlock it later with:
+
+bash
+Copy
+Edit
+sudo zypper removelock kernel-default-devel
+✅ 4. Verify result
+After removal, check again:
+
+bash
+Copy
+Edit
+rpm -qa | grep kernel-default-devel
+Should only show:
+
+bash
+Copy
+Edit
+kernel-default-devel-6.4.0-150600.23.42.2.x86_64
+
+✅ Basic User Creation
+🔹 Example: Add user user with home directory and bash shell
+bash
+Copy
+Edit
+sudo useradd -m -s /bin/bash user
+-m creates a home directory at /home/user
+
+-s /bin/bash sets the default shell to bash
+
+✅ Add user to groups
+🔹 Add to one or more groups (e.g., wheel, audio, video)
+bash
+Copy
+Edit
+sudo usermod -aG wheel,audio,video user
+-aG means "append these groups"
+
+Don't forget the comma, not spaces
+
+✅ Set user password
+bash
+Copy
+Edit
+sudo passwd user
+You’ll be prompted to enter and confirm the password.
+
+✅ Full example (in one go)
+bash
+Copy
+Edit
+sudo useradd -m -s /bin/bash -G wheel,audio,video user
+sudo passwd user
+🔍 Check the user and groups
+To confirm the user and groups:
+
+bash
+Copy
+Edit
+id user
+Example output:
+
+bash
+Copy
+Edit
+uid=1001(user) gid=100(users) groups=100(users),10(wheel),33(audio),44(video)
+
+✅ To give a user sudo access in openSUSE:
+🔹 1. Add user to wheel group
+bash
+Copy
+Edit
+sudo usermod -aG wheel user
+🔹 2. Ensure wheel group has sudo rights
+Open the sudoers file safely using visudo:
+
+bash
+Copy
+Edit
+sudo visudo
+Then uncomment the following line (remove the # if it's there):
+
+bash
+Copy
+Edit
+%wheel ALL=(ALL) ALL
+This grants all members of wheel full sudo access.
+
+🔒 Optional: Allow wheel users to run sudo without a password
+If you want that (not recommended for production):
+
+bash
+Copy
+Edit
+%wheel ALL=(ALL) NOPASSWD: ALL
+✅ Test
+After adding the user and modifying the sudoers file:
+
+bash
+Copy
+Edit
+su - user
+sudo whoami
+It should return:
+
+nginx
+Copy
+Edit
+root
