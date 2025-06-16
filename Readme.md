@@ -11432,3 +11432,64 @@ nginx
 Copy
 Edit
 root
+
+## some php-fpm missing module fix How to fix both issues:
+Fix #1: PHP-FPM socket not found
+Check if PHP-FPM is running
+
+bash
+Copy
+sudo systemctl status php8.1-fpm
+If not running, start it:
+
+bash
+Copy
+sudo systemctl start php8.1-fpm
+Check the PHP-FPM socket location
+
+Sometimes the socket is created at a different path or PHP version is different.
+
+Find the socket by:
+
+bash
+Copy
+sudo find /var/run/php/ -name '*.sock'
+If the socket file is at a different location (or PHP version is different), update your nginx config's fastcgi_pass accordingly.
+
+For example, if you see:
+
+swift
+Copy
+/var/run/php/php8.0-fpm.sock
+But your nginx config points to php8.1, update it to php8.0-fpm.sock or install PHP 8.1 FPM.
+
+Restart nginx after fixing config
+
+bash
+Copy
+sudo systemctl restart nginx
+Fix #2: Enable PDO MySQL extension in PHP
+The error about PDO::MYSQL_ATTR_INIT_COMMAND means your PHP does not have the PDO MySQL driver enabled.
+
+Install the PDO MySQL extension for PHP
+
+For PHP 8.1:
+
+bash
+Copy
+sudo apt-get install php8.1-mysql
+If you use a different PHP version, adjust accordingly (php7.4-mysql, etc.)
+
+Restart PHP-FPM and nginx
+
+bash
+Copy
+sudo systemctl restart php8.1-fpm
+sudo systemctl restart nginx
+Summary
+Make sure PHP-FPM service is running and socket path matches nginx config.
+
+Install and enable the php8.1-mysql package to fix PDO MySQL errors.
+
+Restart services after changes.
+
