@@ -9964,7 +9964,7 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 
 
-## sritten service 
+## written service 
 [Unit]
 Description=Flask Upload Server
 After=network.target
@@ -11492,4 +11492,323 @@ Make sure PHP-FPM service is running and socket path matches nginx config.
 Install and enable the php8.1-mysql package to fix PDO MySQL errors.
 
 Restart services after changes.
+
+Got it! Here are the Linux commands and instructions to manually create the PostgreSQL database and user, plus the steps to run your Django project:
+
+1. Install PostgreSQL (if not already installed)
+bash
+Copy
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+2. Start PostgreSQL service
+bash
+Copy
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+3. Switch to the postgres user (PostgreSQL admin user)
+bash
+Copy
+sudo -i -u postgres
+4. Open PostgreSQL interactive terminal
+bash
+Copy
+psql
+5. Create PostgreSQL database and user
+Replace cardealer_db with your database name, and choose a username and password, e.g., cardealer_user and securepassword.
+
+sql
+Copy
+CREATE DATABASE cardealer_db;
+CREATE USER cardealer_user WITH PASSWORD 'securepassword';
+GRANT ALL PRIVILEGES ON DATABASE cardealer_db TO cardealer_user;
+\q
+6. Exit postgres user shell
+bash
+Copy
+exit
+7. Configure your Django project's settings.py
+Edit your settings.py to include your PostgreSQL credentials under DATABASES:
+
+python
+Copy
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cardealer_db',
+        'USER': 'cardealer_user',
+        'PASSWORD': 'securepassword',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+8. Set up Python environment and install requirements
+bash
+Copy
+cd /path/to/project/root
+
+# Optional but recommended: create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+9. Make and apply migrations
+bash
+Copy
+python manage.py makemigrations
+python manage.py migrate
+10. Create superuser for admin login
+bash
+Copy
+python manage.py createsuperuser
+Follow the prompts to create admin username and password.
+
+11. Run the Django development server
+bash
+Copy
+python manage.py runserver
+12. Open your browser and go to:
+cpp
+Copy
+http://127.0.0.1:8000/
+(Replace 8000 if you specified a different port in the runserver command.)
+
+
+You ran into two main issues here:
+
+1. psycopg2-binary install failed with missing compiler and dependencies
+Error:
+
+yaml
+Copy
+error: command 'x86_64-linux-gnu-gcc' failed: No such file or directory
+This means your system is missing build tools and PostgreSQL dev headers necessary to compile psycopg2 from source.
+
+2. Django module not found after pip install failed
+Since the package installation failed, Django is not installed in your venv, so manage.py fails to import it.
+
+How to fix it step-by-step
+Step 1: Install necessary system dependencies for psycopg2
+Run these commands on your Ubuntu machine to install build tools and PostgreSQL development libraries:
+
+bash
+Copy
+sudo apt update
+sudo apt install build-essential libpq-dev python3-dev
+build-essential: compiler tools (gcc, g++, make, etc.)
+
+libpq-dev: PostgreSQL client library and headers needed by psycopg2
+
+python3-dev: Python headers for building C extensions
+
+Step 2: Make sure your virtual environment is activated
+bash
+Copy
+source venv/bin/activate
+Step 3: Upgrade pip, setuptools, wheel inside venv to avoid legacy install issues
+bash
+Copy
+pip install --upgrade pip setuptools wheel
+Step 4: Reinstall requirements
+Now retry installing all Python dependencies:
+
+bash
+Copy
+pip install -r requirements.txt
+Step 5: Confirm Django installed successfully
+Check:
+
+bash
+Copy
+python -m django --version
+Should print 3.0.7 or similar.
+
+Step 6: Proceed with migrations
+bash
+Copy
+python manage.py makemigrations
+python manage.py migrate
+Summary
+bash
+Copy
+sudo apt update
+sudo apt install build-essential libpq-dev python3-dev
+
+source venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+
+python manage.py makemigrations
+python manage.py migrate
+
+
+The error:
+
+pgsql
+Copy
+ImportError: cannot import name 'convert_path' from 'setuptools'
+means the version of setuptools you installed is incompatible with the django-allauth==0.42.0 version in your requirements.
+
+Here’s how to fix this:
+Option 1: Downgrade setuptools to a version compatible with your packages
+Try installing setuptools version 59.6.0, which you previously had and which is compatible:
+
+bash
+Copy
+pip install setuptools==59.6.0
+Then try reinstalling:
+
+bash
+Copy
+pip install -r requirements.txt
+Option 2: Manually install django-allauth separately using a compatible version
+You can try installing django-allauth separately and then install the rest:
+
+bash
+Copy
+pip install "setuptools<60"
+pip install django-allauth==0.42.0
+pip install -r requirements.txt --no-deps
+Explanation
+The latest setuptools (>60) removed convert_path that older versions of django-allauth rely on.
+
+Pinning setuptools back to 59.6.0 fixes the import error.
+
+Then django-allauth installs correctly.
+
+After a successful install
+Run:
+
+bash
+Copy
+python manage.py makemigrations
+python manage.py migrate
+
+The error message:
+
+pgsql
+Copy
+FATAL:  password authentication failed for user "cardealer_user"
+means PostgreSQL is rejecting the connection because the password you provided for the user cardealer_user in your Django settings is wrong or the user does not exist.
+
+Here’s how to manually create the PostgreSQL user and database and fix the password issue:
+1. Log in to PostgreSQL as the postgres superuser
+bash
+Copy
+sudo -u postgres psql
+2. Create the database and user, and set a password
+Replace your_password_here with a strong password you will use in your Django settings.
+
+sql
+Copy
+CREATE DATABASE cardealer_db;
+CREATE USER cardealer_user WITH PASSWORD 'your_password_here';
+ALTER ROLE cardealer_user SET client_encoding TO 'utf8';
+ALTER ROLE cardealer_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE cardealer_user SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE cardealer_db TO cardealer_user;
+\q
+3. Update your Django settings.py
+Find the DATABASES setting and update the credentials accordingly:
+
+python
+Copy
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cardealer_db',
+        'USER': 'cardealer_user',
+        'PASSWORD': 'your_password_here',  # Must match the one set above
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+4. Retry the migrations
+bash
+Copy
+python manage.py makemigrations
+python manage.py migrate
+5. (Optional) Create a superuser for admin login
+bash
+Copy
+python manage.py createsuperuser
+Follow the prompts to create the admin user.
+
+
+Check if PostgreSQL service is running
+Run:
+
+bash
+Copy
+sudo systemctl status postgresql
+You should see something like:
+
+yaml
+Copy
+● postgresql.service - PostgreSQL RDBMS
+   Loaded: loaded (/lib/systemd/system/postgresql.service; enabled; vendor preset: enabled)
+   Active: active (running) since ...
+If it’s not active (running), start it with:
+
+bash
+Copy
+sudo systemctl start postgresql
+To enable it to start automatically on boot:
+
+bash
+Copy
+sudo systemctl enable postgresql
+Verify PostgreSQL is listening on port 5432
+bash
+Copy
+sudo netstat -plunt | grep 5432
+You should see PostgreSQL bound to 0.0.0.0 or 127.0.0.1, something like:
+
+nginx
+Copy
+tcp        0      0 127.0.0.1:5432          0.0.0.0:*              LISTEN      1234/postgres
+Double-check the password is correct
+If you’re still getting password authentication failed, try logging in manually as the database user to test:
+
+bash
+Copy
+psql -U cardealer_user -d cardealer_db -h localhost
+It will prompt for a password — enter the password you set earlier.
+
+If login fails, the password or user setup is incorrect.
+
+Yep, you can definitely change the PostgreSQL user password if you think you set the wrong one! Here’s how to do it:
+
+How to change PostgreSQL user password
+Switch to the postgres user (PostgreSQL admin user):
+
+bash
+Copy
+sudo -i -u postgres
+Enter the PostgreSQL prompt:
+
+bash
+Copy
+psql
+Change the password for your user (cardealer_user):
+
+sql
+Copy
+ALTER USER cardealer_user WITH PASSWORD 'new_password_here';
+Make sure to replace 'new_password_here' with the password you want.
+
+Exit psql:
+
+sql
+Copy
+\q
+Exit the postgres user shell:
+
+bash
+Copy
+exit
+After that:
+Update your Django settings (settings.py or environment variables) with the new password.
+
+Restart your Django app and try again.
 
