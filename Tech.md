@@ -11812,3 +11812,81 @@ Update your Django settings (settings.py or environment variables) with the new 
 
 Restart your Django app and try again.
 
+## cool terminal
+Run this once:
+
+bash
+Copy
+Edit
+sudo apt update
+sudo apt install figlet toilet lolcat fortune neofetch -y
+sudo apt install ruby -y && sudo gem install lolcat
+🧠 CUSTOM BANNER FUNCTION
+Add this to your ~/.bashrc (paste at the top or near bottom):
+
+bash
+Copy
+Edit
+function zerxis_banner() {
+  clear
+
+  # Random banner text
+  BANNERS=("Zerxis" "Welcome" "NairobiSkates" "$USER@$HOSTNAME" "🔥 SYSTEM ONLINE 🔥")
+
+  # Random font
+  FONTS=("slant" "block" "standard" "big" "digital")
+
+  # Pick one randomly
+  BANNER_TEXT=${BANNERS[$RANDOM % ${#BANNERS[@]}]}
+  FONT=${FONTS[$RANDOM % ${#FONTS[@]}]}
+
+  # Fancy Banner
+  echo "$BANNER_TEXT" | figlet -f "$FONT" | lolcat
+
+  # Motivational quote
+  echo -e "\n🧠 Quote of the day:\n" | lolcat
+  fortune | lolcat
+
+  # System info
+  echo -e "\n📊 System Info:\n" | lolcat
+  neofetch --color_blocks off --disable resolution gpu wm theme icons
+}
+Then call it at the end of .bashrc:
+
+bash
+Copy
+Edit
+zerxis_banner
+🔄 ROTATING EFFECTS & VARIANTS
+Want to switch between figlet and toilet, or use a random layout on login?
+
+Replace the banner part with:
+
+bash
+Copy
+Edit
+if (( RANDOM % 2 == 0 )); then
+  echo "$BANNER_TEXT" | figlet -f "$FONT" | lolcat
+else
+  echo "$BANNER_TEXT" | toilet -f "$FONT" --filter border | lolcat
+fi
+🎁 OPTIONAL ASCII ART
+Create ~/.bash_banners/ and drop in .txt ASCII art files. Then add to the banner:
+
+bash
+Copy
+Edit
+if [ -d ~/.bash_banners ]; then
+  files=(~/.bash_banners/*.txt)
+  if [ ${#files[@]} -gt 0 ]; then
+    cat "${files[$RANDOM % ${#files[@]}]}" | lolcat
+  fi
+fi
+🧪 TEST
+Apply it:
+
+bash
+Copy
+Edit
+source ~/.bashrc
+Or just open a new terminal or SSH session to see the magic.
