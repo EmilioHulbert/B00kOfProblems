@@ -11899,3 +11899,10 @@ ssh -t root@159.69.206.22 'bash --noprofile --norc'
 Environment=DJANGO_DATABASE=dbname
 or
 EnvironmentFile=/etc/myapp.env
+
+## very cool, block direct ip access using iptables but permit domain
+# Allow local access to port 8001
+iptables -A INPUT -p tcp -s 127.0.0.1 --dport 8001 -j ACCEPT
+
+# Drop everything else
+iptables -A INPUT -p tcp --dport 8001 -j DROP
