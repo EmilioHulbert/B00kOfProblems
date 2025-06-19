@@ -11890,3 +11890,12 @@ Copy
 Edit
 source ~/.bashrc
 Or just open a new terminal or SSH session to see the magic.
+
+
+##login to ssh without reading bashrc files
+ssh -t root@159.69.206.22 'bash --noprofile --norc'
+
+## including Environment variables in service file
+Environment=DJANGO_DATABASE=dbname
+or
+EnvironmentFile=/etc/myapp.env
