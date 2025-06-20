@@ -11906,3 +11906,112 @@ iptables -A INPUT -p tcp -s 127.0.0.1 --dport 8001 -j ACCEPT
 
 # Drop everything else
 iptables -A INPUT -p tcp --dport 8001 -j DROP
+
+## installing python3.9
+install python 3.9
+✅ Step-by-step: Install Python 3.9 on Ubuntu
+1. Update your system
+bash
+Copy
+Edit
+sudo apt update && sudo apt upgrade -y
+2. Install prerequisites
+bash
+Copy
+Edit
+sudo apt install -y software-properties-common
+3. Add the deadsnakes PPA (provides older Python versions)
+bash
+Copy
+Edit
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+4. Install Python 3.9
+bash
+Copy
+Edit
+sudo apt install -y python3.9 python3.9-venv python3.9-dev
+5. Verify the installation
+bash
+Copy
+Edit
+python3.9 --version
+You should see:
+
+bash
+Copy
+Edit
+Python 3.9.x
+🎯 Optional: Set up a virtual environment with Python 3.9
+6. Create a virtual environment
+bash
+Copy
+Edit
+python3.9 -m venv /opt/iamovpn/env-py39
+7. Activate the virtual environment
+bash
+Copy
+Edit
+source /opt/iamovpn/env-py39/bin/activate
+8. Install your project dependencies
+If you have a requirements.txt:
+
+bash
+Copy
+Edit
+pip install -r requirements.txt
+Or manually install needed packages like flask-restplus:
+
+bash
+Copy
+Edit
+pip install flask-restplus
+
+## quick sed find and replace
+find . -type f -exec sed -i 's/80/3002/g;
+
+## fix some django error
+Origin checking failed - https://hybrid.nairobiskates.com does not match any trusted origins.
+** solution **
+✅ How to Fix It
+1. Add the origin to CSRF_TRUSTED_ORIGINS
+You must explicitly allow the domain in Django settings.
+
+In your settings.py file:
+python
+Copy
+Edit
+CSRF_TRUSTED_ORIGINS = [
+    "https://hybrid.nairobiskates.com",
+]
+Note:
+
+Ensure the domain uses https:// if you're serving over HTTPS.
+
+For older Django versions (before 4.0), this should be:
+
+python
+Copy
+Edit
+CSRF_TRUSTED_ORIGINS = [
+    'hybrid.nairobiskates.com',
+]
+2. Ensure CSRF Token is in Your Form
+In your HTML template (using Django template language), every POST form must include this inside the form tag:
+
+html
+Copy
+Edit
+<form method="POST" action="{% url 'your_view_name' %}">
+  {% csrf_token %}
+  <!-- your form inputs -->
+</form>
+3. Browser Must Accept Cookies
+Ensure:
+
+Cookies are not disabled.
+
+You're not blocking cookies via ad-blockers or browser privacy settings.
+
+You're not testing across multiple tabs without reloading the form page after login.
+
