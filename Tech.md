@@ -12085,3 +12085,16 @@ Let me know if you also need setup steps for Facebook or LinkedIn, or if you'd l
 You said:
 @@ installing netstat
 apt install net-tools
+
+## fix blueman popups
+sudo nano /etc/polkit-1/rules.d/50-blueman.rules
+paste:
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.blueman.rfkill.setstate") {
+        return polkit.Result.YES;
+    }
+});
+
+sudo systemctl restart polkit
+sudo groupadd bluetooth
+sudo usermod -aG bluetooth $USER
