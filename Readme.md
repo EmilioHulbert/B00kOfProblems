@@ -12015,3 +12015,73 @@ You're not blocking cookies via ad-blockers or browser privacy settings.
 
 You're not testing across multiple tabs without reloading the form page after login.
 
+✅ Steps to Get Google OAuth Client ID
+🔹 Step 1: Go to Google Cloud Console
+https://console.cloud.google.com/
+
+Select your project or create a new one.
+
+Make sure OAuth consent screen is set up (required before you can create credentials).
+
+Choose "External" if your users are not part of your Google organization.
+
+Add app name, support email, developer contact info, and scopes (you can use basic email, profile for login).
+
+Add test users (your Gmail address if not published).
+
+🔹 Step 2: Create OAuth 2.0 Client ID
+Navigate to:
+APIs & Services > Credentials > + Create Credentials > OAuth client ID
+
+For the application type, select:
+✅ "Web application"
+
+Configure these fields:
+
+🔸 Name:
+Example: Hybrid Skate Login
+
+🔸 Authorized JavaScript origins:
+Add the domain(s) that will load the login page:
+
+arduino
+Copy
+Edit
+https://hybrid.nairobiskates.com
+🔸 Authorized redirect URIs:
+This is very important. Add:
+
+ruby
+Copy
+Edit
+https://hybrid.nairobiskates.com/accounts/google/login/callback/
+📌 This must match what Django Allauth expects:
+/accounts/<provider>/login/callback/
+
+🔹 Step 3: Copy the Credentials
+After saving, you’ll get:
+
+Client ID
+
+Client Secret
+
+Use these in Django admin when adding a SocialApp for Google:
+
+Provider: Google
+
+Client id: (paste it)
+
+Secret key: (paste it)
+
+Sites: Select your domain (e.g., hybrid.nairobiskates.com)
+
+✅ You're Done!
+Now provider_login_url 'google' will generate a working login link.
+
+Let me know if you also need setup steps for Facebook or LinkedIn, or if you'd like to test the login flow securely.
+
+
+
+You said:
+@@ installing netstat
+apt install net-tools
