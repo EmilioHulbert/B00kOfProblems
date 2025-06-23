@@ -12098,3 +12098,6 @@ polkit.addRule(function(action, subject) {
 sudo systemctl restart polkit
 sudo groupadd bluetooth
 sudo usermod -aG bluetooth $USER
+
+## get kernel headers for proxmox pve
+http://download.proxmox.com/debian/pve/dists/bookworm/pve-no-subscription/binary-amd64/
