@@ -12221,3 +12221,72 @@ pip install psycopg2
 ## django issues of login creds not getting read 
 do this
 source exports.sh 
+
+👌 Good — let’s do this carefully so you can drop the existing database on the server and import a fresh copy without headaches.
+
+⚠ Make sure you have a backup (e.g. your updated_data.sql) before you proceed.
+
+🚀 Step-by-step guide
+1️⃣ SSH into your server
+bash
+Copy
+Edit
+ssh root@htz
+2️⃣ Connect to PostgreSQL
+If your DB is named, say, b2b_db and owned by b2b_user, connect as postgres:
+
+bash
+Copy
+Edit
+sudo -u postgres psql
+(or psql -U postgres depending on your setup)
+
+3️⃣ Drop the database
+At the psql prompt:
+
+sql
+Copy
+Edit
+DROP DATABASE b2b_db;
+⚠ Replace b2b_db with your actual DB name.
+
+4️⃣ Create a fresh empty database
+sql
+Copy
+Edit
+CREATE DATABASE b2b_db OWNER b2b_user;
+(again, replace b2b_db and b2b_user with your actual DB and user names)
+
+5️⃣ Exit psql
+sql
+Copy
+Edit
+\q
+6️⃣ Import your fresh data
+Back at the shell:
+
+bash
+Copy
+Edit
+psql -U b2b_user -d b2b_db -f /tmp/updated_data.sql
+or if b2b_user has no direct rights:
+
+bash
+Copy
+Edit
+sudo -u postgres psql -d b2b_db -f /tmp/updated_data.sql
+7️⃣ Verify
+Log in and check:
+
+bash
+Copy
+Edit
+sudo -u postgres psql -d b2b_db
+sql
+Copy
+Edit
+\dt  -- list tables
+SELECT COUNT(*) FROM supplier_product;  -- or any table to confirm data
+\q
+✅ Done!
+Your server DB is now a fresh copy.
