@@ -12217,3 +12217,7 @@ Copy
 Edit
 pip install psycopg2
 ✅ This provides the missing libpq-fe.h and other dev files to build psycopg2.
+
+## django issues of login creds not getting read 
+do this
+source exports.sh 
