@@ -12192,3 +12192,28 @@ make
 
 ##Downgrading pip
 pip install "pip<24.1"
+
+💡 Why is this happening?
+Your error:
+
+yaml
+Copy
+Edit
+fatal error: libpq-fe.h: No such file or directory
+➡ This means psycopg2 is trying to compile from source, but the PostgreSQL client development headers (where libpq-fe.h lives) are missing.
+⚡ 2️⃣ If you must use psycopg2 (non-binary), install build deps
+If for some reason your app requires psycopg2 (e.g. packaging, licensing, size):
+On Ubuntu/Debian:
+
+bash
+Copy
+Edit
+sudo apt update
+sudo apt install libpq-dev gcc python3-dev
+Then:
+
+bash
+Copy
+Edit
+pip install psycopg2
+✅ This provides the missing libpq-fe.h and other dev files to build psycopg2.
