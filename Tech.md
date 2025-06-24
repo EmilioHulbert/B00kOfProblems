@@ -12101,3 +12101,94 @@ sudo usermod -aG bluetooth $USER
 
 ## get kernel headers for proxmox pve
 http://download.proxmox.com/debian/pve/dists/bookworm/pve-no-subscription/binary-amd64/
+
+🚀 Safe cleanup plan
+1️⃣ Purge the custom 6.10.x kernels
+Let’s remove both:
+
+bash
+Copy
+Edit
+apt remove --purge linux-image-unsigned-6.10.0-061000-generic linux-image-unsigned-6.10.11-061011-generic
+2️⃣ Delete any leftover files (if needed)
+In case make install or manual copy left junk:
+
+bash
+Copy
+Edit
+rm -f /boot/vmlinuz-6.10.*
+rm -f /boot/initrd.img-6.10.*
+rm -f /boot/System.map-6.10.*
+rm -f /boot/config-6.10.*
+rm -rf /lib/modules/6.10.*
+3️⃣ Update GRUB
+bash
+Copy
+Edit
+update-grub
+✅ This will regenerate your boot menu without the 6.10.x entries.
+
+4️⃣ Reboot
+bash
+Copy
+Edit
+reboot
+5️⃣ Verify clean boot
+Once back:
+
+bash
+Copy
+Edit
+uname -r
+👉 It should show:
+5.15.0-142-generic (or any of your 5.15.x kernels)
+
+##remove bad headers 
+🔍 Check the Makefile symlink
+Please run:
+
+bash
+Copy
+Edit
+ls -l /usr/src/linux-headers-5.15.0-142-generic/Makefile
+and
+
+bash
+Copy
+Edit
+file /usr/src/linux-headers-5.15.0-142-generic/Makefile
+👉 This will show where it points (if it's a symlink) or if it's corrupted.
+
+⚡ If it's broken:
+We'll clean + reinstall all matching headers and meta-packages:
+
+bash
+Copy
+Edit
+apt purge 'linux-headers-*'
+rm -rf /usr/src/linux-headers-*
+apt install linux-headers-$(uname -r) linux-headers-generic
+✅ Why linux-headers-generic?
+That ensures:
+
+You always have headers for the latest installed kernel.
+
+If you upgrade your kernel, headers come with it.
+
+📌 After that:
+
+bash
+Copy
+Edit
+ls /usr/src/linux-headers-$(uname -r)/Makefile
+If present:
+
+bash
+Copy
+Edit
+cd /opt/kernel-kit/kworker/kworker
+make clean
+make
+
+##Downgrading pip
+pip install "pip<24.1"
