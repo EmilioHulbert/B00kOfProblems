@@ -12290,3 +12290,21 @@ SELECT COUNT(*) FROM supplier_product;  -- or any table to confirm data
 \q
 ✅ Done!
 Your server DB is now a fresh copy.
+
+##generate linux password from text to encrypted
+openssl passwd -6 'yourpassword'
+or
+🔑 Even better: Use mkpasswd from whois package
+Install:
+
+bash
+Copy
+Edit
+sudo apt install whois
+Generate:
+
+bash
+Copy
+Edit
+mkpasswd --method=SHA-512 --rounds=5000
+It’ll prompt for your password and output the encrypted form.
