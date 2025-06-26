@@ -12538,3 +12538,193 @@ ssh -N -L 800:localhost:444 htz -v
 /etc/hosts trick is the easiest for browsers.
 
 curl -H is great for quick tests.
+
+##setting up zimbra
+🚀 Overview of what we’ll do
+✅ Install Zimbra on your server
+✅ Secure with SSL (we’ll use Let’s Encrypt)
+✅ Configure DNS records in Cloudflare
+✅ Test sending/receiving mail
+✅ (Optional) Webmail + mobile client setup
+
+⚠ Pre-requisites
+👉 A fresh Ubuntu 20.04 / 22.04 server at Hetzner (best if dedicated to mail)
+👉 A static public IP (Hetzner gives this)
+👉 You control your domain DNS (✅ Cloudflare)
+
+💻 Step 1: Set up server basics
+1️⃣ Update and install tools
+bash
+Copy
+Edit
+apt update && apt upgrade -y
+apt install -y net-tools wget curl sudo ufw
+2️⃣ Set server hostname
+👉 Pick a FQDN (mail server hostname)
+👉 Example: mail.brimurmotors.live
+
+bash
+Copy
+Edit
+hostnamectl set-hostname mail.brimurmotors.live
+3️⃣ Edit /etc/hosts
+Make sure this line exists:
+
+pgsql
+Copy
+Edit
+YOUR.SERVER.IP.ADDRESS  mail.brimurmotors.live mail
+(Replace YOUR.SERVER.IP.ADDRESS)
+
+👉 Example:
+
+Copy
+Edit
+65.109.85.123  mail.brimurmotors.live mail
+🌐 Step 2: DNS records in Cloudflare
+👉 Go to Cloudflare → DNS → Add Records
+
+Type    Name    Value   Priority / TTL
+A   mail    YOUR.SERVER.IP.ADDRESS  Auto TTL
+MX  @   mail.brimurmotors.live  10
+TXT @   v=spf1 mx ~all  Auto TTL
+TXT _dmarc  v=DMARC1; p=quarantine; rua=mailto:admin@brimurmotors.live  Auto TTL
+(later) TXT zm._domainkey   (Zimbra DKIM key)   Auto TTL
+
+👉 Disable Cloudflare proxy (orange cloud) for mail record → it must be a grey cloud!
+
+🛠 Step 3: Open firewall
+bash
+Copy
+Edit
+ufw allow 22/tcp
+ufw allow 25/tcp
+ufw allow 465/tcp
+ufw allow 587/tcp
+ufw allow 110/tcp
+ufw allow 143/tcp
+ufw allow 993/tcp
+ufw allow 995/tcp
+ufw allow 7071/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable
+📨 Step 4: Download and install Zimbra
+1️⃣ Get installer
+bash
+Copy
+Edit
+wget https://files.zimbra.com/downloads/8.8.15_GA/zimbra-8.8.15_GA_4511.UBUNTU20_64.20211118033954.tgz
+or
+https://maldua.github.io/zimbra-foss-builder/downloads.html
+tar xvf zimbra-8.8.15_GA_4511.UBUNTU20_64.20211118033954.tgz
+cd zimbra-8.8.15_GA_4511.UBUNTU20_64.20211118033954
+(Adjust if you want a newer version)
+
+2️⃣ Run installer
+bash
+Copy
+Edit
+./install.sh
+👉 When prompted:
+
+Agree to license → Y
+
+Use Zimbra's package repository → Y
+
+Select packages:
+
+MTA → Y
+
+LDAP → Y
+
+Mailbox → Y
+
+SNMP, logger, spell, etc → Y (optional, recommended)
+
+Proxy → Y (recommended for webmail)
+
+3️⃣ Config menu (Zimbra setup)
+Set domain: brimurmotors.live
+
+Set admin password → choose one
+
+Set mail host: mail.brimurmotors.live
+
+👉 When finished: r to apply config → a to save → q to quit
+
+🔐 Step 5: Get Let’s Encrypt SSL
+👉 You can use certbot + symlink into Zimbra, or Zimbra built-in support (in recent builds).
+Example:
+
+bash
+Copy
+Edit
+apt install certbot
+certbot certonly --standalone -d mail.brimurmotors.live
+👉 After cert issued:
+
+swift
+Copy
+Edit
+cp /etc/letsencrypt/live/mail.brimurmotors.live/fullchain.pem /opt/zimbra/ssl/zimbra/commercial/commercial.crt
+cp /etc/letsencrypt/live/mail.brimurmotors.live/privkey.pem /opt/zimbra/ssl/zimbra/commercial/commercial.key
+su - zimbra
+zmcontrol restart
+(We can script auto-renew later.)
+
+🗝 Step 6: Enable DKIM
+bash
+Copy
+Edit
+su - zimbra
+zmprov md brimurmotors.live zimbraDomainDKIMEnabled TRUE
+zmprov gdkimkey brimurmotors.live
+👉 This will output a TXT record → add to Cloudflare:
+
+vbnet
+Copy
+Edit
+Name: zm._domainkey
+Value: (paste the DKIM key given)
+✅ Final check
+👉 Access webmail:
+
+arduino
+Copy
+Edit
+https://mail.brimurmotors.live
+Login with:
+
+pgsql
+Copy
+Edit
+admin@brimurmotors.live
+(your password)
+👉 Test sending/receiving:
+
+Use mail-tester.com
+
+Send test mails to Gmail, Outlook → see if they land in inbox
+
+📝 Summary of DNS records
+Type    Name    Value
+A   mail    YOUR.SERVER.IP.ADDRESS
+MX  @   mail.brimurmotors.live
+TXT @   v=spf1 mx ~all
+TXT _dmarc  v=DMARC1; p=quarantine; rua=mailto:admin@brimurmotors.live
+TXT zm._domainkey   (DKIM key from Zimbra)
+
+👉 All mail records → grey cloud in Cloudflare!
+
+🏁 What’s next
+✅ I can help:
+
+Automate SSL renewal
+
+Set up auto backups
+
+Tune spam filtering
+
+Secure Zimbra (fail2ban, strong passwords, etc)
+
