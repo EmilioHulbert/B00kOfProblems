@@ -12440,3 +12440,101 @@ wp theme install /path/to/your-theme.zip --activate
 Temporarily disable Cloudflare proxy while uploading.
 
 Or upload/unzip the theme via SFTP/SSH directly on the server.
+
+i have some question if i do this ssh  -N -L  800:localhost:443 htz -v i will have back port 800 on my machine running the default app running on port 443 which ia a django app, reverse proxied by nginx so it runs on 443 what if i want to access a wordpress running there on the same server same port just that it is on a diffrent config you know the way nginx does it like has those configs now i need to access wordpress not the main django app.is this possible mr man?
+
+
+ChatGPT said:
+✅ Brilliant question — and I see you’re thinking deeply about how SSH tunnels interact with Nginx’s virtual hosts. Let me break it down clearly.
+
+🚩 Your current setup
+👉 You have:
+
+Nginx running on port 443 on the server.
+
+Nginx has multiple server {} blocks:
+
+One for Django (say server_name django.example.com)
+
+One for WordPress (say server_name wordpress.example.com)
+
+👉 You run this:
+
+bash
+Copy
+Edit
+ssh -N -L 800:localhost:443 htz -v
+➡ This means:
+
+You’re forwarding your local port 800 → server’s port 443.
+
+When you open https://localhost:800 in your browser → request goes through the tunnel → hits Nginx on port 443 → Nginx chooses the server {} block based on the Host: header.
+
+⚡ The key detail
+👉 Nginx doesn’t care where the request came from — what matters is the Host header in the request.
+
+👉 When you visit:
+
+arduino
+Copy
+Edit
+https://localhost:800
+➡ Your browser sends:
+
+makefile
+Copy
+Edit
+Host: localhost
+Nginx doesn’t have a server_name localhost → it defaults (usually to the first server block defined, or a default).
+
+✅ How to access WordPress through that tunnel
+👉 The trick is:
+➡ You must make your browser send the right Host header → e.g., Host: wordpress.example.com
+➡ Since you’re connecting to localhost:800, the browser will send Host: localhost — unless you override it.
+
+💡 Solution options
+🟢 Option 1 — Use /etc/hosts temporarily
+Add to your local machine:
+
+Copy
+Edit
+127.0.0.1  wordpress.example.com
+Then visit:
+
+arduino
+Copy
+Edit
+https://wordpress.example.com:800
+➡ Browser connects to localhost:800 (your tunnel), but sends Host: wordpress.example.com
+
+✅ Nginx will match the right server block → you get WordPress.
+
+🟢 Option 2 — Use curl or http client with Host override
+Example:
+
+bash
+Copy
+Edit
+curl -H "Host: wordpress.example.com" https://localhost:800
+✅ This works for testing.
+
+🟢 Option 3 — Browser plugin (like Modify Headers)
+Use a browser plugin to override Host header to wordpress.example.com when hitting https://localhost:800
+
+🟢 Option 4 — SSH tunnel per vhost
+If you have Nginx listening on other ports (e.g. 444 for WordPress) you could tunnel those specifically:
+
+bash
+Copy
+Edit
+ssh -N -L 800:localhost:444 htz -v
+➡ But usually Nginx just has one HTTPS port (443) and picks the vhost by Host header.
+
+✉ Summary
+👉 Yes, Mr. Man — it’s absolutely possible. SSH tunnel just forwards; Nginx uses Host to pick the right config.
+
+✅ Make sure your client (browser, curl, whatever) sends the correct Host header:
+
+/etc/hosts trick is the easiest for browsers.
+
+curl -H is great for quick tests.
