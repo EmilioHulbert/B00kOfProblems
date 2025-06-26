@@ -12728,3 +12728,376 @@ Tune spam filtering
 
 Secure Zimbra (fail2ban, strong passwords, etc)
 
+##make quick linux swapfile
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+## disable what i dont need zimbra
+✅ Disable what you don’t need
+Once install finishes:
+
+bash
+Copy
+Edit
+su - zimbra
+zmprov ms `zmhostname` zimbraServiceEnabled snmp
+zmprov ms `zmhostname` zimbraServiceEnabled spell
+zmprov ms `zmhostname` zimbraServiceEnabled stats
+zmcontrol restart
+👉 This trims memory use
+
+##update ldap password
+ zmldappasswd melody254
+##ldap shit
+zimbra@mail:~$ /opt/zimbra/common/bin/ldapmodify -x -H ldap://127.0.1.1:389 -D "uid=zimbra,cn=admins,cn=zimbra" -W -f /tmp/fix-ports.ldif
+Enter LDAP Password: 
+modifying entry "cn=mail.brimurmotors.live,cn=servers,cn=zimbra"
+
+ldap modifications
+💥 Perfect — you have ldapmodify! This gives us a clean and powerful way forward to fix your ports directly in LDAP. Let’s do it carefully.
+
+🚀 What we’ll do
+✅ We’ll prepare an LDIF file that updates your zimbraMailPort, zimbraMailSSLPort, and optionally zimbraAdminPort.
+✅ We’ll apply it with ldapmodify.
+✅ Then restart Zimbra → mailboxd should start on 8080 / 8443 → zmprov works again → clean config.
+
+⚡ Step-by-step plan
+1️⃣ Create the LDIF file
+Let’s say your hostname is mail.brimurmotors.live.
+
+👉 Create this file:
+
+bash
+Copy
+Edit
+nano /tmp/fix-ports.ldif
+👉 Paste this:
+
+yaml
+Copy
+Edit
+dn: cn=mail.brimurmotors.live,cn=servers,cn=zimbra
+changetype: modify
+replace: zimbraMailPort
+zimbraMailPort: 8080
+-
+replace: zimbraMailSSLPort
+zimbraMailSSLPort: 8443
+-
+replace: zimbraAdminPort
+zimbraAdminPort: 7071
+✅ Save and exit (Ctrl+O, Enter, Ctrl+X)
+
+2️⃣ Apply the LDIF
+Run:
+
+bash
+Copy
+Edit
+/opt/zimbra/common/bin/ldapmodify -x -H ldap://localhost:389 -D "uid=zimbra,cn=admins,cn=zimbra" -W -f /tmp/fix-ports.ldif
+/opt/zimbra/common/bin/ldapmodify -x -H ldap://127.0.1.1:389 -D "uid=zimbra,cn=admins,cn=zimbra" -W -f /tmp/fix-ports.ldif
+
+👉 It will ask for password → use your Zimbra LDAP admin password (same as stored in /opt/zimbra/conf/localconfig.xml → look for zimbra_ldap_password).
+
+Example to see password:
+
+bash
+Copy
+Edit
+zmlocalconfig -s zimbra_ldap_password
+3️⃣ Restart Zimbra
+bash
+Copy
+Edit
+zmcontrol restart
+✅ Now mailboxd should bind 8080 / 8443 → Nginx stays on 80 / 443 → no conflict.
+
+4️⃣ Confirm
+bash
+Copy
+Edit
+ss -tulpn | grep java
+👉 You should see 8080 / 8443 bound.
+
+✅ Then you can use zmprov normally to check/adjust config permanently.
+
+
+
+💥 Good catch — let’s focus on getting you access to LDAP cleanly so we can fix this!
+
+🚀 Why you see: Can't contact LDAP server
+✅ Your LDAP server isn’t running or accessible at this point.
+✅ This is not a password issue — it's because LDAP is down → no service to connect to.
+
+👉 You can confirm:
+
+bash
+Copy
+Edit
+zmcontrol status
+✅ You'll likely see ldap stopped or failed.
+
+👉 You can try to start LDAP alone:
+
+bash
+Copy
+Edit
+zmcontrol start ldap
+or
+
+bash
+Copy
+Edit
+/opt/zimbra/libexec/zmslapd
+⚡ About resetting LDAP password
+👉 Normally, you can reset the LDAP admin password if LDAP is running:
+
+bash
+Copy
+Edit
+/opt/zimbra/libexec/zmldappasswd new_password_here
+✅ This updates localconfig + LDAP — but again, LDAP must be running for this to work fully.
+
+✅ Next steps
+👉 Let’s make sure LDAP is actually running:
+
+bash
+Copy
+Edit
+ps aux | grep slapd
+ss -tulpn | grep 389
+👉 And try:
+
+bash
+Copy
+Edit
+zmcontrol start ldap
+👉 If it refuses to start → paste any error you see!
+
+🌟 Bottom line
+💡 Your ports issue starts with LDAP config → but right now, LDAP itself is down. Our next step is to get LDAP up → then we can reset password + update ports cleanly.
+
+⚡ Paste your:
+
+bash
+Copy
+Edit
+zmcontrol status
+and:
+
+bash
+Copy
+Edit
+zmcontrol start ldap
+👉 I’ll guide you fast from there 🚀
+
+
+🚀 What’s happening
+✅ zmcontrol status shows:
+
+sql
+Copy
+Edit
+ldap                    Running
+✅ But ldapmodify says:
+
+vbnet
+Copy
+Edit
+ldap_sasl_bind(SIMPLE): Can't contact LDAP server (-1)
+👉 This means LDAP appears running (according to Zimbra) but:
+
+Either it’s not really listening on localhost:389
+
+Or firewall / bind mismatch is blocking access
+
+Or it’s stuck/half-crashed (common when mailboxd is broken)
+
+⚡ Verify if LDAP is truly running
+Run:
+
+bash
+Copy
+Edit
+ss -tulpn | grep 389
+👉 Check if LDAP (slapd) is listening at all.
+
+Also:
+
+bash
+Copy
+Edit
+ps aux | grep slapd
+👉 See if slapd process is actually alive.
+
+🛑 If LDAP is not listening
+✅ Restart it cleanly:
+
+bash
+Copy
+Edit
+zmcontrol stop ldap
+zmcontrol start ldap
+✅ Watch logs if it fails:
+
+bash
+Copy
+Edit
+tail -n 50 /opt/zimbra/log/mailbox.log
+tail -n 50 /opt/zimbra/log/zmmailboxd.out
+tail -n 50 /opt/zimbra/log/zmmailboxdctl.out
+✅ Also:
+
+bash
+Copy
+Edit
+tail -n 50 /opt/zimbra/log/zmlocalconfig.log
+(to see any config issues on LDAP start)
+
+💡 Why this matters
+👉 Without LDAP contact:
+
+We can’t modify ports
+
+We can’t reset LDAP password
+
+Mailboxd will stay stuck
+
+🌟 Summary
+👉 Please paste output of:
+
+perl
+Copy
+Edit
+ss -tulpn | grep 389
+ps aux | grep slapd
+👉 This will confirm if LDAP is really up and listening.
+
+⚡ From there I’ll help you:
+✅ Restart LDAP cleanly
+✅ Patch ports or reset password
+✅ Bring mailboxd up 🚀
+
+##final key
+👉 Normally, the easier way:
+
+bash
+Copy
+Edit
+# Generate and install DKIM key in one command
+/opt/zimbra/libexec/zmdkimkeyutil -a -d brimurmotors.live
+✅ This will:
+
+Generate the DKIM key
+
+Save it in LDAP correctly
+
+Print the DNS record you should add at Cloudflare
+
+✅ You’re so close — let’s clear this up cleanly. I see the two key problems right now:
+
+🔑 Problem 1 — Port conflict on 9443
+Your error:
+
+pgsql
+Copy
+Edit
+ERROR: service.INVALID_REQUEST (invalid request: port 9443 conflict between zimbraMailSSLPort and zimbraMailSSLClientCertPort on server mail.brimurmotors.live)
+👉 Meaning: Zimbra tried to bind two services to port 9443:
+
+zimbraMailSSLPort
+
+zimbraMailSSLClientCertPort
+
+➡ You can’t have both on the same port.
+
+✅ How to fix the port conflict
+👉 Check current settings:
+
+bash
+Copy
+Edit
+zmprov gs `zmhostname` | egrep 'zimbraMailSSLPort|zimbraMailSSLClientCertPort'
+👉 If both are 9443 → change one to a different port. For example:
+
+bash
+Copy
+Edit
+zmprov ms `zmhostname` zimbraMailSSLClientCertPort 9444
+or
+
+bash
+Copy
+Edit
+zmprov ms `zmhostname` zimbraMailSSLPort 9443
+zmprov ms `zmhostname` zimbraMailSSLClientCertPort 9444
+👉 Then restart:
+
+bash
+Copy
+Edit
+zmcontrol restart
+🔑 Problem 2 — Zimbra proxy Nginx listen port “0”
+Your error:
+
+swift
+Copy
+Edit
+nginx: [emerg] invalid port in "0" of the "listen" directive in /opt/zimbra/conf/nginx/includes/nginx.conf.web.http.default:6
+👉 Zimbra’s internal Nginx config ended up with listen 0;
+➡ This happens if Zimbra thinks a port is 0 (unset or invalid).
+
+✅ How to fix the proxy listen issue
+👉 Check what Zimbra proxy thinks:
+
+bash
+Copy
+Edit
+zmprov gs `zmhostname` | grep -i proxy
+Look for:
+
+zimbraReverseProxyHttpPort
+
+zimbraReverseProxyHttpsPort
+
+👉 Set them to good values (if missing or 0):
+
+bash
+Copy
+Edit
+zmprov ms `zmhostname` zimbraReverseProxyHttpPort 80
+zmprov ms `zmhostname` zimbraReverseProxyHttpsPort 443
+👉 Restart:
+
+bash
+Copy
+Edit
+zmcontrol restart
+💡 Summary of your next steps
+1️⃣ Run:
+
+bash
+Copy
+Edit
+zmprov gs `zmhostname` | egrep 'zimbraMailSSLPort|zimbraMailSSLClientCertPort'
+👉 Fix any port conflicts as above.
+
+2️⃣ Run:
+
+bash
+Copy
+Edit
+zmprov gs `zmhostname` | grep -i proxy
+👉 Set valid proxy ports if needed.
+
+3️⃣ Restart:
+
+bash
+Copy
+Edit
+zmcontrol restart
+4️⃣ Try accessing via:
+👉 https://mail.brimurmotors.live/zimbraAdmin
