@@ -13101,3 +13101,186 @@ Edit
 zmcontrol restart
 4️⃣ Try accessing via:
 👉 https://mail.brimurmotors.live/zimbraAdmin
+
+##debugging mail server
+✅ 1. DNS/MX Records Check
+Check that your domain has valid MX records pointing to your Zimbra server:
+
+bash
+Copy
+Edit
+dig +short MX brimurmotors.live
+Expected output should be something like:
+
+Copy
+Edit
+10 mail.brimurmotors.live.
+Also check that mail.brimurmotors.live resolves:
+
+bash
+Copy
+Edit
+dig +short mail.brimurmotors.live
+It should return your Hetzner server's public IP (159.69.x.x).
+
+✅ 2. Zimbra listening on SMTP (port 25)?
+Check this:
+
+bash
+Copy
+Edit
+ss -tulpn | grep :25
+You should see zimbra or postfix (MTA) listening.
+
+✅ 3. Zimbra logs – any signs of Gmail delivery?
+Run:
+
+bash
+Copy
+Edit
+tail -n 100 /var/log/mail.log
+Look for any lines showing connection attempts from Gmail or errors (like TLS issues, relay denied, greylisting, etc).
+
+✅ 4. Mailbox exists?
+Make sure you actually have a mailbox for emilio@brimurmotors.live:
+
+bash
+Copy
+Edit
+zmprov ga emilio@brimurmotors.live | grep -i Mail
+You should see mailHost, mailQuota, etc.
+
+If not, create it:
+
+bash
+Copy
+Edit
+zmprov ca emilio@brimurmotors.live StrongPassword123
+Then try sending again from Gmail.
+
+✅ 5. Firewall / Port 25 blocked?
+If Hetzner blocks outbound or inbound port 25, you won’t receive/send mail.
+
+Test from your server:
+
+bash
+Copy
+Edit
+telnet alt4.gmail-smtp-in.l.google.com 25
+If it hangs or fails — port 25 is likely blocked.
+
+➡️ You’ll need to:
+
+Open the port in Hetzner firewall config.
+
+Or relay incoming mail via something like Mailgun/SendGrid/Postfix+smarthost.
+
+✅ 6. Spam folders or greylisting
+Zimbra may be greylisting the first delivery attempt. Check your logs, or retry in 5–15 minutes.
+
+✅ Bonus: Webmail
+Login at:
+
+arduino
+Copy
+Edit
+https://mail.brimurmotors.live
+As emilio@brimurmotors.live
+
+##extra debugging mail
+🔥 You're this close — the issue is clear now.
+
+🚨 Problem:
+Your server can't resolve mail.brimurmotors.live even though it's correctly defined in public DNS.
+
+From your logs:
+
+pgsql
+Copy
+Edit
+delivery temporarily suspended: Host or domain name not found.
+Name service error for name=mail.brimurmotors.live type=A: Host not found, try again
+✅ Confirm: DNS works externally
+You already ran:
+
+bash
+Copy
+Edit
+dig +short mail.brimurmotors.live
+And got:
+
+Copy
+Edit
+159.69.206.22
+So public DNS is fine.
+
+🔍 Root Cause: /etc/resolv.conf is probably misconfigured on your server
+Check this:
+bash
+Copy
+Edit
+cat /etc/resolv.conf
+If it contains something like:
+
+nginx
+Copy
+Edit
+nameserver 127.0.0.53
+You're relying on systemd-resolved, which may not be properly forwarding DNS queries — especially in minimal cloud images.
+
+🛠 Fix: Add working nameservers
+Edit /etc/resolv.conf to use real resolvers:
+
+Step 1 — Edit resolv.conf
+bash
+Copy
+Edit
+nano /etc/resolv.conf
+Replace contents with:
+
+nginx
+Copy
+Edit
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+You can also use Hetzner’s resolver or your favorite.
+
+Step 2 — Prevent override (optional)
+If /etc/resolv.conf is being auto-overwritten on reboot, also do:
+
+bash
+Copy
+Edit
+chattr +i /etc/resolv.conf
+This locks the file (immutable). You can undo it with chattr -i.
+
+✅ Step 3 — Test local DNS resolution
+bash
+Copy
+Edit
+dig mail.brimurmotors.live
+host mail.brimurmotors.live
+It should return:
+
+css
+Copy
+Edit
+mail.brimurmotors.live has address 159.69.206.22
+🔁 Step 4 — Restart Postfix and flush queue
+bash
+Copy
+Edit
+postfix flush
+systemctl restart postfix
+Then tail logs again:
+
+bash
+Copy
+Edit
+tail -f /var/log/mail.log
+You should start seeing:
+
+ini
+Copy
+Edit
+status=sent (250 2.0.0 Ok: queued as ...)
