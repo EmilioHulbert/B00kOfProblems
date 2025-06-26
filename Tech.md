@@ -12308,3 +12308,70 @@ Copy
 Edit
 mkpasswd --method=SHA-512 --rounds=5000
 It’ll prompt for your password and output the encrypted form.
+
+## system hard reboot
+echo 1 > /proc/sys/kernel/sysrq
+echo b > /proc/sysrq-trigger
+
+##useful dig commands
+dig brimurmotors.live +short
+dig ns brimurmotors.live
+1️⃣ Confirm nameserver propagation
+👉 Check with:
+
+bash
+Copy
+Edit
+dig @8.8.8.8 brimurmotors.live
+dig @8.8.8.8 www.brimurmotors.live
+or use an online tool like https://www.whatsmydns.net/
+➡ Confirm both domains point to 159.69.206.22.
+
+If they don’t resolve yet — just wait 30 minutes to a few hours for DNS to propagate.
+
+2️⃣ Make sure Cloudflare Proxy is OFF (temporarily)
+For Let’s Encrypt to work:
+
+Go to Cloudflare DNS panel
+
+For brimurmotors.live and www, toggle the orange cloud 🔶 to grey cloud ☁️ (DNS only)
+
+👉 This ensures Certbot can see your server directly — no Cloudflare in between during SSL validation.
+
+3️⃣ Retry Certbot
+Run:
+
+bash
+Copy
+Edit
+certbot --nginx -d brimurmotors.live -d www.brimurmotors.live
+✅ This should succeed if DNS is propagated and proxy is disabled.
+
+4️⃣ Re-enable Cloudflare Proxy
+Once the SSL cert is issued and Nginx is working:
+
+Turn the Cloudflare proxy 🔶 back ON for both records (optional but recommended for performance and DDoS protection).
+
+5️⃣ Extra: add email records if needed
+If you want to send/receive email (e.g. you@brimurmotors.live):
+
+Add an MX record in Cloudflare:
+
+vbnet
+Copy
+Edit
+Type: MX
+Name: @
+Content: (your mail server hostname e.g. mail.yourprovider.com)
+Priority: 10
+TTL: Auto
+And SPF/DKIM/DMARC as recommended by your email provider.
+
+📝 Summary action plan:
+✅ DNS A records → done (just verify they resolve!)
+✅ Nameservers → done
+✅ Disable Cloudflare proxy temporarily
+✅ Run certbot again
+✅ Re-enable proxy
+✅ (Optional) Set up MX, SPF, DKIM, DMARC for mail
+
