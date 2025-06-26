@@ -12375,3 +12375,68 @@ And SPF/DKIM/DMARC as recommended by your email provider.
 ✅ Re-enable proxy
 ✅ (Optional) Set up MX, SPF, DKIM, DMARC for mail
 
+
+🚩 Why you're hitting "Request Entity Too Large"
+➡ When using Cloudflare as a proxy (orange cloud ☁️):
+
+Your uploads pass through Cloudflare before hitting your server.
+
+Cloudflare applies its own size limits to the request — before your server even sees it.
+
+👉 Cloudflare’s default upload limit (free plan):
+💡 100 MB per request (sometimes even lower depending on zone config).
+
+👉 That’s why:
+
+Even if you set upload_max_filesize, post_max_size, etc., Cloudflare can still block large uploads.
+
+⚡ Solutions
+1️⃣ Upload the theme directly on your server
+➡ Use SFTP, SSH, or scp:
+
+Upload the .zip theme file into /var/www/html/wp-content/themes/
+
+Unzip it:
+
+bash
+Copy
+Edit
+unzip your-theme.zip -d /var/www/html/wp-content/themes/
+✅ No Cloudflare limit applies because you bypass the web upload.
+
+2️⃣ Disable Cloudflare proxy temporarily
+➡ In your Cloudflare dashboard:
+
+Go to DNS
+
+For your domain’s A record → click the orange cloud (☁️) → turn it grey (DNS-only).
+
+Now upload the theme via WordPress admin.
+
+After upload → turn proxying (orange cloud) back on.
+
+👉 This way the upload flows directly to your server without Cloudflare filtering.
+
+3️⃣ Upgrade Cloudflare plan
+💡 (If you want to keep Cloudflare proxy active during upload)
+
+Cloudflare Pro/Business plans support higher upload limits (200 MB or more).
+
+But usually it’s overkill for theme uploads — use SFTP or disable proxy temporarily instead.
+
+4️⃣ Alternative: Upload via WP-CLI
+If you have wp-cli:
+
+bash
+Copy
+Edit
+wp theme install /path/to/your-theme.zip --activate
+✅ Again, no web upload — no Cloudflare limit.
+
+✅ Summary plan
+💡 Since your server limits are fine, Cloudflare is the blocker:
+👉 Either:
+
+Temporarily disable Cloudflare proxy while uploading.
+
+Or upload/unzip the theme via SFTP/SSH directly on the server.
