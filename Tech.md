@@ -13430,3 +13430,20 @@ nginx
 Copy
 Edit
 proxy_set_header X-Forwarded-Proto https;
+
+##zimbra login as root
+# Login as root
+su - zimbra
+
+# THEN run any Zimbra commands directly, no sudo
+zmcontrol restart
+
+##fix zimbra permissions as root
+/opt/zimbra/libexec/zmfixperms
+##critical zimbra permission
+root@mail:~# cat /etc/sudoers.d/zimbra 
+zimbra ALL=(ALL) NOPASSWD:ALL
+edit
+chmod 755 /etc/sudoers.d/zimbra 
+return original
+chmod 440 /etc/sudoers.d/zimbra 
