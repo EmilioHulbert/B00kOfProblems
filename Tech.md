@@ -13284,3 +13284,58 @@ ini
 Copy
 Edit
 status=sent (250 2.0.0 Ok: queued as ...)
+
+##fix nginx error www-data
+This error:
+
+bash
+Copy
+Edit
+getgrnam("www-data") failed in /etc/nginx/nginx.conf:1
+means that Nginx is trying to run as a user group (www-data) that doesn’t exist on your system.
+
+📌 What’s going wrong?
+In /etc/nginx/nginx.conf, you probably have this near the top:
+
+nginx
+Copy
+Edit
+user www-data;
+But the group www-data (and maybe the user) doesn’t exist on your system — especially likely if you're on something like CentOS, RHEL, or a non-Ubuntu/Debian system where the web server might run as a different user (like nginx or apache).
+
+✅ Fix
+Option 1: Change the user to nginx (common on CentOS/RHEL/AlmaLinux)
+
+Edit /etc/nginx/nginx.conf:
+
+nginx
+Copy
+Edit
+user nginx;
+Then test it:
+
+bash
+Copy
+Edit
+nginx -t
+Option 2: Create the missing www-data user/group
+
+If you prefer to stick with www-data (maybe to match your app configs):
+
+bash
+Copy
+Edit
+groupadd www-data
+useradd -g www-data -s /sbin/nologin www-data
+Then test again:
+
+bash
+Copy
+Edit
+nginx -t
+Summary
+You're getting getgrnam("www-data") because the group doesn't exist.
+
+Either change user www-data; to user nginx; (or whatever your system uses), or
+
+Create the www-data user/group if you're sticking with that name.
