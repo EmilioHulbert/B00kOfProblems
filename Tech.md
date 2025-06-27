@@ -13447,3 +13447,11 @@ edit
 chmod 755 /etc/sudoers.d/zimbra 
 return original
 chmod 440 /etc/sudoers.d/zimbra 
+
+##search and correct proxy port
+zimbra@mail:~$ zmprov gs  `zmhostname` | grep -i proxy |grep 0
+zimbraAdminProxyPort: 9071
+zimbraMailProxyPort: 0
+so
+DO
+zmprov ms `zmhostname`  zimbraMailProxyPort 8082
