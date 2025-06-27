@@ -13339,3 +13339,94 @@ You're getting getgrnam("www-data") because the group doesn't exist.
 Either change user www-data; to user nginx; (or whatever your system uses), or
 
 Create the www-data user/group if you're sticking with that name.
+
+##using rsync 
+rsync -avz --exclude 'venv' B2B-Ecommerce-Platform/ root@htz:/var/www/e-project/B2B-Ecommerce-Platform/
+
+##postgres feed db data
+sudo -u postgres psql b2b_db < updated_data.sql 
+##set zimbra
+ zmprov ms `zmhostname`  zimbraMailSSLProxyPort 8081
+
+
+ ##fix zimbra cookies issue
+That “An unknown error has occurred” message in Zimbra — especially after a page refresh — is surprisingly common and usually comes down to one of a few issues. Here's a breakdown of likely causes and how to fix them:
+
+🔍 Most Common Causes & Fixes
+1. Session Expired or Invalid Cookie
+What happens: If you reload the page and your session cookie is corrupted or expired, Zimbra may not handle it gracefully.
+
+Fix:
+
+Try clearing your browser cache and cookies.
+
+Re-login manually after clearing.
+
+2. Reverse Proxy Confusion (Nginx misconfig)
+What happens: If you’re using Nginx as a reverse proxy (like you are), a slight mismatch in headers or SSL forwarding can confuse Zimbra.
+
+Fix:
+
+Make sure these headers are included in your Nginx config (you mostly have them, but double-check):
+
+nginx
+Copy
+Edit
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+Also ensure Zimbra knows it's behind a proxy:
+
+bash
+Copy
+Edit
+zmprov ms `zmhostname` zimbraReverseProxyUseSSL true
+or
+zmprov ms `zmhostname` zimbraReverseProxyXmppBoshSSL TRUE 
+zmprov ms `zmhostname` zimbraMailReferMode reverse-proxied
+zmcontrol restart
+3. Jetty (mailboxd) Memory or Thread Crash
+What happens: If Jetty crashes or gets overloaded, the interface might still look reachable, but logic behind it fails.
+
+Fix:
+
+Check memory allocation:
+
+bash
+Copy
+Edit
+zmlocalconfig mailboxd_java_heap_size
+If too low (e.g., 512 MB), increase:
+
+bash
+Copy
+Edit
+zmlocalconfig -e mailboxd_java_heap_size=2048
+zmcontrol restart
+4. Zimbra Bug or Cache Glitch
+What happens: Especially on older Zimbra versions, JS or AJAX calls sometimes error out after refresh.
+
+Fix:
+
+Try switching to the HTML version of the web interface.
+
+You can also clear server caches:
+
+bash
+Copy
+Edit
+zmprov flushCache
+5. SSL Mismatch or Certificate Warning
+What happens: If your browser thinks the certificate isn’t trusted (Zimbra’s self-signed cert vs. Let’s Encrypt in Nginx), it might refuse secure cookies.
+
+Fix:
+
+Ensure all access is via your domain, not 127.0.0.1 or IP.
+
+Make sure the proxy passes HTTPS cleanly:
+
+nginx
+Copy
+Edit
+proxy_set_header X-Forwarded-Proto https;
