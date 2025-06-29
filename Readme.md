@@ -13455,3 +13455,9 @@ zimbraMailProxyPort: 0
 so
 DO
 zmprov ms `zmhostname`  zimbraMailProxyPort 8082
+
+#zimbra logs
+tail -f /opt/zimbra/log/mailbox.log
+
+## watch php in real time
+watch -n 1 "ps --no-headers -o 'pid,ppid,cmd,%mem,%cpu,etime' -C php-fpm8.1"
