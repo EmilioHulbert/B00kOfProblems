@@ -13464,3 +13464,5 @@ watch -n 1 "ps --no-headers -o 'pid,ppid,cmd,%mem,%cpu,etime' -C php-fpm8.1"
 
 ##print exactly line number 4 using sed
 sed -n '4p' Details.md 
+##using awk
+awk 'NR==1' frpc.ini 
