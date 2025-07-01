@@ -13466,3 +13466,169 @@ watch -n 1 "ps --no-headers -o 'pid,ppid,cmd,%mem,%cpu,etime' -C php-fpm8.1"
 sed -n '4p' Details.md 
 ##using awk
 awk 'NR==1' frpc.ini 
+
+## using rclone to access mega cloud and mount using fuse
+sudo apt update
+sudo apt install rclone
+rclone config
+Then follow the interactive prompts:
+
+Choose n for new remote
+
+Name it (e.g., mega)
+
+Select MEGA (24 as of latest version)
+
+Enter your MEGA email and password
+
+Skip advanced config
+✅ Step 1: List your MEGA cloud contents
+Run:
+
+bash
+Copy
+Edit
+rclone ls mega:
+This should list the files (with their sizes) in your MEGA root directory.
+
+If you want a tree-style listing:
+
+bash
+Copy
+Edit
+rclone lsd mega:
+To list specific folders:
+
+bash
+Copy
+Edit
+rclone ls mega:/some-folder
+✅ Step 2: Upload a test file
+Create a test file:
+
+bash
+Copy
+Edit
+echo "Hello from rclone" > test.txt
+Then upload it:
+
+bash
+Copy
+Edit
+rclone copy test.txt mega:
+Confirm upload:
+
+bash
+Copy
+Edit
+rclone ls mega:
+✅ Step 3: Download from MEGA
+Try downloading that test file:
+
+bash
+Copy
+Edit
+rclone copy mega:test.txt ./
+Check that it appears in your local directory:
+
+bash
+Copy
+Edit
+cat test.txt
+
+Choose Yes to test the connection3. 📁 Optional: Mount MEGA as a filesystem
+If you want rsync to work like it does with local files:
+
+Install FUSE and mount tools:
+bash
+Copy
+Edit
+sudo apt install fuse3
+mkdir ~/MegaMount
+rclone mount mega: ~/MegaMount
+4. 🔁 Use rsync to copy files to MEGA
+Example command:
+
+bash
+Copy
+Edit
+rsync -av --progress /your/local/folder/ ~/MegaMount/
+Or if you're not using mounting:
+You can copy files directly using rclone (not rsync):
+
+bash
+Copy
+Edit
+rclone copy /your/local/folder mega:/remote/folder --progress
+🧼 Clean Unmount (if mounted)
+When done:
+
+bash
+Copy
+Edit
+fusermount -u ~/MegaMount
+🧼 Clean Unmount (if mounted)
+When done:
+
+bash
+Copy
+Edit
+fusermount -u ~/MegaMount
+
+
+✅ Step-by-Step Fix
+1. 🛠️ Install FUSE 3 (provides fusermount3)
+On Ubuntu/Debian, run:
+
+bash
+Copy
+Edit
+sudo apt update
+sudo apt install fuse3
+This will install fusermount3 and required tools.
+
+2. ✅ Try mounting again
+Now try:
+
+bash
+Copy
+Edit
+rclone mount mega: ~/MegaMount --vfs-cache-mode writes
+The --vfs-cache-mode writes flag avoids errors when writing to MEGA, since MEGA does not support true streaming.
+
+3. 🧪 Test with rsync
+Once mounted (if no errors), try copying something:
+
+bash
+Copy
+Edit
+rsync -av /etc/hosts ~/MegaMount/
+Then check:
+
+bash
+Copy
+Edit
+ls ~/MegaMount
+You should see the hosts file now uploaded to your MEGA.
+
+📌 If still not working…
+Check FUSE is working:
+
+bash
+Copy
+Edit
+lsmod | grep fuse
+If it’s not loaded, try:
+
+bash
+Copy
+Edit
+sudo modprobe fuse
+Or add your user to the fuse group:
+
+bash
+Copy
+Edit
+sudo usermod -aG fuse $(whoami)
+Then reboot or re-login.
+
