@@ -13811,3 +13811,44 @@ sudo chmod -R 755 /var/www/masoko.brimurmotors.live/wp-content/uploads
 ##installing some missing plugins for wordpress big shop theme
 sudo apt install php8.1-gd php8.1-imagick php8.1-mbstring php8.1-intl
 sudo systemctl restart php8.1-fpm 
+#install plugin
+wp super cache
+
+You're now seeing the “You should use a persistent object cache” warning — this is different from page caching and relates to database query performance.
+
+🧠 What Is Persistent Object Caching?
+WordPress stores frequently-used data in memory during a single page load — this is called object caching. But by default, it's not persistent, meaning it resets on every request.
+
+With a persistent object cache, data (like query results, options, menus, etc.) is saved across requests, speeding up your site — especially dynamic and database-heavy pages.
+
+✅ How to Fix It (Enable Persistent Object Cache)
+You need to install and configure a backend like Redis, Memcached, or APCu. Here's how:
+
+Option 1: ✅ Use Redis (Recommended for most VPS/Cloud setups)
+🔧 Step-by-step:
+Install Redis on the server (Ubuntu/Debian):
+
+bash
+Copy
+Edit
+sudo apt install redis-server php-redis
+sudo systemctl enable redis
+sudo systemctl start redis
+Install a Redis plugin in WordPress:
+
+Go to: Plugins → Add New
+
+Search: "Redis Object Cache" (by Till Krüss)
+
+Install & Activate
+
+Enable Redis caching in WordPress:
+
+After activation, go to Tools → Redis
+
+Click Enable Object Cache
+
+Verify:
+
+You should now see Object Cache: Connected.
+
