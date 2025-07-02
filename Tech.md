@@ -13852,3 +13852,10 @@ Verify:
 
 You should now see Object Cache: Connected.
 
+##one currency switcher
+WBW Currency Switcher for WooCommerce
+Activate
+More Details
+WBW Currency Switcher for WooCommerce allows customers to switch products prices to any currencies. Get rates converted in the real-time with dynamic …
+
+By Nick McReynolds
