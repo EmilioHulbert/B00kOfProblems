@@ -13807,3 +13807,7 @@ Copy
 Edit
 sudo chown -R www-data:www-data /var/www/masoko.brimurmotors.live/wp-content/uploads
 sudo chmod -R 755 /var/www/masoko.brimurmotors.live/wp-content/uploads
+
+##installing some missing plugins for wordpress big shop theme
+sudo apt install php8.1-gd php8.1-imagick php8.1-mbstring php8.1-intl
+sudo systemctl restart php8.1-fpm 
