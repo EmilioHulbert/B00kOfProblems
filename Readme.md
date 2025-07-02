@@ -13470,6 +13470,8 @@ awk 'NR==1' frpc.ini
 ## using rclone to access mega cloud and mount using fuse
 sudo apt update
 sudo apt install rclone
+or
+https://github.com/rclone/rclone/releases/tag/v1.70.2
 rclone config
 Then follow the interactive prompts:
 
@@ -13603,6 +13605,8 @@ bash
 Copy
 Edit
 rsync -av /etc/hosts ~/MegaMount/
+another usage
+rsync -avz --exclude 'venv' B2B-Ecommerce-Platform/ root@htz:/var/www/e-project/B2B-Ecommerce-Platform/
 Then check:
 
 bash
