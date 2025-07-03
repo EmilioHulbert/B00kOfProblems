@@ -13859,3 +13859,68 @@ More Details
 WBW Currency Switcher for WooCommerce allows customers to switch products prices to any currencies. Get rates converted in the real-time with dynamic …
 
 By Nick McReynolds
+
+#fixing django static assets
+Thanks — this clears things up a lot.
+
+You're running a Django app (hybriddjango) behind Nginx, and the image update isn't reflecting because Django's static handling isn't fully configured on the server side. Specifically, this is the key issue from your collectstatic attempt:
+
+❌ django.core.exceptions.ImproperlyConfigured: You're using the staticfiles app without having set the STATIC_ROOT setting to a filesystem path.
+
+✅ Fix: Set STATIC_ROOT in settings.py
+Open your Django project’s settings.py and add:
+
+python
+Copy
+Edit
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # or any dir you prefer
+Make sure this directory is outside your static folder (don't mix up STATICFILES_DIRS and STATIC_ROOT).
+
+✅ Re-run collectstatic
+After setting STATIC_ROOT, run:
+
+bash
+Copy
+Edit
+python manage.py collectstatic
+This command gathers all your static files (including your updated img1.jpg) into the STATIC_ROOT directory — the one Nginx (or Django in dev) actually serves.
+
+🧠 Why your changes weren’t reflected:
+You probably replaced the image in your app’s static/ folder (like app/static/img/img1.jpg)
+
+But because collectstatic hasn’t been run (and STATIC_ROOT wasn't set), those files never made it to the place where Django/Nginx serve them
+
+So your remote server is still serving the old copy from last time collectstatic ran — or none at all, depending on what’s been deployed
+
+✅ Bonus: Let Nginx Serve Static Files (Recommended)
+If you want better performance and caching control, let nginx serve static files directly instead of proxying them through Django.
+
+Add to your Nginx config (/etc/nginx/sites-available/hybrid.nairobiskates.com):
+nginx
+Copy
+Edit
+location /static/ {
+    alias /var/www/e-project/B2B-Ecommerce-Platform/staticfiles/;
+    access_log off;
+    expires 1h;
+    add_header Cache-Control "public";
+}
+⚠️ Make sure the path matches your STATIC_ROOT.
+
+Then reload nginx:
+
+bash
+Copy
+Edit
+sudo nginx -s reload
+✅ Sanity Check
+Update img1.jpg locally
+
+Run collectstatic on the remote
+
+Confirm the updated image is in /staticfiles/
+
+Visit the image directly in the browser:
+https://hybrid.nairobiskates.com/static/img/img1.jpg
+(hard-refresh or append ?v=2)
+
