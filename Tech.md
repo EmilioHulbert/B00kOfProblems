@@ -13924,3 +13924,38 @@ Visit the image directly in the browser:
 https://hybrid.nairobiskates.com/static/img/img1.jpg
 (hard-refresh or append ?v=2)
 
+##install xfreerdp
+sudo apt update
+sudo apt install freerdp2-x11 -y
+Why xfreerdp works:
+The Windows RDP server you’re trying to connect to requires CredSSP, which rdesktop can’t handle. xfreerdp, however, does support it and provides modern TLS, NLA, and certificate options.
+
+Your working command:
+bash
+Copy
+Edit
+xfreerdp /u:maldev /p:maldev /v:192.168.56.5 /cert:ignore /f
+If you get any further auth errors or certificate issues, we can also disable NLA explicitly with:
+
+bash
+Copy
+Edit
+xfreerdp /u:maldev /p:maldev /v:192.168.56.5 /cert:ignore /sec:rdp /f
+Let me know if you'd like to make clipboard sharing, drive redirection, or sound work as well.
+## right full screen changes
+xfreerdp /u:maldev /p:maldev /v:192.168.56.5 /cert:ignore /size:1920x1080
+✅ 2. Try the /toggle-fullscreen argument
+Add this flag:
+
+bash
+Copy
+Edit
+xfreerdp /u:maldev /p:maldev /v:192.168.56.5 /cert:ignore /f /toggle-fullscreen
+Or instead of /f, use:
+
+bash
+Copy
+Edit
+xfreerdp /u:maldev /p:maldev /v:192.168.56.5 /cert:ignore /toggle-fullscreen
+This sometimes improves toggle handling on specific desktop environments.
+
