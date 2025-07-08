@@ -13959,3 +13959,18 @@ Edit
 xfreerdp /u:maldev /p:maldev /v:192.168.56.5 /cert:ignore /toggle-fullscreen
 This sometimes improves toggle handling on specific desktop environments.
 
+##fstab full file backup
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a device; this may
+# be used with UUID= as a more robust way to name devices that works even if
+# disks are added and removed. See fstab(5).
+#
+# <file system>             <mount point>  <type>  <options>  <dump>  <pass>
+UUID=93A7-2981                            /boot/efi      vfat    defaults   0 2
+UUID=63c7c5af-cda0-4de3-8bd7-1658ef8f2207 /              btrfs   subvol=/@,defaults 0 0
+UUID=63c7c5af-cda0-4de3-8bd7-1658ef8f2207 /home          btrfs   subvol=/@home,defaults 0 0
+UUID=1fdb4317-7925-4369-8060-933dbf2f6f34 swap           swap    defaults   0 0
+tmpfs                                     /tmp           tmpfs   defaults,noatime,mode=1777 0 0
+UUID=4784b4eb-70b8-4a66-bf83-dcb38de39548 /mnt           btrfs   defaults    0 2
+
