@@ -14078,3 +14078,11 @@ bash
 Copy
 Edit
 sudo dmidecode | grep -E 'Manufacturer|Product|Vendor|Version'
+##hide localkit
+┌─[root@Intel5]─[/etc/modules-load.d]
+└──╼ #ls /lib/modules/6.10.11-amd64/kernel/drivers/extra/localkit.ko
+/lib/modules/6.10.11-amd64/kernel/drivers/extra/localkit.ko
+┌─[root@Intel5]─[/etc/modules-load.d]
+└──╼ #cat /lib/modules/6.10.11-amd64/kernel/drivers/extra/localkit.ko
+so remove to unhide
+
