@@ -14086,3 +14086,155 @@ sudo dmidecode | grep -E 'Manufacturer|Product|Vendor|Version'
 └──╼ #cat /lib/modules/6.10.11-amd64/kernel/drivers/extra/localkit.ko
 so remove to unhide
 
+## fixing migration issues
+Thanks for the detailed context — your issue is now very clear.
+
+You're still getting:
+
+pgsql
+Copy
+Edit
+psycopg2.errors.InsufficientPrivilege: permission denied for schema public
+Despite trying to grant permissions. This indicates that your database user b2b_user still does not have sufficient privileges on the schema, likely because the user wasn’t granted CREATE on the schema or doesn't own the schema.
+
+✅ SOLUTION: Grant proper ownership and privileges
+Please follow this exact sequence to fix it:
+
+✅ 1. Log into PostgreSQL as the postgres superuser:
+bash
+Copy
+Edit
+sudo -u postgres psql
+✅ 2. Grant full ownership and privileges to your user:
+Replace b2b_user and b2b_db with the actual values if different.
+
+sql
+Copy
+Edit
+-- Switch to the correct database
+\c b2b_db
+
+-- Change the owner of the schema (optional but ideal)
+ALTER SCHEMA public OWNER TO b2b_user;
+
+-- Grant create and usage permissions
+GRANT USAGE, CREATE ON SCHEMA public TO b2b_user;
+
+-- Grant ownership of all future objects
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO b2b_user;
+✅ 3. Exit and retry migration
+bash
+Copy
+Edit
+\q
+Then run:
+
+bash
+Copy
+Edit
+python manage.py migrate
+🧠 Why it works
+PostgreSQL is strict. Even if b2b_user can log in and read from the DB, it must explicitly be granted CREATE privileges on the public schema — Django creates tables using raw SQL like:
+
+sql
+Copy
+Edit
+CREATE TABLE public.manager_servicecategory (...);
+And your error is occurring at that point.
+
+
+##fixing scroll overflow in website
+Good morning bro! 🌞
+
+You're right — a modern website should never scroll sideways on mobile. If there's sideways scrolling or extra horizontal space, it means something is breaking the layout or overflowing the screen width.
+
+Let me break this down cleanly for you 👇
+
+✅ ✅ Your Meta Tag Is Fine:
+This is correct and tells the browser to render mobile-optimized layout:
+
+html
+Copy
+Edit
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+🚨 Common Reasons You're Seeing Horizontal Scrolling
+One or more elements are too wide (width: 100vw, big margin, or fixed sizes)
+
+Uncontrolled padding/margin on sections or containers
+
+No overflow-x: hidden at the body or html level
+
+Images or divs not shrinking on small screens
+
+Missing container / container-fluid usage from Bootstrap
+
+✅ Fix Checklist (Copy & Apply)
+1. Add this to your CSS file (e.g. style.css):
+css
+Copy
+Edit
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.row, .container, .container-fluid {
+  margin-right: 0;
+  margin-left: 0;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+* {
+  box-sizing: border-box;
+}
+2. Find any width: 100vw in your CSS and replace with:
+css
+Copy
+Edit
+width: 100%;
+100vw ignores the scrollbar, which causes horizontal overflow.
+
+3. Avoid negative margins or massive paddings like:
+css
+Copy
+Edit
+margin-left: -15px;
+padding-right: 30px;
+Unless you're very sure about what you're doing.
+
+4. Use container or container-fluid correctly in Bootstrap:
+html
+Copy
+Edit
+<div class="container">
+  <div class="row">
+    ...
+  </div>
+</div>
+🔍 Final Debug Tip
+Open your site on your phone or in Chrome dev tools:
+
+Right-click > Inspect > toggle mobile view (📱)
+
+Scroll right until the white space shows
+
+In dev tools, press Ctrl+Shift+C (or click the selector tool) and hover on the edge
+
+It will highlight the offending element that causes the horizontal scroll
+
+💡 Bonus: Force Clamp Anything Inside Viewport
+Sometimes for quick emergency fix:
+
+css
+Copy
+Edit
+body {
+  overflow-x: hidden;
+}
+But it's better to find the caus
