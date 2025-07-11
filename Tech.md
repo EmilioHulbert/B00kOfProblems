@@ -14238,3 +14238,94 @@ body {
   overflow-x: hidden;
 }
 But it's better to find the caus
+
+##scanning wordpress site to know theme name
+To scan a WordPress site and detect what theme it is using, you can use theme detector tools, browser dev tools, or some command-line approaches.
+
+✅ 1. Use an Online WordPress Theme Detector
+These tools scan the site and try to identify the theme and plugins:
+
+https://whatwpthemeisthat.com
+
+https://www.wpthemedetector.com
+
+https://scanwp.net
+
+🔍 Just enter the WordPress site URL and it’ll tell you:
+
+Theme name and author
+
+If it’s a child theme or a custom theme
+
+The parent theme
+
+Some of the plugins used
+
+✅ 2. Use Developer Tools in Your Browser
+You can manually inspect the source:
+
+Open the website in your browser.
+
+Right-click and choose Inspect (DevTools).
+
+Go to the Sources or Network tab.
+
+Look for references like:
+
+swift
+Copy
+Edit
+/wp-content/themes/theme-name/
+or CSS/JS files with paths such as:
+
+arduino
+Copy
+Edit
+https://example.com/wp-content/themes/astra/style.css
+🔍 The folder name often reveals the theme (e.g., astra, divi, oceanwp, etc.)
+
+✅ 3. Use Command Line (cURL)
+If you want a quick check from the command line:
+
+bash
+Copy
+Edit
+curl -s https://example.com | grep -i "wp-content/themes"
+That should output lines containing the theme folder name.
+
+✅ 4. Check /style.css Manually (if not blocked)
+Try visiting:
+
+bash
+Copy
+Edit
+https://example.com/wp-content/themes/[theme-name]/style.css
+This file usually contains the theme metadata at the top:
+
+css
+Copy
+Edit
+/*
+Theme Name: Astra
+Author: Brainstorm Force
+Version: 3.0.2
+*/
+You can find the theme name, version, author, and more there.
+
+
+##django learner in views
+✅ How to Do It Properly in views:
+If you want to redirect to a URL name from your view (like "manager:branding-home"), you must use reverse() or redirect():
+
+python
+Copy
+Edit
+from django.shortcuts import redirect
+from django.urls import reverse
+
+# ✅ Option 1: Simple redirect
+return redirect('manager:branding-home')
+
+# ✅ Option 2: Add hash to the URL
+url = reverse('manager:branding-home') + '#contact'
+return redirect(url)
