@@ -14329,3 +14329,5 @@ return redirect('manager:branding-home')
 # ✅ Option 2: Add hash to the URL
 url = reverse('manager:branding-home') + '#contact'
 return redirect(url)
+## proper docker installation
+https://phoenixnap.com/kb/install-docker-ubuntu
