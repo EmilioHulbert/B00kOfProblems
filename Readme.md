@@ -14331,3 +14331,57 @@ url = reverse('manager:branding-home') + '#contact'
 return redirect(url)
 ## proper docker installation
 https://phoenixnap.com/kb/install-docker-ubuntu
+##docker remove dangling images
+✅ FIX (step-by-step)
+1. Clean out old containers and volumes
+bash
+Copy
+Edit
+docker-compose down -v --remove-orphans
+docker system prune -af --volumes
+2. Delete dangling images (just in case)
+bash
+Copy
+Edit
+docker image prune -af
+3. Rebuild from scratch
+bash
+Copy
+Edit
+docker-compose build --no-cache
+docker-compose up -d
+🛠 If you're using a mounted volume (bind), double-check for issues
+In docker-compose.yml:
+
+yaml
+Copy
+Edit
+volumes:
+  - ./ssh_key:/expose.nairobiskates.com/ssh_host_key
+Make sure:
+
+./ssh_key exists
+
+It’s a valid OpenSSH private key, and
+
+It’s not a folder, unless your code expects a folder
+
+If you're setting this in your .env or docker-compose.override.yml, inspect that too.
+
+🧹 Optional: Full reset of expose-server_expose_1
+If you're stuck in a zombie container/image state, do this:
+
+bash
+Copy
+Edit
+docker rm -f expose-server_expose_1 || true
+docker rmi expose-server_expose || true
+docker volume prune -f
+docker network prune -f
+Then:
+
+bash
+Copy
+Edit
+docker-compose build --no-cache
+docker-compose up -d
