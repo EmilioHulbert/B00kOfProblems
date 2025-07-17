@@ -14385,3 +14385,39 @@ Copy
 Edit
 docker-compose build --no-cache
 docker-compose up -d
+
+## enable password authentication on server
+required
+PasswordAuthentication yes
+then
+sudo systemctl restart ssh
+Allow the user in SSH (if needed):
+If you have AllowUsers directives in sshd_config, be sure to include user:
+
+ini
+AllowUsers ubuntu userif file includes
+Include /etc/ssh/sshd_config.d/*.conf
+do a check like
+grep -i passwordauthentication /etc/ssh/sshd_config.d/*.conf
+✅ Optional: Debug Output
+Still not working? Try:
+
+bash
+ssh -vvv user@13.61.64.51
+
+
+##reloading openresty nginx
+/usr/local/openresty/nginx/<?php
+//require_once('/var/www/html/wordpress/wp-includes/pluggable.php');
+require_once('/var/www/html/wordpress/wp-load.php');
+echo wp_hash_password('melody254');
+sbin/nginx -s reload
+/ # vi /usr/local/openresty/nginx/conf/nginx.conf
+
+##renew wordpress password manually in db.it uses bcrypt encryption
+use wordpress;
+show tables;
+use wp-pluggable.php with below contents
+
+update  wp_users set user_pass='$wp$2y$10$jKvhGJ0ZeLgpvPgXOp2MdupjlCC2oEYOAHjr6/gB873euoQ3iFSGC' where ID=1;
+EXIT
