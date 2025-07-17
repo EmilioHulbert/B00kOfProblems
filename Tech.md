@@ -14499,3 +14499,39 @@ bash
 Copy
 Edit
 mysql -u wordpressuser -p wordpress
+
+php --ini | grep "Loaded Configuration File"
+🔧 Method 1: Modify php.ini
+Find your php.ini file (depends on your PHP version):
+
+bash
+Copy
+Edit
+php --ini | grep "Loaded Configuration File"
+Then edit it:
+
+bash
+Copy
+Edit
+sudo nano /etc/php/8.2/apache2/php.ini   # Example path, change 8.2 to your version
+Find this line:
+
+ini
+Copy
+Edit
+max_execution_time = 29
+Change to:
+
+ini
+Copy
+Edit
+max_execution_time = 120
+Then restart your web server:
+
+bash
+Copy
+Edit
+sudo systemctl restart apache2
+# or, if using Nginx:
+sudo systemctl restart php8.2-fpm
+
