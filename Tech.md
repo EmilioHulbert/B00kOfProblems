@@ -14535,3 +14535,6 @@ sudo systemctl restart apache2
 # or, if using Nginx:
 sudo systemctl restart php8.2-fpm
 
+##view latest changed files
+ls -lt $(find -type f -iname "*.log")
+
