@@ -14425,3 +14425,77 @@ or similary use python as below
 import bcrypt
 print(bcrypt.hashpw(b"newpassword", bcrypt.gensalt()).decode())
 
+The WPForms plugin requires curl and dom PHP extensions. Read more for additional information on PHP extensions.
+apt install php-curl php-xml
+
+❌ soap (SoapClient: not enabled)
+
+❌ mbstring (Multibyte string: not supported)
+sudo apt update
+sudo apt install php-curl php-soap php-mbstring php-xml
+🔁 If you're using PHP 8.2 or another version, confirm with:
+
+bash
+Copy
+Edit
+php -v
+If it's a different version (e.g., 8.2), run:
+
+bash
+Copy
+Edit
+sudo apt install php8.2-curl php8.2-soap php8.2-mbstring php8.2-xml
+To fix “Unyson Backup requires PHP Zip module” on Debian 12sudo apt update
+sudo apt install php-zip
+# For Apache:
+sudo systemctl restart apache2
+
+# For Nginx with PHP-FPM:
+sudo systemctl restart php8.2-fpm
+
+##creating wordpress db user
+✅ Working Commands Recap
+sql
+Copy
+Edit
+-- Start clean:
+DROP USER IF EXISTS 'wordpressuser'@'localhost';
+DROP USER IF EXISTS 'wordpressuser'@'%';
+
+-- Create user with password:
+CREATE USER 'wordpressuser'@'localhost' IDENTIFIED BY 'password';
+
+-- Grant privileges:
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpressuser'@'localhost';
+
+-- Apply changes:
+FLUSH PRIVILEGES;
+ut make sure that:
+
+✅ The database wordpress exists:
+
+bash
+Copy
+Edit
+mysql -u root -p -e "SHOW DATABASES LIKE 'wordpress';"
+✅ The user can connect:
+
+bash
+Copy
+Edit
+mysql -u wordpressuser -p -h localhost
+If this fails, the error message will help narrow it down.
+Is MariaDB running?
+
+bash
+Copy
+Edit
+sudo systemctl status mariadb
+Are credentials in wp-config.php exactly correct?
+
+Does the wordpress database exist and have tables?
+
+bash
+Copy
+Edit
+mysql -u wordpressuser -p wordpress
