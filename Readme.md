@@ -14538,3 +14538,85 @@ sudo systemctl restart php8.2-fpm
 ##view latest changed files
 ls -lt $(find -type f -iname "*.log")
 
+##some wordpress cheats
+define('WP_MEMORY_LIMIT', '256M');
+@ini_set('max_execution_time', '300');
+define('WP_IMAGE_EDITORS', ['WP_Image_Editor_GD']);
+3. ⚙️ Enable Debugging (during development only)
+If you're in development:
+
+php
+Copy
+Edit
+define( 'WP_DEBUG', true );
+define( 'WP_DEBUG_LOG', true );
+define( 'WP_DEBUG_DISPLAY', false ); // Log to file instead of screen
+2. 🔒 Disable File Editing (recommended for security)
+Add this to disable plugin/theme editing in the admin dashboard (prevents attackers from injecting malicious code):
+
+php
+Copy
+Edit
+define( 'DISALLOW_FILE_EDIT', true );
+## plugins to preform a wordpress reset
+If you've removed all old plugins and themes and activated the default Twenty Twenty-Five theme, but still see old content (like pages, posts, widgets, or settings), it means that WordPress content is stored in the database, and simply changing the theme doesn't delete existing content.
+
+Here’s what you can do to reset WordPress to a clean, fresh install with only default Twenty Twenty-Five theme:
+
+✅ Option 1: Use a Plugin to Reset WordPress
+If you want to reset everything (posts, pages, settings, users, etc.):
+
+Install a reset plugin, like:
+
+WP Reset
+
+Advanced WordPress Reset
+
+After activating the plugin, go to its settings (usually under “Tools” → “WP Reset”).
+
+Click “Reset Site” (make sure to read the warning, as it wipes everything).
+
+After reset:
+
+It will reactivate the Twenty Twenty-Five theme.
+
+All content, settings, and customizations will be removed.
+
+✅ Option 2: Manual Cleanup (Less Drastic)
+If you want to keep WordPress and just remove old content, do the following:
+
+Posts → Select All → Bulk Delete
+
+Pages → Select All → Bulk Delete
+
+Media → Select All → Bulk Delete
+
+Appearance > Widgets → Clear all widget areas
+
+Appearance > Menus → Delete old menus
+
+Settings:
+
+Go to Reading → Set to “Your latest posts”
+
+Unset any custom homepage if needed
+
+Users → Remove any unwanted accounts
+
+Plugins → Delete any unused or deactivated plugins
+
+✅ Final Touches
+Go to Appearance > Themes → Make sure Twenty Twenty-Five is active.
+
+Go to Customize to see if any old settings remain and reset them.
+
+Clear any caching (plugin or browser cache).
+
+⚠️ Pro Tip
+If you want truly clean WordPress (like fresh install), the only foolproof way is to:
+
+Delete all WordPress files.
+
+Drop (delete) the database.
+
+Reinstall WordPress from scratch.
