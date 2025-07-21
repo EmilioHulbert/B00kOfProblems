@@ -14605,6 +14605,7 @@ Users → Remove any unwanted accounts
 
 Plugins → Delete any unused or deactivated plugins
 
+
 ✅ Final Touches
 Go to Appearance > Themes → Make sure Twenty Twenty-Five is active.
 
@@ -14620,3 +14621,16 @@ Delete all WordPress files.
 Drop (delete) the database.
 
 Reinstall WordPress from scratch.
+## fix postgres authentication issue 
+┌─[postgres@Intel5]─[/mnt/moving/B2B-Ecommerce-Platform]
+└──╼ $psql -U  b2b_user -d b2b_db
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  Peer authentication failed for user "b2b_user"
+sudo nano /etc/postgresql/14/main/pg_hba.conf  # version may vary (use `ls /etc/postgresql`)
+Find a line like:
+local   all             all                                     peer
+Change it to:
+local   all             all                                     md5
+sudo service postgresql restart
+Now you can use:
+psql -U b2b_user -d b2b_db -W
+
