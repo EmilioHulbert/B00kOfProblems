@@ -14643,3 +14643,6 @@ psql -U b2b_user -d b2b_db -W
  3947  update-alternatives --install /usr/bin/python python /usr/bin/python3.11 2
  3948  update-alternatives --config python
  3949  python
+## find files skipping particular ones
+find . -path ./venv -prune -o -type f ! -name "*.pyc" -exec grep -Hn "127.0.0.1" {} +
+
