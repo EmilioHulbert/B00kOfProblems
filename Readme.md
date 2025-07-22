@@ -14634,3 +14634,12 @@ sudo service postgresql restart
 Now you can use:
 psql -U b2b_user -d b2b_db -W
 
+## quick config alternatives config python
+ 3942  which python3.10
+ 3943  update-alternatives --install /usr/bin/python python /usr/local/bin/python3.10 1
+ 3944  rm /usr/bin/python3
+ 3945  update-alternatives --install /usr/bin/python python /usr/local/bin/python3.10 1
+ 3946  which python3.11
+ 3947  update-alternatives --install /usr/bin/python python /usr/bin/python3.11 2
+ 3948  update-alternatives --config python
+ 3949  python
