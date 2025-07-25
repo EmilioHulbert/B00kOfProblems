@@ -14646,3 +14646,67 @@ psql -U b2b_user -d b2b_db -W
 ## find files skipping particular ones
 find . -path ./venv -prune -o -type f ! -name "*.pyc" -exec grep -Hn "127.0.0.1" {} +
 
+✅ What SITE_ID = 2 Means in Django
+Django's Sites Framework allows you to manage multiple “sites” from the same Django project — especially useful if you're running your app on more than one domain (e.g. example.com and api.example.com).
+
+When you set:
+
+python
+Copy
+Edit
+SITE_ID = 2
+You're telling Django:
+
+“Use the Site object with primary key (ID) = 2 from the django_site table as the current site for this app.”
+
+🔍 Where That 2 Comes From
+The number corresponds to a row in the database table django_site. You can view it with:
+
+bash
+Copy
+Edit
+python manage.py shell
+python
+Copy
+Edit
+from django.contrib.sites.models import Site
+Site.objects.all()
+You'll see output like:
+
+python
+Copy
+Edit
+<QuerySet [
+  <Site: example.com>,
+  <Site: localhost:1000>
+]>
+And if you check:
+
+python
+Copy
+Edit
+Site.objects.get(id=2)
+That would be the one Django is using when SITE_ID = 2.
+
+⚠️ Important
+If you set SITE_ID = 2 but no Site with id=2 exists in the DB → you’ll still get the Site matching query does not exist error.
+
+So always check that a Site with that exact ID exists and has the correct domain.
+
+✅ Best Practice in Dev
+In dev, if you’re just running on localhost:1000, a safe setup is:
+
+python
+Copy
+Edit
+SITE_ID = 1
+And ensure that in the DB:
+
+bash
+Copy
+Edit
+python manage.py shell
+python
+Copy
+Edit
+Site.objects.filter(id=1).update(domain="localhost:1000", name="Local Dev")
