@@ -14769,3 +14769,66 @@ bash
 Copy
 Edit
 pip install --upgrade pip
+#Quick install and configure redis
+The error Cannot assign requested address when trying to connect to redis://localhost:6379/0 means your application (probably Celery or something similar) can't reach Redis because Redis isn't installed or running.
+
+Here’s how to quickly install Redis, start it, and enable it to run on boot on most Debian/Ubuntu-based systems:
+
+✅ Step-by-Step Installation & Activation
+bash
+Copy
+Edit
+# Update packages
+sudo apt update
+
+# Install Redis server
+sudo apt install redis-server -y
+
+# Start Redis service
+sudo systemctl start redis
+
+# Enable Redis to start on boot
+sudo systemctl enable redis
+
+# Check Redis status
+sudo systemctl status redis
+You should see output like Active: active (running).
+
+🔎 Quick Redis Connectivity Test
+bash
+Copy
+Edit
+redis-cli ping
+Expected output:
+
+bash
+Copy
+Edit
+PONG
+📌 If Redis is installed but still not connecting
+Check that Redis is listening on the correct interface:
+
+bash
+Copy
+Edit
+sudo netstat -plnt | grep 6379
+Expected output should show 127.0.0.1:6379 or similar.
+
+If not:
+
+Edit config file:
+
+bash
+Copy
+Edit
+sudo nano /etc/redis/redis.conf
+Find the line: bind 127.0.0.1 ::1
+Make sure it's not commented out (no # in front).
+
+Restart Redis:
+
+bash
+Copy
+Edit
+sudo systemctl restart redis
+
