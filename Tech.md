@@ -14832,3 +14832,13 @@ Copy
 Edit
 sudo systemctl restart redis
 
+##fix django you are 3 hours behind or server is 3 hours behind server 
+TIME_ZONE = "Africa/Nairobi"
+##error
+Traceback (most recent call last):
+  File "/usr/bin/apt-listchanges", line 29, in <module>
+    import apt_pkg
+ModuleNotFoundError: No module named 'apt_pkg'
+fix
+apt install --reinstall python3-apt
+
