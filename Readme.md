@@ -14842,3 +14842,6 @@ ModuleNotFoundError: No module named 'apt_pkg'
 fix
 apt install --reinstall python3-apt
 
+##activation site for all windows
+get.activated.win
+
