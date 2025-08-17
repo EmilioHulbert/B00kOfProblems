@@ -14844,4 +14844,9 @@ apt install --reinstall python3-apt
 
 ##activation site for all windows
 get.activated.win
+## fix locate not findng files
+└──╼[ZERODIUM]#locate rockyou.txt
+┌──[[Sun Aug 17 12:44:53 PM EAT 2025]root@Z3r0S3C]─[/]
+└──╼[ZERODIUM]#ls /usr/share/wordlists/
+updatedb
 
