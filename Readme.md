@@ -14945,3 +14945,19 @@ hydra -L users.txt -P "$TOP_1000" -s 5061 41.139.203.91 sip
 
 # Goldeneye Github LInk
 https://github.com/jseidl/GoldenEye
+##Installing pbcopy on linux
+### Install
+```bash
+sudo apt-get install xclip -y
+```
+### Create Alias
+```bash
+alias pbcopy='xclip -selection clipboard'
+alias pbpaste='xclip -selection clipboard -o'
+```
+### Try out
+```bash
+pbcopy < /proc/cpuinfo 
+pbpaste > tst.txt
+cat tst.txt 
+```
