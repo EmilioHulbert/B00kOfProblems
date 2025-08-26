@@ -14961,3 +14961,36 @@ pbcopy < /proc/cpuinfo
 pbpaste > tst.txt
 cat tst.txt 
 ```
+##Get a chroot in a proxmox vm
+qm config 106
+pvesm path AFSData:106/vm-106-disk-0.qcow2
+Suppose it’s:
+
+/mnt/pve/AFSData/images/106/vm-106-disk-0.qcow2
+apt install qemu-utils
+Now mount it into /mnt/vm106:
+
+mkdir -p /mnt/vm106
+guestmount -a /mnt/pve/AFSData/images/106/vm-106-disk-0.qcow2 -i --rw /mnt/vm106
+(⚠️ If the VM is still running, use --ro instead of --rw to avoid corruption.)
+🛠 Step 3. Bind system directories
+mount --bind /dev  /mnt/vm106/dev
+mount --bind /dev/pts /mnt/vm106/dev/pts
+mount --bind /proc /mnt/vm106/proc
+mount --bind /sys  /mnt/vm106/sys
+🛠 Step 4. Enter the VM system
+chroot /mnt/vm106 /bin/bash
+Now you are inside the VM’s root filesystem exactly like a normal system.
+
+🛠 Step 5. Cleanup
+
+When done:
+
+exit
+umount /mnt/vm106/dev/pts
+umount /mnt/vm106/dev
+umount /mnt/vm106/proc
+umount /mnt/vm106/sys
+guestunmount /mnt/vm106
+
+
