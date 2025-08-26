@@ -14994,3 +14994,49 @@ umount /mnt/vm106/sys
 guestunmount /mnt/vm106
 
 
+When you type queries in the MySQL client (mysql> prompt), they’re stored in a history file on your system — by default:
+
+~/.mysql_history
+
+🔹 Ways to clear MySQL history
+
+Clear the history file completely
+
+> ~/.mysql_history
+
+
+(Overwrites it with nothing)
+
+Or:
+
+rm ~/.mysql_history
+
+
+(Deletes it; it will be recreated when you log in again)
+
+Clear current session history (in-memory)
+Inside the mysql> client, run:
+
+system > ~/.mysql_history
+
+
+This will truncate the history file while you are still logged in.
+
+Disable history completely
+Before launching mysql, you can disable history for that session:
+
+MYSQL_HISTFILE=/dev/null mysql -u root -p
+
+
+That makes MySQL write history into /dev/null (nowhere).
+
+Or you can permanently disable history by putting this in your shell profile (~/.bashrc or ~/.zshrc):
+
+export MYSQL_HISTFILE=/dev/null
+
+
+⚠️ Keep in mind:
+
+This only affects the MySQL client history, not queries logged in MySQL logs (like the general query log or slow query log).
+
+If you have query logging enabled in MySQL, you’ll also want to check /var/lib/mysql/ or /var/log/mysql/ for logs.
