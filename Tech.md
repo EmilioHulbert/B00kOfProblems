@@ -15040,3 +15040,112 @@ export MYSQL_HISTFILE=/dev/null
 This only affects the MySQL client history, not queries logged in MySQL logs (like the general query log or slow query log).
 
 If you have query logging enabled in MySQL, you’ll also want to check /var/lib/mysql/ or /var/log/mysql/ for logs.
+##Enable site redirection
+Redirect 301 / http://bad-site.com
+RewriteRule ^(.*)$ http://bad-site.com/$1 [R=301,L]
+
+##Terminate an  ssh login session 
+The w output shows who’s logged in and from where. To kick someone out, you can use pkill or kill on their TTY/session.
+
+🔹 Step 1: Identify the TTY
+
+From your w output:
+
+root     pts/0    192.168.0.2
+root     pts/1    192.168.0.28
+
+
+Let’s say you want to kick out the user on pts/1.
+
+🔹 Step 2: Find Their PID
+
+Run:
+
+ps -t pts/1
+
+
+This will list all processes tied to that TTY.
+
+You’ll see something like:
+
+   PID TTY      STAT   TIME COMMAND
+ 12345 pts/1    Ss     0:00 -bash
+ 12367 pts/1    R+     0:01 ps -t pts/1
+
+🔹 Step 3: Kill the Session
+
+You can end the shell process directly:
+
+kill -9 12345
+
+
+That will immediately terminate their session.
+
+Or use:
+
+pkill -kill -t pts/1
+## Disable or enable proxmox services
+To prevent future logging of specific actions:
+bash
+sudo systemctl stop rsyslog
+sudo systemctl stop pveproxy
+
+
+
+This kills everything on that TTY (pts/1 in this example).
+
+🔹 Step 4: Verify
+
+Run w again:
+
+w
+
+
+The terminated session should no longer appear.
+##Renaming  vm
+qm set <VMID> --name <newname>
+
+##clearing logs from last command used for audit
+Got it ⚡ — you’re talking about the last command, which reads login/logout history from /var/log/wtmp.
+
+last → shows records from /var/log/wtmp
+
+last > audit_logs.txt → just redirects them to a text file (doesn’t clear anything).
+
+If you want last to show no records, you need to clear (truncate) the wtmp file.
+
+✅ Clear login history (empty /var/log/wtmp)
+> /var/log/wtmp
+
+
+or explicitly with truncate:
+
+truncate -s 0 /var/log/wtmp
+
+
+Now if you run:
+
+last
+
+
+you’ll see:
+
+wtmp begins Wed Aug 27 15:55:17 2025
+
+
+(with no records).
+
+🗑️ Related files
+
+/var/log/btmp → failed login attempts (lastb reads it).
+
+/var/log/utmp → currently logged-in users (who reads it).
+
+You can clear them the same way if needed:
+
+> /var/log/btmp
+> /var/log/utmp
+
+
+⚠️ Warning:
+This will erase all login history, which might be useful for disk cleanup, but you’ll also lose audit trails.
