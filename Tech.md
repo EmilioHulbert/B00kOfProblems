@@ -15149,3 +15149,28 @@ You can clear them the same way if needed:
 
 ⚠️ Warning:
 This will erase all login history, which might be useful for disk cleanup, but you’ll also lose audit trails.
+##Do some tar encrption and decryption
+tar cvf - files/ | gpg --symmetric --batch --passphrase "somepassword" --pinentry-mode loopback -o file.tar.gpg
+To decrypt
+To decrypt and extract it in one step:
+
+gpg --batch --yes --passphrase "somepass" --pinentry-mode loopback -d file.tar.gpg | tar xvf -
+
+
+Explanation:
+
+-d = decrypt to stdout
+
+--batch --yes --passphrase = provide passphrase non-interactively
+
+pipe into tar xvf - to extract
+
+If you just want to decrypt back into a tar file (without extracting immediately):
+
+gpg --batch --yes --passphrase "somepass" --pinentry-mode loopback -o file.tar -d file.tar.gpg
+
+
+Then you can extract with:
+
+tar xvf file.tar
+
