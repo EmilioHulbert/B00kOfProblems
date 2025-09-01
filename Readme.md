@@ -15237,3 +15237,14 @@ rm -rf /var/cache/apt/archives/*
 
 
 Expected: ~200–500MB freed.
+
+## Fix dns fials
+If DNS fails:
+
+cat /etc/resolv.conf
+
+
+Make sure you have valid resolvers like:
+
+nameserver 8.8.8.8
+nameserver 1.1.1.1
