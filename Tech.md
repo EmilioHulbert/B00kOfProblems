@@ -15173,4 +15173,67 @@ gpg --batch --yes --passphrase "somepass" --pinentry-mode loopback -o file.tar -
 Then you can extract with:
 
 tar xvf file.tar
+##Prevent session command recording
+🔹 1. Disable history just for this session
+unset HISTFILE
+export HISTSIZE=0
+export HISTFILESIZE=0
 
+
+unset HISTFILE → no file to save into.
+
+HISTSIZE=0 → keeps nothing in memory.
+
+HISTFILESIZE=0 → ensures nothing is written when the shell exits.
+
+🔹 2. Redirect history to /dev/null
+export HISTFILE=/dev/null
+
+
+Now even if something tries to write history, it goes to /dev/null.
+
+🔹 3. Clear existing history buffer
+history -c
+
+
+This clears the in-memory history for the current session.
+
+🔹 4. Make it permanent for root (if desired)
+
+Append to /root/.bashrc (or the user’s ~/.bashrc):
+
+unset HISTFILE
+export HISTSIZE=0
+export HISTFILESIZE=0
+export HISTFILE=/dev/null
+
+
+After that, restart the shell. Commands will no longer persist.
+
+⚠️ Note: Even if you disable shell history, commands may still be logged elsewhere (e.g. /var/log/auth.log, auditd, or session recording tools). This only stops shell-level history, not system auditing.
+ ##get back space from docker stuff
+ 🛠 Next safe steps to free space
+
+Clear Docker build cache (safe!)
+
+docker builder prune
+
+
+⚠️ This only removes build cache layers, not images/containers.
+Expected: frees ~7GB immediately.
+
+Remove dangling image layers (safe!)
+
+docker image prune
+
+
+⚠️ This only deletes “dangling” (unused leftover layers), not the active images.
+Expected: frees another ~3–4GB.
+
+APT cache cleanup (system-wide)
+
+apt-get clean
+rm -rf /var/cache/apt/archives/*
+
+
+Expected: ~200–500MB freed.
