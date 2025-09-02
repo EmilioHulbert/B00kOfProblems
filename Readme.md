@@ -15248,3 +15248,85 @@ Make sure you have valid resolvers like:
 
 nameserver 8.8.8.8
 nameserver 1.1.1.1
+##Instaling persistent object cache module for wordpress 
+1. Persistent Object Cache (APCu)
+
+Since your host supports APCu, you just need to enable it in PHP and then configure WordPress to use it.
+
+Install APCu
+
+On Ubuntu/Debian:
+
+sudo apt update
+sudo apt install php-apcu -y
+sudo systemctl restart php7.4-fpm   # replace with your PHP version
+sudo systemctl restart nginx        # or apache2
+
+
+On CentOS/RHEL:
+
+sudo yum install php-pecl-apcu -y
+sudo systemctl restart php-fpm
+
+Verify APCu
+
+Check if APCu is enabled:
+
+php -m | grep apcu
+
+Enable in WordPress
+
+Add this to your wp-config.php:
+
+define('WP_CACHE', true);
+
+
+Then install a caching plugin that supports APCu (like W3 Total Cache, Redis Object Cache, or a dedicated APCu Object Cache plugin).
+👉 Some plugins auto-detect APCu and enable it.
+
+2. imagick (ImageMagick PHP Extension)
+
+This extension improves image processing (better scaling, thumbnails, etc.).
+
+Install
+
+Ubuntu/Debian:
+
+sudo apt install php-imagick -y
+sudo systemctl restart php7.4-fpm
+
+
+CentOS/RHEL:
+
+sudo yum install php-pecl-imagick -y
+sudo systemctl restart php-fpm
+
+
+Verify:
+
+php -m | grep imagick
+
+3. intl (Internationalization PHP Extension)
+
+Needed for proper formatting of dates, numbers, and translations.
+
+Install
+
+Ubuntu/Debian:
+
+sudo apt install php-intl -y
+sudo systemctl restart php7.4-fpm
+
+
+CentOS/RHEL:
+
+sudo yum install php-intl -y
+sudo systemctl restart php-fpm
+
+
+Verify:
+
+php -m | grep intl
+
+
+✅ After installing apcu, imagick, and intl, restart PHP and your web server. Then recheck WordPress Site Health — those warnings should disappear.
