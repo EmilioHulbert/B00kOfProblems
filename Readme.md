@@ -15330,3 +15330,21 @@ php -m | grep intl
 
 
 ✅ After installing apcu, imagick, and intl, restart PHP and your web server. Then recheck WordPress Site Health — those warnings should disappear.
+
+##Chrome update process
+Got it 👍 You can update Google Chrome on Linux manually with wget + dpkg -i. Here’s the step-by-step for Debian/Ubuntu based distros (since you mentioned dpkg):
+
+1. Download the latest stable .deb package
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+
+2. Install / update it
+sudo dpkg -i google-chrome-stable_current_amd64.deb
+
+3. Fix any missing dependencies
+
+If you see dependency errors, run:
+
+sudo apt-get install -f
+
+4. Verify version
+google-chrome --version
