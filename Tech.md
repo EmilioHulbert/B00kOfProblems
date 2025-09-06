@@ -15348,3 +15348,54 @@ sudo apt-get install -f
 
 4. Verify version
 google-chrome --version
+##Enabling service preset in parrot os
+Edit and enable here 
+┌─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #find /usr/lib/systemd/system-preset /etc/systemd/system-preset -type f
+/usr/lib/systemd/system-preset/90-systemd.preset
+/usr/lib/systemd/system-preset/85-parrot.preset
+/etc/systemd/system-preset/99-custom.preset
+┌─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #
+Then re-apply:
+
+sudo systemctl preset nginx.service
+
+
+Check status:
+
+systemctl status nginx.service
+
+OR
+sudo mkdir -p /etc/systemd/system-preset/
+echo 'enable nginx.service' | sudo tee /etc/systemd/system-preset/99-custom.preset
+Then apply the preset:
+
+sudo systemctl preset nginx.service
+
+
+Now run:
+
+systemctl status nginx.service
+
+
+And you should finally see:
+
+Loaded: loaded (/lib/systemd/system/nginx.service; enabled; preset: enabled)
+create your own presets in supported systems
+1. ✅ Overwrite/Create the Correct Preset File
+
+Run this:
+
+echo 'enable nginx.service' | sudo tee /etc/systemd/system-preset/99-custom.preset
+
+
+Then verify the contents:
+
+cat /etc/systemd/system-preset/99-custom.preset
+
+
+You should see:
+
+enable nginx.service
+
