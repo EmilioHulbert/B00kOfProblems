@@ -15399,3 +15399,61 @@ You should see:
 
 enable nginx.service
 
+##Correct way tocopy images using find and exec 
+You're encountering this issue:
+
+cp: './all/shoes_1.jpg' and 'all/shoes_1.jpg' are the same file
+
+
+Because you're running:
+
+find -type f -name "*.jpg" -exec cp {} all/ \;
+
+
+…from inside the all/ directory, which means you're trying to copy files from all/ back into all/, and that causes the error:
+
+same file
+
+✅ Correct Way: Exclude the all/ Directory from find
+
+You want to:
+
+Copy all .jpg files from all subfolders
+
+But not from the all/ folder itself (to avoid copying them into themselves)
+
+✅ Fixed command:
+
+From inside the images/ folder:
+
+find . -path ./all -prune -o -type f -name "*.jpg" -exec cp {} all/ \;
+
+🔍 What this does:
+
+-path ./all -prune: skips descending into the ./all directory
+
+-o: "or"
+
+-type f -name "*.jpg": matches all JPG files
+
+-exec cp {} all/ \;: copies them into the all/ folder
+
+✅ Alternative (from parent folder):
+
+If you're not inside images/, you can run:
+
+find images/ -path "images/all" -prune -o -type f -name "*.jpg" -exec cp {} images/all/ \;
+
+📂 Summary Directory Structure
+
+Assuming:
+
+images/
+├── all/              ← where you want to gather everything
+├── shoes/
+├── bags/
+├── jewelry/
+└── belts/
+
+
+You are now copying everything except from all/ into all/ without errors.
