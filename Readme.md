@@ -15457,3 +15457,73 @@ images/
 
 
 You are now copying everything except from all/ into all/ without errors.
+##Increase php upload limits
+The uploaded file exceeds the upload_max_filesize directive in php.ini.
+ChatGPT said:
+
+Ahh 👍 that’s a server configuration issue, not WordPress itself. It means your PHP settings don’t allow large enough file uploads (e.g., when uploading plugins, themes, or product images).
+
+Let’s fix it step by step:
+
+🔹 1. Edit php.ini
+
+If you have access to your server (VPS / cPanel):
+
+Find your php.ini file.
+
+Common paths: /etc/php/8.1/apache2/php.ini or /etc/php/8.1/fpm/php.ini (depending on setup).
+
+If cPanel, search for Select PHP Version → Options.
+
+Increase the limits:
+
+upload_max_filesize = 64M
+post_max_size = 128M
+memory_limit = 256M
+max_execution_time = 300
+max_input_time = 300
+
+
+(You can raise the numbers depending on your needs, e.g., 128M / 512M for big files.)
+
+Restart your web server:
+
+Apache: sudo systemctl restart apache2
+
+Nginx + PHP-FPM: sudo systemctl restart php8.1-fpm
+
+🔹 2. If You Can’t Access php.ini
+
+Try one of these alternatives:
+
+a) .htaccess (for Apache hosting)
+
+Add this to your .htaccess file inside your WordPress root:
+
+php_value upload_max_filesize 64M
+php_value post_max_size 128M
+php_value memory_limit 256M
+php_value max_execution_time 300
+php_value max_input_time 300
+
+b) wp-config.php
+
+Add before the line that says “That’s all, stop editing! Happy publishing”:
+
+@ini_set('upload_max_filesize', '64M');
+@ini_set('post_max_size', '128M');
+@ini_set('memory_limit', '256M');
+@ini_set('max_execution_time', '300');
+@ini_set('max_input_time', '300');
+
+c) If using cPanel
+
+Go to Select PHP Version → Options.
+
+Change upload_max_filesize, post_max_size, and memory_limit from there.
+
+🔹 3. Verify the Changes
+
+In WordPress, go to Media → Add New.
+
+It should now show the updated max upload size (e.g., Maximum upload file size: 64 MB).
