@@ -15493,7 +15493,6 @@ Apache: sudo systemctl restart apache2
 Nginx + PHP-FPM: sudo systemctl restart php8.1-fpm
 
 🔹 2. If You Can’t Access php.ini
-
 Try one of these alternatives:
 
 a) .htaccess (for Apache hosting)
@@ -15526,4 +15525,7 @@ Change upload_max_filesize, post_max_size, and memory_limit from there.
 
 In WordPress, go to Media → Add New.
 
-It should now show the updated max upload size (e.g., Maximum upload file size: 64 MB).
+#It should now show the updated max upload size (e.g., Maximum upload file size: 64 MB).
+
+##Download and install microsoft store for old windows 10
+https://github.com/kkkgo/LTSB-Add-MicrosoftStore
