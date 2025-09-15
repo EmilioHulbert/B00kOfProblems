@@ -15529,3 +15529,18 @@ In WordPress, go to Media → Add New.
 
 ##Download and install microsoft store for old windows 10
 https://github.com/kkkgo/LTSB-Add-MicrosoftStore
+##Expanding virtusl box images capacities
+If this VM is only for Teams testing, 20 GB will work (barely).
+
+If you want to use it long-term, expand the VirtualBox disk:
+
+Shut down the VM.
+
+Run this on your host:
+
+VBoxManage modifyhd "path/to/disk.vdi" --resize 51200
+
+
+(that makes it 50 GB; adjust as you like).
+
+Then boot the VM and extend the partition in Disk Management.
