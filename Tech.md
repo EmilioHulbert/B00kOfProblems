@@ -15544,3 +15544,94 @@ VBoxManage modifyhd "path/to/disk.vdi" --resize 51200
 (that makes it 50 GB; adjust as you like).
 
 Then boot the VM and extend the partition in Disk Management.
+##Auto attach devices to avm
+how can auto attach of webcam be enabled for my vm is i possible, so that i dont have o do it upon each vm start up.
+ChatGPT said:
+
+Yes 🚀 it’s possible — you can make your VM auto-attach the webcam on startup, but it depends on the hypervisor you’re using (VirtualBox, VMware, Hyper-V, etc.). Let me break it down:
+
+🖥️ VirtualBox
+
+By default, VirtualBox doesn’t persist webcam passthrough unless you configure it.
+
+You need to create a USB device filter:
+
+Open VM settings → USB.
+
+Enable USB Controller (USB 2.0 or 3.0).
+
+Add a new filter for your webcam (it will auto-fill vendor/product IDs when the device is connected).
+
+Save → Now VirtualBox will auto-attach the webcam every time the VM starts.
+
+Alternatively, you can force it via CLI:
+
+VBoxManage usbfilter add 0 --target "YourVMName" --name "Webcam" --vendorid <VID> --productid <PID>
+
+
+(Replace <VID> and <PID> with your webcam’s values, which you can get from lsusb on Linux or Device Manager on Windows.)
+
+🖥️ VMware Workstation / Fusion
+
+You can auto-connect USB devices by editing the VM’s .vmx config file.
+
+Add this line:
+
+usb.autoConnect.device0 = "vid:#### pid:####"
+
+
+Example:
+
+usb.autoConnect.device0 = "vid:046d pid:0825"
+
+
+(Replace with your webcam’s Vendor ID and Product ID.)
+
+When you start the VM, VMware will automatically connect that webcam.
+
+🖥️ Hyper-V
+
+Hyper-V doesn’t support direct USB passthrough for webcams.
+
+You can only expose webcams via Remote Desktop with “camera redirection” enabled.
+
+Auto-attach in the sense of VirtualBox/VMware is not possible here.
+
+✅ So:
+
+VirtualBox → use a USB filter.
+
+VMware → add usb.autoConnect in .vmx.
+
+Hyper-V → only works via RDP redirection, no auto passthrough.
+So your command will be:
+VBoxManage usbfilter add 0 --target "YourVMName" --name "Webcam" --vendorid 0x0408 --productid 0x5411
+
+Aha ⚡— if VBoxManage list vms shows nothing, it usually means VirtualBox isn’t “seeing” any registered VMs. That can happen if:
+
+You’re running VBoxManage as root, but your VMs are registered under your normal user.
+
+VirtualBox keeps VM registrations per-user in ~/.config/VirtualBox/VirtualBox.xml.
+
+Root has its own empty config, so VBoxManage list vms as root looks blank.
+
+You created the VMs in the GUI as your normal user, not root.
+
+✅ Fix: Run as your normal user
+
+Try:
+
+VBoxManage list vms
+
+
+but without sudo / as root. That should list your VMs.
+
+If you must run as root
+
+You can explicitly point VBoxManage to the right VM registry with the VBOX_USER_HOME env var. For example, if your user is hulbert:
+
+VBOX_USER_HOME=/home/hulbert/.config/VirtualBox VBoxManage list vms
+
+
+👉 Once you see your VM name listed, you can run your USB filter command with the correct name.
+
