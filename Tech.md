@@ -15634,4 +15634,30 @@ VBOX_USER_HOME=/home/hulbert/.config/VirtualBox VBoxManage list vms
 
 
 👉 Once you see your VM name listed, you can run your USB filter command with the correct name.
+##Enabling hibernation in windows
+Step 1: Enable Hibernation
 
+Open Command Prompt as Administrator
+(search for cmd, right-click → Run as administrator).
+
+Run this command:
+
+powercfg /hibernate on
+
+Step 2: Verify
+
+Run:
+
+powercfg /availablesleepstates
+
+
+It will show if Hibernate is now available.
+
+Step 3: Use Shutdown with Hibernate
+
+Now you can run:
+
+shutdown -h
+
+
+✅ That should put your system into hibernation.
