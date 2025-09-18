@@ -15661,3 +15661,32 @@ shutdown -h
 
 
 ✅ That should put your system into hibernation.
+
+##Installing php gd for imageic manipulation on server
+To fix it, you need to install the GD extension that matches your PHP version.
+
+Since earlier you were using PHP 8.2, run this:
+
+sudo apt update
+sudo apt install -y php8.2-gd
+
+
+Then restart PHP-FPM (or Apache, depending on what you’re running):
+
+If using PHP-FPM + NGINX:
+
+sudo systemctl restart php8.2-fpm
+sudo systemctl restart nginx
+
+
+If using Apache:
+
+sudo systemctl restart apache2
+
+
+✅ To confirm GD is installed, run:
+
+php -m | grep gd
+
+
+You should see gd in the output.
