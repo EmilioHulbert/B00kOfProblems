@@ -15690,3 +15690,34 @@ php -m | grep gd
 
 
 You should see gd in the output.
+
+##Fixing apt update error ip error
+That IP error you saw:
+
+Err:8 https://updates.duplicati.com/experimental/debian all Release
+  404  Not Found [IP: 162.159.140.98 443]
+E: The repository 'https://updates.duplicati.com/experimental/debian all Release' does not have a Release file.
+
+
+👉 It means you have an old or invalid repo in your apt sources list. The server at updates.duplicati.com no longer hosts a valid Debian repo at that path, so apt throws a 404.
+
+It doesn’t affect your PHP install at all, but apt will always complain on every update until you remove it.
+
+✅ How to fix/remove it
+
+Check where that repo is saved:
+
+grep -r "duplicati" /etc/apt/sources.list.d/ /etc/apt/sources.list
+
+
+If you see a file like /etc/apt/sources.list.d/duplicati.list, edit or remove it:
+
+sudo rm /etc/apt/sources.list.d/duplicati.list
+
+
+Then refresh:
+
+sudo apt update
+
+
+That error will disappear.
