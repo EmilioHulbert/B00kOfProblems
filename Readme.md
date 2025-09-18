@@ -15854,3 +15854,18 @@ sudo systemctl disable php7.4-fpm
 sudo systemctl restart php8.2-fpm
 sudo systemctl restart nginx
 
+##Quick remove docker dangling volumes
+Quick cleanup tips:
+
+# Remove dangling Docker images, containers, volumes
+docker system prune -af --volumes
+
+# Check disk usage inside Docker
+docker system df
+
+
+Also, check /var/log/ — large log files can be truncated:
+
+du -sh /var/log/*
+# Example: clear big log
+truncate -s 0 /var/log/syslog
