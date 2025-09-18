@@ -15721,3 +15721,86 @@ sudo apt update
 
 
 That error will disappear.
+
+
+##Installing php8.2 on ubuntu
+You need to enable the Sury PHP repository (the official PHP maintainer for Debian/Ubuntu).
+
+Here’s the full step-by-step for Bullseye:
+
+🔹 1. Install prerequisites
+sudo apt install -y apt-transport-https lsb-release ca-certificates curl
+
+🔹 2. Add the Sury PHP repo
+curl -fsSL https://packages.sury.org/php/apt.gpg | sudo gpg --dearmor -o /usr/share/keyrings/sury.gpg
+echo "deb [signed-by=/usr/share/keyrings/sury.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list
+
+🔹 3. Update apt and install PHP 8.2
+sudo apt update
+sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl
+
+🔹 4. Check installed version
+php -v
+
+
+You should see something like:
+
+PHP 8.2.x (cli) (built: ...)
+
+🔹 5. Switch default PHP (if multiple versions installed)
+sudo update-alternatives --config php
+
+
+Select php8.2.
+
+For NGINX/Apache, you may also need to switch FPM service:
+
+sudo a2dismod php7.4
+sudo a2enmod php8.2
+sudo systemctl restart apache2
+
+
+(or, if using NGINX + PHP-FPM:)
+
+sudo systemctl disable php7.4-fpm
+sudo systemctl enable php8.2-fpm
+sudo systemctl restart nginx
+sudo systemctl restart php8.2-fpm
+
+
+👉 That will upgrade your server to PHP 8.2 and kill those "plugin does not work with your PHP version" warnings.
+##Fixed error after the above
+Nice, you’re close 🚀. The problem is with your sury-php.list file — since lsb_release failed, the distro codename (bullseye) didn’t get inserted, so apt sees a malformed line.
+
+Let’s fix it manually 👇
+
+🔹 1. Check your Debian version
+
+You’re on Bullseye (11), but just to confirm:
+
+cat /etc/os-release | grep VERSION_CODENAME
+
+
+It should say bullseye.
+
+🔹 2. Edit the repo file
+
+Open the file:
+
+sudo nano /etc/apt/sources.list.d/sury-php.list
+
+
+Replace its contents with:
+
+deb [signed-by=/usr/share/keyrings/sury.gpg] https://packages.sury.org/php/ bullseye main
+
+
+Save and exit (CTRL+O, Enter, CTRL+X).
+
+🔹 3. Update & install PHP 8.2
+sudo apt update
+sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl
+
+
+That should work now ✅
+
