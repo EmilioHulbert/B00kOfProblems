@@ -15804,3 +15804,53 @@ sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-mysql php8.2-xml php8.2-
 
 That should work now ✅
 
+##Completely remove php7.4-fpm completely from system
+Got it 👍 — let’s safely remove PHP 7.4 from your Debian 11 (Bullseye) server while keeping PHP 8.2 running.
+
+1. Check current PHP versions installed
+
+Run:
+
+php -v
+
+
+and
+
+update-alternatives --display php
+
+
+This will show if PHP 7.4 is still being used as default.
+
+2. Remove PHP 7.4 packages
+
+To remove all PHP 7.4 packages (CLI, FPM, modules, etc.), run:
+
+sudo apt purge -y 'php7.4*'
+
+3. Clean up unused dependencies
+sudo apt autoremove -y
+sudo apt autoclean
+
+4. Verify that only PHP 8.2 is active
+
+Check:
+
+php -v
+
+
+It should now show PHP 8.2.
+
+If you use Apache:
+
+sudo a2dismod php7.4
+sudo a2enmod php8.2
+sudo systemctl restart apache2
+
+
+If you use NGINX + PHP-FPM:
+
+sudo systemctl stop php7.4-fpm
+sudo systemctl disable php7.4-fpm
+sudo systemctl restart php8.2-fpm
+sudo systemctl restart nginx
+
