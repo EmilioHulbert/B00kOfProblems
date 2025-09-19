@@ -15914,5 +15914,38 @@ curl: (92) HTTP/2 stream 1 was not closed cleanly: INTERNAL_ERROR (err 2)
 └──╼ #
 
 
+1. Generate a checksum locally
+
+Run this on your downloaded file:
+
+sha256sum davidsondesigners.com-20250919-144026-479.wpress
 
 
+It will output something like:
+
+a1b2c3d4e5f67890123456789abcdef1234567890abcdef1234567890abcdef  davidsondesigners.com-20250919-144026-479.wpress
+
+2. Compare with original checksum
+
+If the hosting panel (cPanel, Plesk, or your server) gives you a checksum for the backup, compare against it.
+
+If you made the backup yourself, you can run the same sha256sum command on the server copy and compare with your local copy.
+
+On server:
+
+sha256sum /path/to/wp-content/ai1wm-backups/davidsondesigners.com-20250919-144026-479.wpress
+
+
+Compare both hashes — if they match, your file is good ✅.
+
+3. Optional: use md5sum (faster, but weaker)
+md5sum davidsondesigners.com-20250919-144026-479.wpress
+
+4. Quick sanity check
+
+Since .wpress is essentially a compressed archive, you can also check if it’s valid:
+
+file davidsondesigners.com-20250919-144026-479.wpress
+
+
+or even try to import it into All-in-One WP Migration locally. If it loads without errors, it’s intact.
