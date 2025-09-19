@@ -15869,3 +15869,50 @@ Also, check /var/log/ — large log files can be truncated:
 du -sh /var/log/*
 # Example: clear big log
 truncate -s 0 /var/log/syslog
+
+##How to resume a download with curl
+
+Nice catch 🚀 — curl by default doesn’t resume, but you can resume a partially downloaded file with the -C - flag (continue at the offset).
+
+In your case, just run:
+
+curl -C - -O https://davidsondesigners.com/wp-content/ai1wm-backups/davidsondesigners.com-20250919-144026-479.wpress
+
+Explanation:
+
+-C - → tells curl to continue the download from where it left off.
+
+-O → keeps the same filename as on the server.
+
+🔍 Alternative with wget (sometimes more reliable for huge files)
+wget -c https://davidsondesigners.com/wp-content/ai1wm-backups/davidsondesigners.com-20250919-144026-479.wpress
+
+
+-c = continue downloading.
+
+⚠️ Important:
+
+The server must support HTTP range requests for resume to work (most WP hosting setups do).
+
+If it keeps failing, sometimes splitting into chunks with aria2c works best:
+
+aria2c -x 16 -s 16 https://davidsondesigners.com/wp-content/ai1wm-backups/davidsondesigners.com-20250919-144026-479.wpress
+
+┌─[root@Intel5]─[/home/hulbert]
+└──╼ #curl -O https://davidsondesigners.com/wp-content/ai1wm-backups/davidsondesigners.com-20250919-144026-479.wpress
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+ 95 1493M   95 1421M    0     0  1139k      0  0:22:21  0:21:16  0:01:05 1204k
+curl: (92) HTTP/2 stream 1 was not closed cleanly: INTERNAL_ERROR (err 2)
+┌─[✗]─[root@Intel5]─[/home/hulbert]
+└──╼ #curl -C - -O https://davidsondesigners.com/wp-content/ai1wm-backups/davidsondesigners.com-20250919-144026-479.wpress
+** Resuming transfer from byte position 1490410487
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 71.9M  100 71.9M    0     0  1128k      0  0:01:05  0:01:05 --:--:-- 1112k
+┌─[root@Intel5]─[/home/hulbert]
+└──╼ #
+
+
+
+
