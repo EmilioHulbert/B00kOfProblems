@@ -15949,3 +15949,6 @@ file davidsondesigners.com-20250919-144026-479.wpress
 
 
 or even try to import it into All-in-One WP Migration locally. If it loads without errors, it’s intact.
+
+##sed search and replace
+sed -i 's/http:\/\/localhost/https:\/\/davidsondesigners.com/g' $(grep -rl "http://localhost" .)
