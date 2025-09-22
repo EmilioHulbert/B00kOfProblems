@@ -15952,3 +15952,40 @@ or even try to import it into All-in-One WP Migration locally. If it loads witho
 
 ##sed search and replace
 sed -i 's/http:\/\/localhost/https:\/\/davidsondesigners.com/g' $(grep -rl "http://localhost" .)
+##COnfig for nginx to be used with haproxy
+server {
+listen 8084 ssl; # managed by haproxy
+    server_name brimurmotors.live www.brimurmotors.live;
+client_max_body_size 400M;
+    root /var/www/brimurmotors.live;
+    index index.php index.html index.htm;
+
+    access_log /var/log/nginx/brimurmotors.access.log;
+    error_log /var/log/nginx/brimurmotors.error.log;
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;  # Adjust PHP version if necessary
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+    
+
+
+    
+    ssl_certificate /etc/letsencrypt/live/brimurmotors.live/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/brimurmotors.live/privkey.pem; # managed by Certbot
+
+
+}
+
