@@ -15988,4 +15988,8 @@ client_max_body_size 400M;
 
 
 }
+##Quick wp replacements
+UPDATE wp_posts
+SET post_content = REPLACE(post_content, '/home/shop/', '/shop/')
+WHERE post_content LIKE '%/home/shop%';
 
