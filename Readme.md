@@ -15993,3 +15993,33 @@ UPDATE wp_posts
 SET post_content = REPLACE(post_content, '/home/shop/', '/shop/')
 WHERE post_content LIKE '%/home/shop%';
 
+
+##haproxy multiple domain usage on signle line
+Your current HAProxy config only matches one hostname (davidsondesigners.com) and sends it to the backend. You want it to also match www.davidsondesigners.com without duplicating the whole use_backend line, correct?
+
+If so, you’re thinking right — HAProxy supports multiple hostnames in a single ACL match. The mistake people make is either repeating lines unnecessarily or forgetting that req_ssl_sni -i accepts multiple values.
+
+So instead of:
+
+use_backend davidsondesigners.com-https if { req_ssl_sni -i davidsondesigners.com }
+use_backend davidsondesigners.com-https if { req_ssl_sni -i www.davidsondesigners.com }
+
+
+You can compress it into one clean line:
+
+use_backend davidsondesigners.com-https if { req_ssl_sni -i davidsondesigners.com www.davidsondesigners.com }
+
+
+Alternative (cleaner if you’ll scale with more domains later): define an ACL first, then reuse it:
+
+acl host_davidson hdr(host) -i davidsondesigners.com www.davidsondesigners.com
+use_backend davidsondesigners.com-https if host_davidson
+
+
+👉 Why ACL is better:
+
+Easier to maintain if you add more aliases later.
+
+Keeps your use_backend lines shorter.
+
+Works with hdr(host) (hostname header) or req_ssl_sni (TLS SNI).
