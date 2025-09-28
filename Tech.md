@@ -16026,3 +16026,45 @@ Works with hdr(host) (hostname header) or req_ssl_sni (TLS SNI).
 ##How to downgrade a python package
 pip install "selenium<4.3"
 
+
+##Download and install python3.9
+🔧 Build Python 3.9 from source
+
+Install build dependencies (Debian/Ubuntu example):
+
+sudo apt update
+sudo apt install -y build-essential \
+    libssl-dev zlib1g-dev libncurses5-dev \
+    libncursesw5-dev libreadline-dev libsqlite3-dev \
+    libgdbm-dev libdb5.3-dev libbz2-dev \
+    libexpat1-dev liblzma-dev tk-dev uuid-dev wget
+
+
+Download Python 3.9.18 (last in the 3.9 line):
+
+cd /usr/src
+sudo wget https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz
+sudo tar xzf Python-3.9.18.tgz
+cd Python-3.9.18
+
+
+Compile & install (side-by-side, won’t overwrite system Python):
+
+sudo ./configure --enable-optimizations --prefix=/usr/local/python3.9
+sudo make -j$(nproc)
+sudo make altinstall   # use altinstall to avoid overwriting python3 symlink
+
+
+Check it:
+
+/usr/local/python3.9/bin/python3.9 --version
+
+
+(Optional) Create a venv for your Instagram stuff:
+
+/usr/local/python3.9/bin/python3.9 -m venv ~/venv39
+source ~/venv39/bin/activate
+python --version
+
+
+Now you’ve got Python 3.9 isolated, and you can pip install requests InstagramAPI in that venv without fighting 3.10/3.11 compatibility issues.
