@@ -16068,3 +16068,115 @@ python --version
 
 
 Now you’ve got Python 3.9 isolated, and you can pip install requests InstagramAPI in that venv without fighting 3.10/3.11 compatibility issues.
+
+##Fix rsync errors
+The rsync command you ran shows a code 23 error, which means:
+
+rsync error: some files/attrs were not transferred (see previous errors) (code 23)
+
+This is a generic partial transfer error, and it usually happens when rsync hits issues with:
+
+File permissions or ownership
+
+Special files (e.g., device files, sockets)
+
+Symlinks pointing to non-existent locations
+
+Filename or path length issues
+
+I/O errors
+
+Files disappearing or changing during transfer
+
+Filesystems with different capabilities (e.g., NTFS not supporting Linux permissions)
+
+Let's break down your command:
+rsync -avz /mnt/ /media/hulbert/New\ Volume/mnt/
+
+
+/mnt/ → source directory
+
+/media/hulbert/New Volume/mnt/ → target directory (probably on an NTFS or FAT USB drive or external disk)
+
+Troubleshooting Steps
+
+Here’s how to diagnose and fix the problem:
+
+✅ 1. Review Errors Printed Earlier
+
+Look just before the final rsync stats. rsync will list the specific files that failed. Run the command again and scroll up to check what rsync says.
+
+🛠️ 2. Common Fixes
+
+Here are common causes and their fixes:
+
+🔒 Permissions / Extended Attributes
+
+NTFS or FAT doesn't support Linux permissions and xattrs.
+
+Try adding the --no-perms --no-owner --no-group --no-xattrs options:
+
+rsync -avz --no-perms --no-owner --no-group --no-xattrs /mnt/ "/media/hulbert/New Volume/mnt/"
+
+📂 Symlinks
+
+If there are symlinks, use:
+
+-L to follow them
+
+or --copy-links if you want to dereference them
+
+or --safe-links to skip bad symlinks
+
+🧵 Sockets or Special Files
+
+To skip special files like sockets, FIFOs, or device files:
+
+rsync -avz --exclude='*.sock' --exclude='*.fifo' /mnt/ "/media/hulbert/New Volume/mnt/"
+
+
+Or more broadly:
+
+rsync -avz --exclude='dev/*' --exclude='proc/*' --exclude='sys/*' /mnt/ "/media/hulbert/New Volume/mnt/"
+
+📛 Filename or Path Too Long
+
+NTFS can choke on long Linux paths. You could use:
+
+rsync -avz --max-size=100M /mnt/ "/media/hulbert/New Volume/mnt/"
+
+
+...to test a small set first, or check for long paths:
+
+find /mnt | awk '{ print length, $0 }' | sort -n | tail -n 10
+
+🧪 3. Dry Run
+
+Use --dry-run to simulate the transfer and see where it breaks:
+
+rsync -avz --dry-run /mnt/ "/media/hulbert/New Volume/mnt/"
+
+✅ 4. Log the Errors
+
+Use a log file to inspect later:
+
+rsync -avz /mnt/ "/media/hulbert/New Volume/mnt/" --log-file=rsync.log
+
+
+Then check the log:
+
+less rsync.log
+
+Summary
+
+Try this adjusted command for an NTFS destination:
+
+rsync -avz --no-perms --no-owner --no-group --no-xattrs --exclude='*.sock' --exclude='*.fifo' /mnt/ "/media/hulbert/New Volume/mnt/"
+
+
+If issues persist, paste the actual rsync error lines from above the summary, and I’ll help you narrow it down.
+
+Attach
+Search
+Study
+Voice
