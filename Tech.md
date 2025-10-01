@@ -16577,3 +16577,130 @@ settings.json should have
 
 ##Enabling codium running with root privileges
 codium --no-sandbox --user-data-dir=/home/hulbert/.vscode-nosandbox
+
+1️⃣ Download and install DxWnd
+
+Go here: DxWnd GitHub
+ or search “DxWnd latest release”.
+
+Extract the ZIP somewhere convenient, e.g., C:\DxWnd\.
+
+2️⃣ Add Road Rash to DxWnd
+
+Run DxWnd.exe.
+
+Right-click in the window → “Add”.
+
+Fill in the details:
+
+Field	Value
+Name	Road Rash 95
+Path	C:\Program Files (x86)\CGN\Road Rash\Rash.exe (or wherever Rash.exe is)
+Launch in	Windowed (check this)
+Remove border	Checked
+Keep aspect ratio	Checked (optional)
+Screen position	0,0
+Size	Your monitor resolution (e.g., 1920x1080)
+
+Click OK to save.
+
+3️⃣ Optional tweaks in DxWnd
+
+Right-click your added game → Modify → Main → Compatibility.
+
+Check “Force DirectDraw Emulation” if the game flickers or crashes.
+
+Check “Stretch” if you want full screen scaling.
+
+This ensures smooth borderless fullscreen.
+
+4️⃣ Launch Road Rash from DxWnd
+
+Select Road Rash → Launch.
+
+The game will open in a borderless window at full-screen resolution.
+
+5️⃣ Now your AHK script works
+#NoTrayIcon
+SetTitleMatchMode, 2
+
+WinWait, Road Rash
+; Remove title bar just in case
+WinSet, Style, -0xC40000, Road Rash
+
+; Maximize to your screen
+SysGet, MonitorWidth, 78
+SysGet, MonitorHeight, 79
+WinMove, Road Rash,, 0, 0, MonitorWidth, MonitorHeight
+
+
+✅ Now the script actually applies because the game is windowed, but looks full-screen.
+
+If you want, I can write a fully automated AHK script that will:
+
+Launch DxWnd.
+
+Launch Road Rash via DxWnd.
+
+Force it borderless + maximize.
+
+Then you literally run one script and Road Rash goes full-screen borderless every time.
+
+Do you want me to do that next?
+
+You said:
+i see so ?
+ChatGPT said:
+
+Ah, I see the screenshot — you’re in the DxWnd “New Game” window. Here’s how to fill it properly for Road Rash 95:
+
+Key fields:
+
+Name:
+
+Already set: Road Rash 95 ✅
+
+Path:
+
+This should point to the actual game executable:
+
+C:\Program Files (x86)\CGN\Road Rash\ROADRASH.EXE
+
+
+Looks like you typed it almost right, just make sure there’s no typo (am Files → should be C:\Program Files...).
+
+Launch:
+
+You can leave this blank.
+
+This is only if you need DxWnd to launch something before the main executable (like a wrapper or patch). Most people leave it empty.
+
+Generic options (important for your goal):
+
+Early hook → Checked ✅
+
+Run in Window → Checked ✅ (forces the game into a windowed mode)
+
+Remove border → Check this on the right-hand side (important for borderless)
+
+Keep aspect ratio → Optional, but usually ✅
+
+Screen position / Size → Use either:
+
+X=0, Y=0, W=your monitor width, H=your monitor height (forces full screen window)
+
+Or leave defaults and adjust after launching
+
+After this:
+
+Click OK.
+
+Back in the main DxWnd window, select your new entry → Double-click or press Launch.
+
+Road Rash should open windowed but borderless at full screen.
+
+Once it’s running in windowed mode, your AutoHotkey script will now work for maximizing or moving it.
+
+If you want, I can tell you the exact values for X, Y, W, H so it literally becomes full-screen borderless on your monitor automatically.
+
+Do you want me to do that?
