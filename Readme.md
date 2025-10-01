@@ -16362,4 +16362,179 @@ fi
 #     echo "📷 Attaching webcam to VM ($VM)..."
 #     VBoxManage controlvm "$VM" usbattach "$CAMERA_UUID"
 # fi
+##Registering teams as a handler foe linux
+Step 2. Register Teams as the handler on Linux
 
+Depending on your distro:
+
+Create/edit a .desktop file for Teams in:
+
+~/.local/share/applications/msteams.desktop
+
+
+With content:
+
+[Desktop Entry]
+Name=Microsoft Teams
+Exec=/usr/bin/teams --url %u
+Type=Application
+Terminal=false
+MimeType=x-scheme-handler/msteams;
+
+now using flatpak
+[Desktop Entry]
+Name=Microsoft Teams (Flatpak)
+Comment=Join Microsoft Teams meetings with the Flatpak client
+Exec=flatpak run com.github.IsmaelMartinez.teams_for_linux --url %u
+Icon=com.github.IsmaelMartinez.teams_for_linux
+Terminal=false
+Type=Application
+MimeType=x-scheme-handler/msteams;
+Categories=Network;InstantMessaging;
+
+#Checking in chromes handler
+chrome://settings/handlers
+Testing with meeing link directly
+xdg-open "msteams:/l/meetup-join/19%3ameeting_ZjcxNThiNWUtY2Y2Ni00MGVhLTgxYzctNDA1MjhjNzU2YmYx%40thread.v2/0?context=%7B%22Tid%22%3A%22dd83f20e-c004-40c1-8e55-c0fccb22c4ab%22%2C%22Oid%22%3A%2239bafae8-e103-4fbf-ae30-db1902bb01f6%22%7D"
+
+i#Manual way getting vms filters
+VBoxManage list usbfilters --target "YourVMName"
+You’ll see something like:
+
+Index: 0
+   Name: Webcam
+   VendorId: <VID>
+   ProductId: <PID>
+   ...
+
+Step 2. Remove the filter
+
+If you don’t want the VM to auto-grab the webcam anymore:
+
+VBoxManage usbfilter remove 0 --target "YourVMName"
+
+Step 3. Toggle dynamically (host vs VM)
+
+Instead of permanently binding it, do it on-demand:
+
+Make it available to VM only when needed:
+
+Start the VM.
+
+In the VM window → Devices → USB → select your webcam manually.
+→ This attaches it to the VM and removes it from the host.
+
+Give it back to host:
+
+In the VM window → Devices → USB → uncheck the webcam.
+→ Host regains control.
+
+Step 4. If you want scripted switching
+
+You can write helper scripts to attach/detach the webcam:
+
+Attach to VM:
+
+VBoxManage controlvm "YourVMName" usbattach <UUID>
+
+
+Detach from VM:
+VBoxManage controlvm "YourVMName" usbdetach <UUID>
+To get the device <UUID>, run:
+
+bash
+Copy code
+VBoxManage list usbhost
+That lists all connected USB devices with UUID, vendor, and product IDs.
+✅ Summary:
+
+Right now your host can’t see the webcam because the filter auto-grabs it.
+
+Remove or disable that filter, and just attach the device manually when you need it in the VM.
+
+For convenience, you can automate switching with usbattach / usbdetach.
+
+1. Listing all filters
+
+The command you tried fails because --target isn’t valid for list.
+
+Instead, just run:
+
+VBoxManage showvminfo "M365-Connect" | grep -A5 "USB Device Filters"
+
+
+That will show you the USB filters actually bound to that VM, e.g.:
+
+Number of USB Device Filters: 1
+Index: 0
+   Active: yes
+   Name: Webcam
+   VendorId: 0x0408
+   ProductId: 0x5411
+   Remote: no
+
+2. Removing the filter
+
+Once you see the filter index, remove it like this:
+
+VBoxManage usbfilter remove 0 "M365-Connect"
+
+
+(replace 0 with whatever index your webcam is at).
+
+Now the webcam will no longer be auto-grabbed by VirtualBox → host gets it back by default.
+
+3. Attaching manually when needed
+
+When the VM is running:
+
+VBoxManage controlvm "M365-Connect" usbattach 0408:5411
+
+
+But careful — usbattach doesn’t take Vendor:Product directly, it expects the UUID.
+To find it:
+
+VBoxManage list usbhost
+
+
+Example output:
+
+UUID:               aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+VendorId:           0x0408 (Quanta Computer, Inc.)
+ProductId:          0x5411
+Current State:      Busy
+
+
+Then:
+
+VBoxManage controlvm "M365-Connect" usbattach aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+
+
+To detach:
+
+VBoxManage controlvm "M365-Connect" usbdetach aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+
+4. Making your life easier (toggle script idea)
+
+You can write two little scripts:
+
+webcam-to-vm.sh
+
+#!/bin/bash
+VM="M365-Connect"
+UUID=$(VBoxManage list usbhost | awk '/Quanta Computer, Inc. HP HD Camera/{getline; print $2}')
+VBoxManage controlvm "$VM" usbattach "$UUID"
+
+
+webcam-to-host.sh
+
+#!/bin/bash
+VM="M365-Connect"
+UUID=$(VBoxManage list usbhost | awk '/Quanta Computer, Inc. HP HD Camera/{getline; print $2}')
+VBoxManage controlvm "$VM" usbdetach "$UUID"
+
+
+So you just run:
+
+./webcam-to-vm.sh
+./webcam-to-host.sh
