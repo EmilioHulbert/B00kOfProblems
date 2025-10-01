@@ -16182,3 +16182,184 @@ Study
 Voice
 ##Github markdown maker
 https://gprm.itsvg.in/
+
+#Fixing usbfilters to manage webcam device posession either for host or for linux vm
+VBoxManage showvminfo "M365-Connect" | grep -A5 "USB Device Filters"
+#Get vms using
+VBoxManage list vms
+#Get filters using
+VBoxManage showvminfo "M365-Connect" | grep -A5 "USB Device Filters"
+#Remove target
+VBoxManage usbfilter remove 0 --target "M365-Connect"
+
+#Easy toggle script
+#!/bin/bash
+VM="M365-Connect"
+CAMERA_UUID="50655761-f490-4ef3-88c3-66ff73d826d7"
+
+if VBoxManage showvminfo "$VM" | grep -q "$CAMERA_UUID"; then
+    echo "Detaching webcam from VM, giving it back to host..."
+    VBoxManage controlvm "$VM" usbdetach "$CAMERA_UUID"
+else
+    echo "Attaching webcam to VM..."
+    VBoxManage controlvm "$VM" usbattach "$CAMERA_UUID"
+fi
+
+#Disable, and use more dynamic script after this
+# #!/bin/bash
+# VM="M365-Connect"
+# CAMERA_UUID="50655761-f490-4ef3-88c3-66ff73d826d7"
+
+# if VBoxManage showvminfo "$VM" | grep -q "$CAMERA_UUID"; then
+#     echo "Detaching webcam from VM, giving it back to host..."
+#     VBoxManage controlvm "$VM" usbdetach "$CAMERA_UUID"
+# else
+#     echo "Attaching webcam to VM..."
+#     VBoxManage controlvm "$VM" usbattach "$CAMERA_UUID"
+# fi
+
+
+
+#!/bin/bash
+# Toggle webcam between Host and VirtualBox VM
+
+VM="M365-Connect"
+VENDOR="0408"
+PRODUCT="5411"
+
+# Find the USB device UUID dynamically by VendorID and ProductID
+CAMERA_UUID=$(VBoxManage list usbhost | awk -v vid="0x$VENDOR" -v pid="0x$PRODUCT" '
+  BEGIN {uuid=""; v=0; p=0}
+  /^UUID:/      { uuid=$2; next }
+  /^VendorId:/  { v = ($2==vid); next }
+  /^ProductId:/ { p = ($2==pid); next }
+  /^$/ {
+    if (v && p && uuid != "") {
+      print uuid
+      exit
+    }
+    uuid=""; v=0; p=0
+  }
+' | head -n1 | tr -d '[:space:]')
+
+# Verify we actually got a UUID
+if [ -z "$CAMERA_UUID" ]; then
+    echo "❌ Camera not found in VBoxManage list usbhost. Is it connected?"
+    exit 1
+fi
+
+echo "🎯 Found camera UUID: $CAMERA_UUID"
+
+# Check if the VM already has the webcam attached
+if VBoxManage showvminfo "$VM" | grep -q "$CAMERA_UUID"; then
+    echo "🔌 Detaching webcam from VM ($VM), returning to host..."
+    VBoxManage controlvm "$VM" usbdetach "$CAMERA_UUID"
+else
+    echo "📷 Attaching webcam to VM ($VM)..."
+    VBoxManage controlvm "$VM" usbattach "$CAMERA_UUID"
+fi
+
+#Below to autodetect firs running vm and attach
+#!/bin/bash
+# # Toggle webcam between Host and VirtualBox VM
+
+# VENDOR="0408"
+# PRODUCT="5411"
+
+# # Auto-detect the first running VM (can be changed to prompt if multiple)
+# VM=$(VBoxManage list runningvms | awk -F\" '{print $2}' | head -n1)
+
+# if [ -z "$VM" ]; then
+#     echo "❌ No running VMs detected. Start a VM first."
+#     exit 1
+# fi
+
+# echo "🎯 Target VM: $VM"
+
+# # Find the USB device UUID dynamically by VendorID and ProductID
+# CAMERA_UUID=$(VBoxManage list usbhost | awk -v vid="0x$VENDOR" -v pid="0x$PRODUCT" '
+#   BEGIN {uuid=""; v=0; p=0}
+#   /^UUID:/      { uuid=$2; next }
+#   /^VendorId:/  { v = ($2==vid); next }
+#   /^ProductId:/ { p = ($2==pid); next }
+#   /^$/ {
+#     if (v && p && uuid != "") {
+#       print uuid
+#       exit
+#     }
+#     uuid=""; v=0; p=0
+#   }
+# ' | head -n1 | tr -d '[:space:]')
+
+# # Verify we actually got a UUID
+# if [ -z "$CAMERA_UUID" ]; then
+#     echo "❌ Camera not found in VBoxManage list usbhost. Is it connected?"
+#     exit 1
+# fi
+
+# echo "🎯 Found camera UUID: $CAMERA_UUID"
+
+# # Check if the VM already has the webcam attached
+# if VBoxManage showvminfo "$VM" | grep -q "$CAMERA_UUID"; then
+#     echo "🔌 Detaching webcam from VM ($VM), returning to host..."
+#     VBoxManage controlvm "$VM" usbdetach "$CAMERA_UUID"
+# else
+#     echo "📷 Attaching webcam to VM ($VM)..."
+#     VBoxManage controlvm "$VM" usbattach "$CAMERA_UUID"
+# fi
+
+#Select based on running vms
+# # #!/bin/bash
+# # Toggle webcam between Host and VirtualBox VM (interactive if multiple running)
+
+# VENDOR="0408"
+# PRODUCT="5411"
+
+# # Get list of running VMs (preserve full names with spaces)
+# mapfile -t RUNNING_VMS < <(VBoxManage list runningvms | sed -E 's/^"([^"]+)".*$/\1/')
+
+# if [ ${#RUNNING_VMS[@]} -eq 0 ]; then
+#     echo "❌ No running VMs detected. Start a VM first."
+#     exit 1
+# elif [ ${#RUNNING_VMS[@]} -eq 1 ]; then
+#     VM="${RUNNING_VMS[0]}"
+# else
+#     echo "⚡ Multiple running VMs detected. Choose one:"
+#     select VM in "${RUNNING_VMS[@]}"; do
+#         [ -n "$VM" ] && break
+#     done
+# fi
+
+# echo "🎯 Target VM: $VM"
+
+# # Find the USB device UUID dynamically by VendorID and ProductID
+# CAMERA_UUID=$(VBoxManage list usbhost | awk -v vid="0x$VENDOR" -v pid="0x$PRODUCT" '
+#   BEGIN {uuid=""; v=0; p=0}
+#   /^UUID:/      { uuid=$2; next }
+#   /^VendorId:/  { v = ($2==vid); next }
+#   /^ProductId:/ { p = ($2==pid); next }
+#   /^$/ {
+#     if (v && p && uuid != "") {
+#       print uuid
+#       exit
+#     }
+#     uuid=""; v=0; p=0
+#   }
+# ' | head -n1 | tr -d '[:space:]')
+
+# if [ -z "$CAMERA_UUID" ]; then
+#     echo "❌ Camera not found in VBoxManage list usbhost. Is it connected?"
+#     exit 1
+# fi
+
+# echo "🎯 Found camera UUID: $CAMERA_UUID"
+
+# # Toggle attachment
+# if VBoxManage showvminfo "$VM" | grep -q "$CAMERA_UUID"; then
+#     echo "🔌 Detaching webcam from VM ($VM), returning to host..."
+#     VBoxManage controlvm "$VM" usbdetach "$CAMERA_UUID"
+# else
+#     echo "📷 Attaching webcam to VM ($VM)..."
+#     VBoxManage controlvm "$VM" usbattach "$CAMERA_UUID"
+# fi
+
