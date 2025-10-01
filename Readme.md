@@ -16538,3 +16538,14 @@ So you just run:
 
 ./webcam-to-vm.sh
 ./webcam-to-host.sh
+##Validate if json is good or bad
+tep 1. Check your JSON syntax
+
+Run this to validate your JSON:
+
+jq . ~/.config/VSCodium/User/settings.json
+
+
+If jq isn’t installed, install it (sudo apt install jq -y).
+
+If JSON is broken, Codium ignores your config → meaning bash-clean won’t appear.
