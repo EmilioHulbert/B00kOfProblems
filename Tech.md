@@ -16549,3 +16549,17 @@ jq . ~/.config/VSCodium/User/settings.json
 If jq isn’t installed, install it (sudo apt install jq -y).
 
 If JSON is broken, Codium ignores your config → meaning bash-clean won’t appear.
+##Knowing the right codium config
+✅ Next test: confirm Codium’s config path
+
+Run this in your normal shell (outside Codium):
+
+codium --verbose | grep -i "user-data-dir"
+
+
+You should see something like:
+
+[main 2025-10-01T14:20:00.123Z] user-data-dir: /home/hulbert/.config/VSCodium
+
+
+If it points somewhere else (like ~/.var/app/... or /root/.config/...), then Codium is pulling settings from a different location than you edited.
