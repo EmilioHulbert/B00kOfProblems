@@ -16575,3 +16575,5 @@ settings.json should have
     "terminal.integrated.defaultProfile.linux": "bash-clean"
 }
 
+##Enabling codium running with root privileges
+codium --no-sandbox --user-data-dir=/home/hulbert/.vscode-nosandbox
