@@ -16549,3 +16549,29 @@ jq . ~/.config/VSCodium/User/settings.json
 If jq isn’t installed, install it (sudo apt install jq -y).
 
 If JSON is broken, Codium ignores your config → meaning bash-clean won’t appear.
+##Implement vscodium custom bashrc file
+#Finding and making right --rcfile for vscodium terminal to login
+
+check bash environment variables
+echo $0
+echo $BASH_ENV
+echo $PS1
+echo $EUID
+echo $USER
+
+#Force start codium with specif environment
+codium --user-data-dir=/home/hulbert/.config/VSCodium
+checking for settings file within !/.config
+find ~ -type f -name "settings.json" 2>/dev/null | grep VSCodium
+
+settings.json should have 
+{
+    "terminal.integrated.profiles.linux": {
+        "bash-clean": {
+            "path": "/bin/bash",
+            "args": ["--noprofile", "--rcfile", "/home/hulbert/.bashrc-codium"]
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash-clean"
+}
+
