@@ -17136,3 +17136,5 @@ psql -h 127.0.0.1 -U postgres -d manatal_llm -W
 
 and use postgres as the password.
 
+#Make roadrash full screen:
+download dxwnd.exe
