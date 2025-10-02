@@ -17004,4 +17004,135 @@ plugin:
     xdotool: {}
 ┌─[root@Intel5]─[/home/hulbert/Desktop/Manatal-LLM-Back-main]
 └──╼ #
+#Restoring redis log file after clearing caches
+1. Check your config
+
+Look inside /etc/redis/redis.conf for the logfile directive:
+
+grep logfile /etc/redis/redis.conf
+
+
+You’ll see something like:
+
+logfile /var/log/redis/redis-server.log
+2. Recreate the directory and file
+
+If it points to /var/log/redis/redis-server.log, then recreate it:
+mkdir -p /var/log/redis
+touch /var/log/redis/redis-server.log
+chown redis:redis /var/log/redis/redis-server.log
+chmod 640 /var/log/redis/redis-server.log
+3. Restart Redis
+systemctl restart redis-server
+systemctl status redis-server
+4. Alternative: disable file logging
+
+If you don’t actually care about Redis writing logs to a file (you can rely only on journalctl), you can disable file logging by editing /etc/redis/redis.conf:
+
+logfile ""
+That way Redis only logs to systemd/journald and you won’t get file errors.
+
+##Setting postgresql credentials
+Step 1: Test login with psql
+
+Run this:
+psql -h 127.0.0.1 -p 5432 -U postgres -d manatal_llm
+It will prompt for a password. Enter:
+postgres
+Step 2: If it works
+You’ll drop into the Postgres shell:
+
+makefile
+Copy code
+manatal_llm=#
+✅ That means your DB and credentials are fine.
+
+Step 3: If it fails
+Auth error → Check pg_hba.conf. You might still be on peer auth instead of md5/scram.
+Edit:
+
+pgsql
+Copy code
+/etc/postgresql/<version>/main/pg_hba.conf
+Replace the line for postgres with:
+
+host    all    postgres    127.0.0.1/32    md5
+
+
+Then reload:
+
+systemctl reload postgresql
+
+
+Database doesn’t exist → Create it:
+
+createdb -U postgres manatal_llm
+Port error → Maybe Postgres isn’t running. Check:
+
+systemctl status postgresql
+Perfect, that’s the pg_hba.conf file. This is the file that controls how Postgres authenticates clients.
+
+Right now, your problem is this line:
+
+local   all             postgres                                peer
+
+
+👉 That means: when connecting as postgres via local Unix socket, Postgres ignores your password and instead checks your Linux username.
+So unless you’re literally logged into the OS as the postgres user, psql -U postgres with a password will fail.
+
+🔧 Fix Option 1: Change peer → md5 (or scram-sha-256)
+
+If you want to use password auth for postgres:
+
+local   all             postgres                                scram-sha-256
+
+
+or (older style):
+
+local   all             postgres                                md5
+
+
+Then reload Postgres:
+
+systemctl reload postgresql
+
+
+Now psql -U postgres -h 127.0.0.1 will actually ask for a password and accept postgres.
+🔧 Fix Option 2: Keep peer, but login as system postgres
+
+If you don’t want to edit pg_hba.conf, just do:
+
+sudo -u postgres psql
+
+
+That works because peer says “trust the OS user if it matches the DB user.”
+If this is production: best practice is don’t use the postgres superuser at all for apps. Create a dedicated user:
+
+CREATE USER manatal WITH PASSWORD 'strongpassword';
+CREATE DATABASE manatal_llm OWNER manatal;
+GRANT ALL PRIVILEGES ON DATABASE manatal_llm TO manatal;
+
+
+Then change your DB_URL to:
+
+postgresql://manatal:strongpassword@127.0.0.1:5432/manatal_llm
+1. Reset the postgres user password
+
+Log in as the OS-level postgres user (bypassing password checks via peer on the socket):
+
+sudo -u postgres psql
+
+
+Then in the Postgres shell:
+
+ALTER USER postgres WITH PASSWORD 'postgres';
+
+
+Exit with \q.
+Now you can connect with:
+
+psql -h 127.0.0.1 -U postgres -d manatal_llm -W
+
+
+and use postgres as the password.
 
