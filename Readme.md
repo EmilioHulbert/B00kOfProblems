@@ -16704,3 +16704,304 @@ Once it’s running in windowed mode, your AutoHotkey script will now work for m
 If you want, I can tell you the exact values for X, Y, W, H so it literally becomes full-screen borderless on your monitor automatically.
 
 Do you want me to do that?
+
+#Enabling 3 finger and 4 finger swiping on parrot os
+#research
+Installing fusuma
+Setup (Parrot OS):
+# Install dependencies
+sudo apt update
+sudo apt install ruby libinput-tools xdotool wmctrl
+
+# Install fusuma
+sudo gem install fusuma
+Create config:
+mkdir -p ~/.config/fusuma
+nano ~/.config/fusuma/config.yml
+Run it:
+fusuma -d
+✅ Step 1: Install helpers
+
+Fusuma needs something to send keystrokes to MATE:
+sudo apt install xdotool wmctrl
+checking for events
+libinput debug-events
+If your touchpad uses the old synaptics driver, Fusuma won’t work. You’d need to switch to libinput:
+
+sudo apt purge xserver-xorg-input-synaptics
+sudo apt install xserver-xorg-input-libinput
+reboot
+#If user does not have permissions
+Your user (hulbert) doesn’t have permission to read /dev/input/event* devices, so libinput (and Fusuma on top of it) can’t see your gestures.
+
+By default, only root and members of the input group can access /dev/input.
+
+🔧 Fix: Add your user to the input group
+
+Run this once:
+
+sudo gpasswd -a hulbert input
+
+
+Then log out and back in (or reboot) so the new group membership takes effect.
+✅ Test again
+
+After logging back in, try:
+
+libinput debug-events
+Swipe with 3 fingers — you should now see output like:
+⚠️ If still broken
+
+Make sure you don’t have the old synaptics driver. Check with:
+xinput list
+If you see SynPS/2 Synaptics TouchPad, you may need to remove xserver-xorg-input-synaptics and rely on libinput instead.
+Quick sanity check after re-login
+
+Run:
+
+groups hulbert
+
+
+If you see input in the list, the change stuck.
+
+Then test:
+
+libinput debug-events
+#Killing and restarting fusuma
+pkill fusuma
+fusuma -d
+
+#Good code, but repeated workspace
+How to Make Fusuma as Snappy as Windows 11
+
+Edit your config ~/.config/fusuma/config.yml like this:
+swipe:
+  3:
+    left:
+      command: "xdotool set_desktop --relative 1"
+    right:
+      command: "xdotool set_desktop --relative -- -1"
+  4:
+    left:
+      command: "xdotool set_desktop --relative 1"
+    right:
+      command: "xdotool set_desktop --relative -- -1"
+
+threshold:
+  swipe: 0.2        # lower = more sensitive (default 0.5)
+  pinch: 0.1
+
+interval:
+  swipe: 0.6        # how long (in seconds) Fusuma tracks before deciding
+  pinch: 0.3
+
+plugin:
+  inputs:
+    libinput_command_input:
+      enable-tap: true
+      enable-dwt: true
+  executors:
+    xdotool: {}
+
+Extra Responsiveness Tweaks
+
+Run Fusuma with higher scheduling priority so gestures don’t lag under load:
+sudo renice -n -10 -p $(pgrep -f fusuma)
+Or better, create a systemd unit override:
+systemctl --user edit fusuma.service
+Add:
+[Service]
+Nice=-10
+Then:
+systemctl --user daemon-reexec
+systemctl --user restart fusuma
+⚡ Result:
+
+3 and 4 finger swipes both switch workspaces
+
+Gestures fire quickly, without “misses”
+
+Feels much closer to Windows Precision touchpad
+#Makking the first good config
+Step 1: Make script /usr/local/bin/workspace-switch.sh
+#!/bin/bash
+
+# Direction comes from Fusuma config
+DIRECTION="$1"
+
+CURRENT=$(xdotool get_desktop)
+MAX=$(xdotool get_num_desktops)
+
+if [[ "$DIRECTION" == "left" ]]; then
+    if [ "$CURRENT" -gt 0 ]; then
+        xdotool set_desktop $((CURRENT - 1))
+    fi
+elif [[ "$DIRECTION" == "right" ]]; then
+    if [ "$CURRENT" -lt $((MAX - 1)) ]; then
+        xdotool set_desktop $((CURRENT + 1))
+    fi
+fi
+Make it executable:
+sudo chmod +x /usr/local/bin/workspace-switch.sh
+
+Step 2: Update Fusuma config
+swipe:
+  3:
+    left:
+      command: "workspace-switch.sh left"
+    right:
+      command: "workspace-switch.sh right"
+  4:
+    left:
+      command: "workspace-switch.sh left"
+    right:
+      command: "workspace-switch.sh right"
+
+threshold:
+  swipe: 0.2
+  pinch: 0.1
+
+interval:
+  swipe: 0.6
+  pinch: 0.3
+
+plugin:
+  inputs:
+    libinput_command_input:
+      enable-tap: true
+      enable-dwt: true
+  executors:
+    xdotool: {}
+
+#Final.Running as a single service
+1. Create a systemd user service
+
+File: ~/.config/systemd/user/fusuma.service
+└──╼ $cat  ~/.config/systemd/user/fusuma.service
+[Unit]
+Description=Fusuma touchpad gesture daemon
+After=graphical.target
+
+[Service]
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+ExecStart=/usr/bin/nice -n -5 fusuma
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target
+
+┌─[hulbert@Intel5]─[~]
+└──╼ $
+
+
+systemctl --user daemon-reload
+systemctl --user enable fusuma.service
+systemctl --user start fusuma.service
+If you want it to run even without logging into a graphical session, enable linger:
+loginctl enable-linger hulbert
+Check logs if needed:
+journalctl --user -u fusuma -f
+1. Why journalctl --user showed nothing
+
+By default, only users in systemd-journal or adm group can read logs.
+
+Since you ran as hulbert, you don’t have permission to read your own user journal unless you’re in one of those groups.
+
+👉 Fix: add yourself to the systemd-journal group:
+
+sudo usermod -aG systemd-journal hulbert
+
+
+Then log out and back in (or reboot) so the group takes effect.
+After that, you can do:
+
+journalctl --user -u fusuma -f
+
+
+No sudo needed.
+#For fusuma .yml file we have
+┌─[hulbert@Intel5]─[~]
+└──╼ $cat ~/.config/fusuma/config.yml
+swipe:
+  3:
+    left:
+      command: "bash -c 'cur=$(xdotool get_desktop); if [ $cur -gt 0 ]; then xdotool set_desktop $((cur - 1)); fi'"
+    right:
+      command: "bash -c 'cur=$(xdotool get_desktop); max=$(( $(xdotool get_num_desktops) - 1 )); if [ $cur -lt $max ]; then xdotool set_desktop $((cur + 1)); fi'"
+  4:
+    left:
+      command: "bash -c 'cur=$(xdotool get_desktop); if [ $cur -gt 0 ]; then xdotool set_desktop $((cur - 1)); fi'"
+    right:
+      command: "bash -c 'cur=$(xdotool get_desktop); max=$(( $(xdotool get_num_desktops) - 1 )); if [ $cur -lt $max ]; then xdotool set_desktop $((cur + 1)); fi'"
+
+threshold:
+  swipe: 0.2
+  pinch: 0.1
+
+interval:
+  swipe: 0.6
+  pinch: 0.3
+
+plugin:
+  inputs:
+    libinput_command_input:
+      enable-tap: true
+      enable-dwt: true
+  executors:
+    xdotool: {}
+
+┌─[hulbert@Intel5]─[~]
+└──╼ $
+
+#The original .sh file and service .yml file separately
+─[root@Intel5]─[/home/hulbert/Desktop/Manatal-LLM-Back-main]
+└──╼ #cat /mnt/itel/workspace-switch.sh /mnt/itel/config.yml 
+#!/bin/bash
+
+# Direction comes from Fusuma config
+DIRECTION="$1"
+
+CURRENT=$(xdotool get_desktop)
+MAX=$(xdotool get_num_desktops)
+
+if [[ "$DIRECTION" == "left" ]]; then
+    if [ "$CURRENT" -gt 0 ]; then
+        xdotool set_desktop $((CURRENT - 1))
+    fi
+elif [[ "$DIRECTION" == "right" ]]; then
+    if [ "$CURRENT" -lt $((MAX - 1)) ]; then
+        xdotool set_desktop $((CURRENT + 1))
+    fi
+fi
+swipe:
+  3:
+    left:
+      command: "workspace-switch.sh left"
+    right:
+      command: "workspace-switch.sh right"
+  4:
+    left:
+      command: "workspace-switch.sh left"
+    right:
+      command: "workspace-switch.sh right"
+
+threshold:
+  swipe: 0.2
+  pinch: 0.1
+
+interval:
+  swipe: 0.6
+  pinch: 0.3
+
+plugin:
+  inputs:
+    libinput_command_input:
+      enable-tap: true
+      enable-dwt: true
+  executors:
+    xdotool: {}
+┌─[root@Intel5]─[/home/hulbert/Desktop/Manatal-LLM-Back-main]
+└──╼ #
+
