@@ -17138,3 +17138,118 @@ and use postgres as the password.
 
 #Make roadrash full screen:
 download dxwnd.exe
+
+#Fixing komorebi dependency issues
+It looks like you're trying to install Komorebi, but you're hitting a dependency issue. The error indicates that libgee-0.8-2 is missing, which is required by Komorebi to function correctly.
+
+To resolve this, you can try the following steps:
+
+Install the missing dependency:
+Run the following command to install libgee-0.8-2:
+
+sudo apt-get install libgee-0.8-2
+
+
+Reconfigure the package:
+After installing the missing dependency, you can attempt to reconfigure the Komorebi package:
+
+sudo dpkg --configure komorebi
+
+
+Fix broken dependencies (if needed):
+If there are still unresolved dependencies, you can use the following command to fix them:
+
+sudo apt-get install -f
+
+┌─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #dpkg -i komorebi-2.1-64-bit.deb 
+Selecting previously unselected package komorebi.
+(Reading database ... 395316 files and directories currently installed.)
+Preparing to unpack komorebi-2.1-64-bit.deb ...
+Unpacking komorebi (2.1.0) ...
+dpkg: dependency problems prevent configuration of komorebi:
+ komorebi depends on libgee-0.8-2; however:
+  Package libgee-0.8-2 is not installed.
+
+dpkg: error processing package komorebi (--install):
+ dependency problems - leaving unconfigured
+Processing triggers for gnome-menus (3.36.0-1.1) ...
+Processing triggers for mate-menus (1.26.0-3) ...
+Processing triggers for desktop-file-utils (0.26-1) ...
+Processing triggers for mailcap (3.70+nmu1) ...
+Processing triggers for fontconfig (2.14.1-4) ...
+Errors were encountered while processing:
+ komorebi
+┌─[✗]─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #sudo apt-get install libgee-0.8-2
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  geoclue-2.0 geoip-database iio-sensor-proxy john john-data keditbookmarks libgeoip1 libkf5bookmarks-data libkf5bookmarks5 libkf5dnssd-data libkf5dnssd5
+  libkf5kiofilewidgets5 libkf5notifyconfig-data libkf5notifyconfig5 libkf5plotting5 libkf5torrent6abi3 libktorrent-l10n libphonon4qt5-4 libphonon4qt5-data
+  libqt5positioning5 libqt5webchannel5 libqt5webengine-data libqt5webenginecore5 libqt5webenginewidgets5 libre2-9 libtorrent-rasterbar2.0 nasm
+  oracle-instantclient-basic phonon4qt5 phonon4qt5-backend-vlc postgresql
+Use 'sudo apt autoremove' to remove them.
+The following NEW packages will be installed:
+  libgee-0.8-2
+0 upgraded, 1 newly installed, 0 to remove and 475 not upgraded.
+1 not fully installed or removed.
+Need to get 236 kB of archives.
+After this operation, 923 kB of additional disk space will be used.
+Get:1 https://deb.parrot.sh/parrot lory/main amd64 libgee-0.8-2 amd64 0.20.6-1 [236 kB]
+Fetched 236 kB in 3s (74.4 kB/s)      
+Selecting previously unselected package libgee-0.8-2:amd64.
+(Reading database ... 395439 files and directories currently installed.)
+Preparing to unpack .../libgee-0.8-2_0.20.6-1_amd64.deb ...
+Unpacking libgee-0.8-2:amd64 (0.20.6-1) ...
+Setting up libgee-0.8-2:amd64 (0.20.6-1) ...
+Setting up komorebi (2.1.0) ...
+[INFO]: Removing old Komorebi properties file..
+[INFO]: Updating existing Komorebi Wallpapers..
+Processing triggers for libc-bin (2.36-9+deb12u9) ...
+Scanning application launchers
+Removing duplicate launchers or broken launchers
+ [-] Missing executable file kcmshell5 at launcher /usr/share/applications/kcm_trash.desktop
+ [-] Missing executable file wing-personal7.2 at launcher /usr/share/applications/wing-personal7.desktop
+ [-] Missing executable file wing-personal10 at launcher /usr/share/applications/wing-personal10.desktop
+ [-] Missing executable file gksu at launcher /usr/share/applications/imagewriter.desktop
+Launchers are updated
+┌─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #sudo dpkg --configure komorebi
+dpkg: error processing package komorebi (--configure):
+ package komorebi is already installed and configured
+Errors were encountered while processing:
+ komorebi
+┌─[✗]─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #sudo apt-get install -f
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  geoclue-2.0 geoip-database iio-sensor-proxy john john-data keditbookmarks libgeoip1 libkf5bookmarks-data libkf5bookmarks5 libkf5dnssd-data libkf5dnssd5
+  libkf5kiofilewidgets5 libkf5notifyconfig-data libkf5notifyconfig5 libkf5plotting5 libkf5torrent6abi3 libktorrent-l10n libphonon4qt5-4 libphonon4qt5-data
+  libqt5positioning5 libqt5webchannel5 libqt5webengine-data libqt5webenginecore5 libqt5webenginewidgets5 libre2-9 libtorrent-rasterbar2.0 nasm
+  oracle-instantclient-basic phonon4qt5 phonon4qt5-backend-vlc postgresql
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 475 not upgraded.
+┌─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #dpkg -i komorebi-2.1-64-bit.deb 
+(Reading database ... 395448 files and directories currently installed.)
+Preparing to unpack komorebi-2.1-64-bit.deb ...
+Unpacking komorebi (2.1.0) over (2.1.0) ...
+[INFO] Ignore any errors
+[*] Resetting desktop configuration
+No such schema “org.nemo.desktop”
+Setting up komorebi (2.1.0) ...
+[INFO]: Removing old Komorebi properties file..
+[INFO]: Updating existing Komorebi Wallpapers..
+Processing triggers for gnome-menus (3.36.0-1.1) ...
+Processing triggers for mate-menus (1.26.0-3) ...
+Processing triggers for desktop-file-utils (0.26-1) ...
+Processing triggers for mailcap (3.70+nmu1) ...
+Processing triggers for fontconfig (2.14.1-4) ...
+┌─[root@Intel5]─[/home/hulbert/Desktop]
+└──╼ #
+
+
