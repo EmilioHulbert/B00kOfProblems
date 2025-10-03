@@ -17252,4 +17252,41 @@ Processing triggers for fontconfig (2.14.1-4) ...
 ┌─[root@Intel5]─[/home/hulbert/Desktop]
 └──╼ #
 
+#Enabling echo request reply in windows firewall
+To allow ICMP Echo Reply so that a Windows machine responds to ping (ICMP) requests, you must tweak the settings in Windows Firewall. The simplest method is to enable a built-in firewall rule or create a new custom rule for ICMPv4.
 
+Enabling ICMP Reply in Windows Firewall
+Open the Start menu, type "Windows Defender Firewall with Advanced Security," and launch it.
+
+In the left pane, choose "Inbound Rules".
+
+Look for the rule named "File and Printer Sharing (Echo Request – ICMPv4-In)".
+
+If the rule is disabled, right-click it and select "Enable Rule".
+
+If you want to create a custom rule:
+
+In the right pane, click "New Rule…"
+
+Select "Custom" and click "Next".
+
+Choose "All programs," then "Next".
+
+Set the Protocol type to ICMPv4 (or ICMPv6 for IPv6).
+
+Click "Customize" and enable "Echo Request".
+
+Complete the prompts to select scope (IP addresses), action (Allow the connection), profiles (Domain, Private, Public), name, and finish.
+
+One-Line Command Option
+Open a Command Prompt as administrator.
+
+Run this command to allow ICMPv4 ping requests:
+
+text
+netsh advfirewall firewall add rule name="ICMPv4 Allow Ping Requests" protocol=icmpv4:8,any dir=in action=allow
+For IPv6:
+
+text
+netsh advfirewall firewall add rule name="ICMPv6 Allow Ping Requests" protocol=icmpv6:8,any dir=in action=allow
+This setting will enable the Windows Firewall to allow and reply to incoming ping (ICMP Echo Request) packets.
