@@ -17290,3 +17290,23 @@ For IPv6:
 text
 netsh advfirewall firewall add rule name="ICMPv6 Allow Ping Requests" protocol=icmpv6:8,any dir=in action=allow
 This setting will enable the Windows Firewall to allow and reply to incoming ping (ICMP Echo Request) packets.
+
+##Compress a file to zip format in linux
+The standard Linux command to compress a file or directory into .zip format is zip. Use the following syntax:
+
+To zip a single file:
+
+text
+zip archive.zip file.txt
+To zip multiple files:
+
+text
+zip archive.zip file1.txt file2.txt
+To zip a directory and all its contents recursively:
+
+text
+zip -r archive.zip foldername/
+Replace archive.zip with the desired name for the compressed file, and adjust the file or folder names as needed.
+
+#Activating Windows 10 enterprise
+https://github.com/naruepanart/win10-enterprise-ltsc-activation
