@@ -17356,4 +17356,7 @@ Now, before I give you a persistent setup (so Caja never shows or spins it up ag
 or permanently disabled/ignored until you explicitly re-enable it?
 
 That determines whether we just use udisksctl or go deeper with udev/systemd rules.
+#Refreshing claudcode vscode extension api if I am using it but then it happens to expire
+API Error: 401 {"type":"error","error":{"type":"authentication_error","message":"OAuth token has expired. Please obtain a new token or refresh your existing token."},"request_id":"req_011CTqfZdDaBUDkgKN13FLHG"} · Please run /login
+Run /login
 
