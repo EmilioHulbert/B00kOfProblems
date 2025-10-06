@@ -17310,3 +17310,50 @@ Replace archive.zip with the desired name for the compressed file, and adjust th
 
 #Activating Windows 10 enterprise
 https://github.com/naruepanart/win10-enterprise-ltsc-activation
+#Stopping harddrive from spinning in Linux even after unmounting it
+# 1. Unmount the drive
+sudo umount /dev/sdX1
+If it says “target is busy,” find out what’s using it:
+sudo lsof /dev/sdX1
+or
+sudo fuser -vm /dev/sdX1
+Kill those processes, then re-run umount.
+# 2. Power off the drive (stop it from spinning)
+sudo udisksctl power-off -b /dev/sdX
+# 2. Power off the drive (stop it from spinning)
+sudo udisksctl power-off -b /dev/sdX
+✅ This tells the kernel to send a standby/spindown command to the drive controller and detach it — Caja will stop showing it.
+
+If it’s an external USB HDD, this also safely disconnects it.
+If it’s internal, it’ll stay powered down until the next reboot or manual access.
+Optional — make Caja ignore it permanently:
+
+If you’re tired of Caja showing it every boot:
+
+Identify UUID:
+
+sudo blkid /dev/sdX1
+
+
+Add it to /etc/fstab with the noauto and nofail options, e.g.:
+
+UUID=xxxx-xxxx  /mnt/mydrive  ext4  noauto,nofail  0  0
+
+
+Now it won’t auto-mount or appear in Caja unless you explicitly mount it.
+Quick summary of what each does:
+Command	Purpose
+umount /dev/sdX1	Detaches filesystem cleanly
+udisksctl power-off -b /dev/sdX	Spins down and removes the drive
+/etc/fstab noauto,nofail	Prevents auto-mounting on startup
+
+Caution:
+If you use hdparm -y /dev/sdX or hdparm -Y /dev/sdX, those can also spin down drives, but Caja or systemd-udevd might wake them again unless you explicitly tell udisks to stop managing it.
+
+Now, before I give you a persistent setup (so Caja never shows or spins it up again), answer this bluntly:
+
+➡️ Do you want it temporarily off and hidden until reboot,
+or permanently disabled/ignored until you explicitly re-enable it?
+
+That determines whether we just use udisksctl or go deeper with udev/systemd rules.
+
