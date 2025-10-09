@@ -17360,3 +17360,302 @@ That determines whether we just use udisksctl or go deeper with udev/systemd rul
 API Error: 401 {"type":"error","error":{"type":"authentication_error","message":"OAuth token has expired. Please obtain a new token or refresh your existing token."},"request_id":"req_011CTqfZdDaBUDkgKN13FLHG"} · Please run /login
 Run /login
 
+##Update prices  in wordpress in bulk
+UPDATE wp_postmeta
+SET meta_value = '7266'
+WHERE meta_key = '_sale_price'
+AND meta_value = '5999';
+
+UPDATE wp_postmeta
+SET meta_value = '5999'
+WHERE meta_key = '_sale_price'
+AND meta_value = '7266';
+
+UPDATE wp_postmeta AS price
+JOIN wp_postmeta AS sale
+  ON price.post_id = sale.post_id
+  AND sale.meta_key = '_sale_price'
+SET price.meta_value = sale.meta_value
+WHERE price.meta_key = '_price';
+
+7266 KSh).
+That means the issue is not your DB, it’s WooCommerce’s price lookup cache or page-level caching layers.
+
+Let’s break it down and kill it properly.
+
+🔍 Root cause
+
+WooCommerce introduced a performance layer where product prices are stored in the wp_wc_product_meta_lookup table and in transient caches.
+Even if you change _sale_price directly, those caches can keep the old price until you regenerate or flush them completely.
+
+✅ Step-by-step fix
+1. Regenerate lookup tables again (force mode)
+
+Go to:
+
+WooCommerce → Status → Tools
+
+
+Find “Regenerate Product Lookup Tables”
+→ Click “Regenerate” once more, even if you already did.
+
+Or use WP-CLI (preferred):
+
+wp wc tool run regenerate_product_lookup_tables --user=1
+
+
+This repopulates wp_wc_product_meta_lookup from the fresh postmeta data.
+
+2. Delete all WooCommerce transients
+
+In the same Tools tab:
+
+WooCommerce → Status → Tools → Clear transients
+
+
+Run both:
+
+“Clear transients”
+
+“Clear expired transients”
+
+Or via WP-CLI:
+
+wp transient delete --all
+
+3. Purge object cache (if any)
+
+If you use Redis / Memcached / LiteSpeed Object Cache:
+
+wp cache flush
+
+
+Or in LiteSpeed → “Purge All”.
+
+4. Purge Cloudflare and browser again
+
+In Cloudflare dashboard → “Caching → Configuration → Purge Everything”.
+
+Hard reload (Ctrl + F5).
+
+5. Check currency converter or caching plugin
+
+If you run a plugin such as WooCommerce Multi-Currency, Price Based on Country, or Currency Switcher,
+→ those often cache converted values separately.
+Clear their own caches (they sometimes hold old prices in transients).
+
+6. Verify
+
+Open one affected product page in Incognito + hard refresh, and check source code:
+
+<meta property="product:price:amount" content="56">
+
+
+If that shows the correct price, the front-end templates will soon follow once cache clears.
+
+⚙️ Optional sanity check via SQL
+
+Run:
+
+SELECT post_id, meta_key, meta_value
+FROM wp_postmeta
+WHERE post_id = 6330 AND meta_key IN ('_price', '_sale_price', '_regular_price');
+
+
+You should see:
+
+_regular_price | 7500
+_sale_price     | 7266
+_price          | 7266
+
+
+If _price is still old, update it:
+
+UPDATE wp_postmeta SET meta_value = '7266'
+WHERE post_id = 6330 AND meta_key = '_price';
+
+
+Then regenerate lookup tables again.
+
+🧠 Why this happens
+
+WooCommerce uses _price for display (not _sale_price directly).
+Normally, it auto-syncs those when you edit via admin, but manual SQL updates skip that sync.
+The regeneration step fixes it.
+
+Bottom line:
+👉 Your prices are updated in DB.
+👉 You just need to sync _price + clear lookup + transient caches.
+
+Run the above 6 steps — after that, your front-end will show the new 56 USD (7266 KSh) price.
+
+Do you want me to give you a one-liner WP-CLI command that fixes all _price values to match _sale_price automatically? That way this never happens again after SQL edits.
+
+You said:
+i did this but still In stock	KShs 7,500.00 Original price was: KShs 7,500.00.KShs 5,999.00Current price is: KShs 5,999.00.	Fashion, Women
+ChatGPT said:
+
+Good — that’s useful data. You’ve done the regeneration and flush, yet the front-end and admin “Prices” column still show the old cached sale price (KShs 5,999 instead of your new KShs 7,266).
+
+That means WooCommerce’s internal price meta (_price) for that product is still stale, even though _sale_price got updated. WooCommerce only uses _price when rendering the price, not _sale_price directly — so the fix must explicitly re-sync _price.
+
+Let’s force this update properly.
+
+⚙️ Step-by-step (tough, but final)
+🧩 Step 1 — Check the meta values directly
+
+Run this in phpMyAdmin or WP-CLI:
+
+SELECT meta_key, meta_value 
+FROM wp_postmeta 
+WHERE post_id = 6330 
+  AND meta_key IN ('_regular_price','_sale_price','_price');
+
+
+If you see something like:
+
+meta_key	meta_value
+_regular_price	7500
+_sale_price	7266
+_price	5999 ✅ ← this is the problem
+
+then _price never got updated.
+
+🛠️ Step 2 — Fix _price to match _sale_price
+
+Run:
+
+UPDATE wp_postmeta 
+SET meta_value = (SELECT meta_value FROM (SELECT * FROM wp_postmeta) AS tmp 
+                  WHERE tmp.post_id = 6330 AND tmp.meta_key = '_sale_price')
+WHERE post_id = 6330 AND meta_key = '_price';
+
+
+If you’re comfortable with WP-CLI:
+
+wp post meta update 6330 _price 7266
+
+
+Then confirm again:
+
+wp post meta get 6330 _price
+
+
+It should show 7266.
+
+🧱 Step 3 — Regenerate lookup table once more
+wp wc tool run regenerate_product_lookup_tables --user=1
+
+🧹 Step 4 — Flush caches again
+wp transient delete --all
+wp cache flush
+
+
+And purge Cloudflare.
+
+🧪 Step 5 — Reload product page
+
+Use an incognito window and check again. You should now see:
+
+KShs 7,500.00  Original price
+KShs 7,266.00  Current price
+
+🧠 Why this happens
+
+WooCommerce always pulls the active display price from the _price meta field.
+Editing only _sale_price doesn’t automatically propagate, because that sync runs only through the WooCommerce admin product editor — not raw SQL or CSV imports.
+
+So any bulk update must either:
+
+Update _price too, or
+
+Trigger a wc_update_product_lookup_tables() rebuild for each product.
+
+🚀 Permanent prevention (one-liner bulk fix)
+
+If you ever bulk-edit sale prices via SQL or CSV again, immediately follow it with this WP-CLI command:
+
+wp db query "UPDATE wp_postmeta p
+JOIN wp_postmeta s ON s.post_id = p.post_id AND s.meta_key = '_sale_price'
+SET p.meta_value = s.meta_value
+WHERE p.meta_key = '_price';"
+
+
+Then regenerate lookup tables and flush caches.
+
+That keeps _price in sync with _sale_price for every product.
+
+Run the SQL or WP-CLI command above for your store, and the prices will finally match the new sale values everywhere.
+Want me to craft a safe script that bulk-syncs _price to _sale_price for all products automatically (with rollback option)?
+
+You said:
+i see MariaDB [davidsondesigners]> SELECT meta_key, meta_value 
+    -> FROM wp_postmeta 
+    -> WHERE post_id = 6330 
+    ->   AND meta_key IN ('_regular_price','_sale_price','_price');
++----------------+------------+
+| meta_key       | meta_value |
++----------------+------------+
+| _regular_price | 7500       |
+| _sale_price    | 7266       |
+| _price         | 5999       |
++----------------+------------+
+3 rows in set (0.001 sec)
+
+ChatGPT said:
+
+Perfect — that confirms the root cause 💥
+
+Your _price field is stale (5999), while _sale_price is the updated value (7266).
+WooCommerce uses _price to render front-end prices — so until that’s updated, the storefront will keep showing KShs 5,999 no matter what.
+
+Let’s fix this cleanly.
+
+✅ Option 1 — Fix this single product (quick)
+
+Run this SQL in MariaDB:
+
+UPDATE wp_postmeta 
+SET meta_value = '7266'
+WHERE post_id = 6330 AND meta_key = '_price';
+
+
+Then regenerate lookup tables:
+
+wp wc tool run regenerate_product_lookup_tables --user=1
+
+
+And flush caches:
+
+wp cache flush
+wp transient delete --all
+
+
+Check again — that product’s price should now match 7,266 front and backend.
+
+✅ Option 2 — Fix all products automatically (recommended)
+
+Run this once — it syncs _price to _sale_price for every product that has one:
+
+UPDATE wp_postmeta AS price
+JOIN wp_postmeta AS sale
+  ON price.post_id = sale.post_id
+  AND sale.meta_key = '_sale_price'
+SET price.meta_value = sale.meta_value
+WHERE price.meta_key = '_price';
+
+
+Then immediately run:
+
+wp wc tool run regenerate_product_lookup_tables --user=1
+wp cache flush
+wp transient delete --all
+
+
+That ensures every product’s _price matches its _sale_price.
+
+⚠️ Why it happened
+
+When you bulk-updated the sale prices (via CSV, SQL, or plugin), WooCommerce didn’t trigger its internal “price sync” hook — so _price never changed.
+That field is what WooCommerce and most themes read from when generating the product HTML, so it’s critical to keep it consistent.
+
