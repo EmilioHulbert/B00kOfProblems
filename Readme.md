@@ -17659,3 +17659,5 @@ That ensures every product’s _price matches its _sale_price.
 When you bulk-updated the sale prices (via CSV, SQL, or plugin), WooCommerce didn’t trigger its internal “price sync” hook — so _price never changed.
 That field is what WooCommerce and most themes read from when generating the product HTML, so it’s critical to keep it consistent.
 
+##Check currently logged in devices with your google account
+g.co/mydevices
