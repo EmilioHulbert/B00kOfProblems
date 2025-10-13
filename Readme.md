@@ -17661,3 +17661,140 @@ That field is what WooCommerce and most themes read from when generating the pro
 
 ##Check currently logged in devices with your google account
 g.co/mydevices
+
+sanity check for pip
+pip check
+
+#Fix some redis server service failing to start
+Good — you’re actually halfway there, Remac.
+Celery is fine — it’s connecting to Redis on localhost:6379 — but Redis itself is crashing repeatedly during startup.
+
+Let’s tear this apart like a proper postmortem.
+
+⚠️ The key line
+redis-server.service: Failed with result 'exit-code'
+status=1/FAILURE
+"Redis is loading..."
+
+
+That "Redis is loading..." means Redis tries to start, but dies before it can finish initializing its dataset.
+Usually this happens due to data corruption, permission issues, or port binding conflicts.
+
+🔍 Step 1 — Find the real reason (check the logs)
+
+Run:
+
+journalctl -u redis-server -n 50 --no-pager
+
+
+or
+
+cat /var/log/redis/redis-server.log | tail -n 30
+
+
+You’ll likely see one of these:
+
+RDB: corrupted file
+
+Can't open the append-only file
+
+Permission denied opening dump.rdb
+
+Address already in use
+
+OOM - out of memory
+
+Post that log snippet if you want me to pinpoint exactly.
+
+⚙️ Step 2 — Check file permissions and ownership
+
+Redis runs as user redis, so if /var/lib/redis or /var/log/redis were touched by root, it will crash.
+
+Run:
+
+ls -ld /var/lib/redis /var/log/redis
+
+
+If ownership isn’t redis:redis, fix it:
+
+chown -R redis:redis /var/lib/redis /var/log/redis
+chmod -R 770 /var/lib/redis /var/log/redis
+
+
+Then restart:
+
+systemctl restart redis-server
+
+🧹 Step 3 — If data corruption is the issue
+
+You might see something like:
+
+“Short read or RDB format error”
+
+If so, you’ll need to remove the corrupted dump:
+
+systemctl stop redis-server
+mv /var/lib/redis/dump.rdb /var/lib/redis/dump.rdb.bak
+mv /var/lib/redis/appendonly.aof /var/lib/redis/appendonly.aof.bak 2>/dev/null
+systemctl start redis-server
+
+
+Redis will rebuild fresh empty storage.
+
+🧱 Step 4 — Verify it’s running
+systemctl status redis-server
+ss -tulpn | grep redis
+redis-cli ping
+
+
+If you get:
+
+PONG
+
+
+you’re good.
+
+Then restart your stack:
+
+honcho restart
+
+
+so your Celery worker reconnects cleanly.
+
+💡 Devil’s Advocate Take
+
+You’re running Celery as root via Honcho (honcho[3110738] worker.1 | ...), while Redis runs as redis.
+That’s sloppy — if Celery crashes Redis or writes files owned by root in /var/lib/redis, you’ll keep getting this failure.
+
+✅ Fix:
+Create a dedicated Unix user for your Django/Celery app and isolate privileges.
+
+useradd -r -s /bin/false nashtech
+chown -R nashtech:nashtech /var/www/nashtech.nairobiskates.com
+sudo -u nashtech bash -c 'source /var/www/nashtech.nairobiskates.com/B2B-Ecommerce-Platform/venv/bin/activate && honcho start'
+
+
+Redis stays redis:redis, Celery runs as nashtech, and your system avoids privilege clashes.
+
+🚀 Optional hardening (production-grade)
+
+You can make Redis immune to this recurring crash pattern by:
+
+Disabling persistence (if Celery is your only client):
+
+save ""
+appendonly no
+
+
+in /etc/redis/redis.conf.
+
+Setting systemd restart policy:
+
+systemctl edit redis-server
+
+
+then add:
+
+[Service]
+Restart=on-failure
+RestartSec=5s
