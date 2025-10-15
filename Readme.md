@@ -17889,3 +17889,32 @@ Press F8 during boot to access the boot options.
 Select Safe Mode with Command Prompt.
 
 From there, attempt the same steps again to remove attributes and modify the hosts file.
+#Opening and setting priority on linux
+taskset -c 0-2 virtualbox
+or
+renicing
+renice -n -2 -p 118962
+Or, the same thing without named options (simpler, works on all systems):
+renice -2 118962
+💡 Notes:
+
+You must run this as root to raise priority (i.e., use negative nice values).
+
+Regular users can only lower their own process priority (i.e., make the nice value more positive).
+
+-20 is the highest priority, 19 is the lowest.
+✅ Example:
+
+If you want to give your VM (say PID 118962) a higher priority:
+
+sudo renice -n -2 -p 118962
+
+
+And to confirm:
+
+ps -o pid,ni,cmd -p 118962
+
+
+Or in htop, you can press F5 → r on a process to renice it interactively.
+
+
