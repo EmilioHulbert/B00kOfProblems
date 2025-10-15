@@ -17798,3 +17798,94 @@ then add:
 [Service]
 Restart=on-failure
 RestartSec=5s
+
+#Taking ownership and crontrol of windows system files
+Use icacls Instead of cacls:
+cacls is deprecated, and icacls should be used instead to modify file permissions. Let's try setting the full control permission using icacls.
+
+Run the following command in Administrator Command Prompt to grant full control to the file for all users:
+
+icacls "C:\Windows\system32\drivers\etc\hosts" /grant Everyone:F
+Double-checking the hosts File:
+
+If you still can't edit the file, make sure you haven't modified the file in a way that prevents changes. Sometimes, the file might be set to read-only or locked by the system.
+
+Try the following command to check the attributes:
+attrib C:\Windows\system32\drivers\etc\hosts
+If you see an R (read-only) attribute, you can remove it by running:
+
+attrib -R C:\Windows\system32\drivers\etc\hosts
+After making these changes, you should be able to update the hosts file.
+If you get
+
+C:\Windows\system32>attrib C:\Windows\system32\drivers\etc\hosts
+A  SHR               C:\Windows\system32\drivers\etc\hosts
+
+C:\Windows\system32>attrib -R C:\Windows\system32\drivers\etc\hosts
+Not resetting hidden file - C:\Windows\system32\drivers\etc\hosts
+
+C:\Windows\system32>attrib -H C:\Windows\system32\drivers\etc\hosts
+Not resetting system file - C:\Windows\system32\drivers\etc\hosts
+
+C:\Windows\system32>attrib -S C:\Windows\system32\drivers\etc\hosts
+Not resetting hidden file - C:\Windows\system32\drivers\etc\hosts
+
+C:\Windows\system32>attrib C:\Windows\system32\drivers\etc\hosts
+A  SHR               C:\Windows\system32\drivers\etc\hosts
+
+C:\Windows\system32>
+It seems like the hosts file has system and hidden file attributes (S for system and H for hidden), which might be preventing you from modifying it even though you've taken ownership. The fact that you're getting the message "Not resetting system file" indicates that the file is being protected by the system.
+
+Here's what we can try next:
+
+Force the Removal of System and Hidden Attributes:
+To remove these attributes, you need to use attrib with administrative privileges, but because the file is marked as a system file, you might need a more direct approach.
+
+First, try running the following command to remove both system and hidden attributes:
+
+attrib -s -h C:\Windows\system32\drivers\etc\hosts
+
+
+This command should remove both the system (S) and hidden (H) attributes. If the file is still protected after this, then the system may be enforcing restrictions that are harder to bypass without disabling certain protections temporarily.
+
+Run Command Prompt as Administrator:
+Even though you've been running with administrator rights, ensure you have the "Run as Administrator" option when opening Command Prompt. You can try again with explicit elevated rights:
+
+Right-click on Command Prompt in the Start menu.
+
+Select Run as Administrator.
+
+Then run the attrib and icacls commands again.
+
+Disable Windows File Protection (Advanced):
+Windows File Protection (WFP) could be enforcing these restrictions, which makes it difficult to modify system files like hosts. If you're okay with more advanced steps, you can temporarily disable it:
+
+Open Command Prompt as Administrator.
+
+Run the following command to stop the Windows Modules Installer service:
+
+net stop wuauserv
+
+
+Then try removing the attributes again with:
+
+attrib -s -h C:\Windows\system32\drivers\etc\hosts
+
+
+Once you've done that, try modifying the hosts file.
+
+After you're done, restart the service by running:
+
+net start wuauserv
+
+Safe Mode Option:
+
+If all else fails, booting into Safe Mode can sometimes bypass file system protections that run in normal Windows mode:
+
+Restart your PC.
+
+Press F8 during boot to access the boot options.
+
+Select Safe Mode with Command Prompt.
+
+From there, attempt the same steps again to remove attributes and modify the hosts file.
