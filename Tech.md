@@ -17918,3 +17918,7 @@ ps -o pid,ni,cmd -p 118962
 Or in htop, you can press F5 → r on a process to renice it interactively.
 
 
+#Fix missing dom extension
+The WPForms plugin requires dom PHP extension. Read more for additional information on PHP extensions.
+ apt-get install php-xml -y
+service php8.3-fpm restart
