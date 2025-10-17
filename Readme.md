@@ -17922,3 +17922,238 @@ Or in htop, you can press F5 → r on a process to renice it interactively.
 The WPForms plugin requires dom PHP extension. Read more for additional information on PHP extensions.
  apt-get install php-xml -y
 service php8.3-fpm restart
+
+#Fix python setup error
+Downloading django_user_agents-0.4.0-py3-none-any.whl (8.6 kB)
+Collecting celery==4.4.2
+  Downloading celery-4.4.2-py2.py3-none-any.whl (422 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 422.8/422.8 KB 28.8 MB/s eta 0:00:00
+Collecting googletrans==4.0.0-rc1
+  Downloading googletrans-4.0.0rc1.tar.gz (20 kB)
+  Preparing metadata (setup.py) ... error
+  error: subprocess-exited-with-error
+  
+  × python setup.py egg_info did not run successfully.
+  │ exit code: 1
+  ╰─> [1 lines of output]
+      ERROR: Can not execute `setup.py` since setuptools is not available in the build environment.
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: metadata-generation-failed
+
+× Encountered error while generating package metadata.
+╰─> See above for output.
+
+note: This is an issue with the package mentioned above, not pip.
+hint: See above for details.
+WARNING: You are using pip version 22.0.4; however, version 25.2 is available.
+You should consider upgrading via the '/var/www/nashtech-solutions.com/venv/bin/python3.10 -m pip install --upgrade pip' command.
+(venv) root@vmi2859150:/var/www/nashtech-solutions.com# 
+
+✅ Problem Summary
+
+The package googletrans==4.0.0-rc1 uses a setup.py for installation, and this requires setuptools. Your current environment doesn’t have setuptools installed, so the build fails with:
+
+ERROR: Can not execute `setup.py` since setuptools is not available in the build environment.
+✅ Solution
+
+Install setuptools (and also wheel, which is commonly needed for building packages) in your virtual environment.
+
+Run:
+source /var/www/nashtech-solutions.com/venv/bin/activate
+
+pip install --upgrade pip setuptools wheel
+Then try installing the package again:
+
+pip install googletrans==4.0.0-rc1
+If you still have trouble with googletrans==4.0.0-rc1, you can try installing a maintained fork:
+
+pip install googletrans==4.0.0rc1 --use-pep517
+
+
+Or try an actively maintained alternative like deep-translator
+:
+
+pip install deep-translator
+📌 Upgrade pip (Recommended)
+
+You're also using an old pip version. To avoid future compatibility issues:
+
+/var/www/nashtech-solutions.com/venv/bin/python3.10 -m pip install --upgrade pip
+🛑 Problem Summary
+
+Pip is rejecting Celery 4.4.2 due to invalid metadata in its pyproject.toml or setup.cfg file:
+
+Requested celery==4.4.2 ... has invalid metadata: Expected matching RIGHT_PARENTHESIS for LEFT_PARENTHESIS, after version specifier pytz (>dev)
+
+This metadata error causes pip ≥ 24.1 to skip installing that version entirely.
+
+✅ Fix Options
+Option 1: Downgrade pip (Recommended for compatibility)
+
+Celery 4.4.2 installs fine with pip versions prior to 24.1.
+
+Run this to downgrade pip inside your virtual environment:
+pip install 'pip<24.1'
+pip install celery==4.4.2
+Option 2: Upgrade Celery (If you can)
+
+If your project is compatible with Celery 5+, update requirements.txt to use a newer version:
+
+celery==5.2.7
+
+
+Then install:
+
+pip install -r requirements.txt
+
+
+Make sure to check the Celery 5 changelog
+ — there are breaking changes from 4.x to 5.x.
+
+Option 3: Use a direct URL + --no-build-isolation (Advanced workaround)
+
+You can try to install celery==4.4.2 from its wheel directly:
+
+pip install https://files.pythonhosted.org/packages/7e/54/4d87a8f589259456efb09f574d538fcf3fd7339a3daaae8e02320c1780f1/celery-4.4.2-py2.py3-none-any.whl --no-build-isolation --use-deprecated=legacy-resolver
+
+
+But this may still fail with pip ≥ 24.1, depending on your environment.
+
+📌 Recommendation
+
+If you must use Celery 4.4.2, your safest path is:
+
+pip install 'pip<24.1'
+pip install celery==4.4.2
+
+
+Then freeze your working dependencies with:
+
+pip freeze > requirements.txt
+🛑 Error Summary
+
+The key part of the error:
+
+Run-time dependency cairo found: NO (tried pkgconfig)
+ERROR: Dependency "cairo" not found, tried pkgconfig
+
+
+Even though you have gcc, libpq-dev, and python3-dev, you're missing the Cairo graphics library (libcairo2 and its development headers).
+
+✅ Fix: Install Cairo System Dependencies
+
+Run this command to install the required libraries for pycairo:
+
+sudo apt install libcairo2-dev pkg-config
+
+
+This will install:
+
+libcairo2-dev: the C headers for Cairo
+
+pkg-config: helps locate the library during build
+
+🔁 Then Retry the Install
+
+After installing the above packages, re-run your pip install:
+
+pip install -r requirements.txt
+
+
+Or if you're testing individually:
+
+pip install pycairo
+
+📌 Optional Cleanup Tip
+
+If you're working on Ubuntu 24.04+ and running into build issues often, also install these helpful build tools once:
+
+sudo apt install build-essential python3-pip python3-venv
+✅ How to Fix It
+Step 1: Install libffi-dev
+
+Run this to install the missing dev package:
+
+sudo apt install libffi-dev
+Step 2: Recompile Python 3.10 (if you built it manually)
+
+If you installed Python 3.10 from source, you must rebuild it now that libffi-dev is available.
+
+Example:
+
+cd /usr/src/Python-3.10.*/  # or wherever your Python 3.10 source is
+sudo make clean
+./configure --enable-optimizations
+make -j$(nproc)
+sudo make altinstall
+
+
+Important: Use make altinstall to avoid overwriting the system Python.
+
+After reinstalling, check:
+
+python3.10 -c "import _ctypes; print('✅ _ctypes is available')"
+🧪 If You Installed Python via apt (not source)
+
+If you installed Python using the system package manager and are still missing _ctypes, try:
+
+sudo apt install python3.10-full
+
+
+This will install all standard modules including _ctypes.
+
+📌 After Fixing
+
+Once _ctypes is available, re-activate your virtual environment and try running again:
+
+source venv/bin/activate
+python manage.py runserver
+🔥 TL;DR: Yes, you really do need to recompile or reinstall Python 3.10, because _ctypes is completely missing.
+
+It’s not something you can "install later" into a broken Python build — _ctypes is a compiled C extension built as part of Python itself, and the only way to get it back is to:
+
+✅ Option 1: Rebuild Python 3.10 from Source (Best if you're using custom Python)
+
+Here’s exactly how to fix it:
+
+🔹 1. Remove the broken version
+
+Just to avoid confusion with the system Python, do not uninstall the system Python. But do clean up any broken /usr/local/python3.10 manually if you're going to rebuild there.
+
+sudo rm -rf /usr/local/python3.10
+
+🔹 2. Download and rebuild Python 3.10.4 with libffi present
+cd /usr/src
+sudo wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz
+sudo tar xzf Python-3.10.4.tgz
+cd Python-3.10.4
+sudo ./configure --enable-optimizations --prefix=/usr/local/python3.10
+sudo make -j$(nproc)
+sudo make altinstall
+
+
+💡 This installs to /usr/local/python3.10/bin/python3.10, separate from system Python.
+
+🔹 3. Test that _ctypes works
+/usr/local/python3.10/bin/python3.10 -c "import _ctypes; print('✅ _ctypes is working')"
+
+✅ Option 2: Use system Python (Ubuntu-provided one)
+
+Ubuntu 24.04 comes with Python 3.12 now, but if you don’t need 3.10 specifically, you can switch to the system Python:
+
+sudo apt install python3.12 python3.12-venv python3.12-dev
+python3.12 -m venv venv
+source venv/bin/activate
+python --version  # should show 3.12.x
+
+
+Then reinstall your requirements:
+
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+
+⛔ Why you can't "fix" it another way
+
+_ctypes is not a Python package — it's a C extension module built during the Python compile process. If it's missing, it means libffi-dev was not installed at the time Python was built, and reinstalling the package afterward doesn't retroactively build _ctypes.
