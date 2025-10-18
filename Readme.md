@@ -18157,3 +18157,49 @@ pip install -r requirements.txt
 ⛔ Why you can't "fix" it another way
 
 _ctypes is not a Python package — it's a C extension module built during the Python compile process. If it's missing, it means libffi-dev was not installed at the time Python was built, and reinstalling the package afterward doesn't retroactively build _ctypes.
+How do i rename a flash disk volume on linux from lets-party to partyman as it appears in caja file manager parrot os
+Good — clear and concrete. Before we proceed, I need to confirm **how** your flash drive is currently formatted, because the renaming method depends on its **filesystem type** (e.g., FAT32, exFAT, NTFS, ext4, etc.).
+
+So, please first run this command (with the USB plugged in):
+
+```bash
+lsblk -f
+```
+
+and show me the output (or at least the relevant line for your flash disk, usually something like `/dev/sdb1`).
+
+---
+
+But to explain upfront — here’s the **general breakdown** by filesystem type:
+
+| Filesystem         | Command to rename volume label       | Example                              |
+| ------------------ | ------------------------------------ | ------------------------------------ |
+| **FAT16/FAT32**    | `sudo fatlabel /dev/sdX1 NEWLABEL`   | `sudo fatlabel /dev/sdb1 PARTyman`   |
+| **exFAT**          | `sudo exfatlabel /dev/sdX1 NEWLABEL` | `sudo exfatlabel /dev/sdb1 partyman` |
+| **NTFS**           | `sudo ntfslabel /dev/sdX1 NEWLABEL`  | `sudo ntfslabel /dev/sdb1 partyman`  |
+| **ext2/ext3/ext4** | `sudo e2label /dev/sdX1 NEWLABEL`    | `sudo e2label /dev/sdb1 partyman`    |
+
+⚠️ **Critical points before running the rename command:**
+
+1. Unmount the flash drive first:
+
+   ```bash
+   sudo umount /dev/sdX1
+   ```
+2. Replace `/dev/sdX1` with your actual device (e.g., `/dev/sdb1`).
+3. Do *not* rename while it’s mounted — Caja or any process holding it open can cause corruption.
+
+---
+
+After renaming, reinsert it or remount:
+
+```bash
+udisksctl mount -b /dev/sdX1
+```
+
+and Caja should show the new label “partyman”.
+
+---
+
+Let’s make sure you do it right — please share your `lsblk -f` output, so I can tell you **exactly** which command to use.
+
