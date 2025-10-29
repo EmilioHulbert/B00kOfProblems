@@ -18221,3 +18221,152 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 
+#Fix pillow installation error
+warning: no previously-included files found matching '.readthedocs.yml'
+      warning: no previously-included files found matching 'codecov.yml'
+      warning: no previously-included files matching '.git*' found anywhere in distribution
+      warning: no previously-included files matching '*.pyc' found anywhere in distribution
+      warning: no previously-included files matching '*.so' found anywhere in distribution
+      no previously-included directories found matching '.ci'
+      adding license file 'LICENSE'
+      writing manifest file 'src/Pillow.egg-info/SOURCES.txt'
+      running build_ext
+      
+      
+      The headers or library files could not be found for jpeg,
+      a required dependency when compiling Pillow from source.
+      
+      Please see the install instructions at:
+         https://pillow.readthedocs.io/en/latest/installation.html
+      
+      Traceback (most recent call last):
+        File "/tmp/pip-install-z9_lk6r0/pillow_7d07662ee6c349db9db31dd1bdfbe15d/setup.py", line 976, in <module>
+          setup(
+        File "/opt/BlogApp-Django/venv/lib/python3.10/site-packages/setuptools/__init__.py", line 153, in setup
+          return distutils.core.setup(**attrs)
+        File "/usr/local/python3.10/lib/python3.10/distutils/core.py", line 148, in setup
+          dist.run_commands()
+        File "/usr/local/python3.10/lib/python3.10/distutils/dist.py", line 966, in run_commands
+          self.run_command(cmd)
+        File "/usr/local/python3.10/lib/python3.10/distutils/dist.py", line 985, in run_command
+          cmd_obj.run()
+        File "/opt/BlogApp-Django/venv/lib/python3.10/site-packages/setuptools/command/install.py", line 61, in run
+          return orig.install.run(self)
+        File "/usr/local/python3.10/lib/python3.10/distutils/command/install.py", line 568, in run
+          self.run_command('build')
+        File "/usr/local/python3.10/lib/python3.10/distutils/cmd.py", line 313, in run_command
+          self.distribution.run_command(command)
+        File "/usr/local/python3.10/lib/python3.10/distutils/dist.py", line 985, in run_command
+          cmd_obj.run()
+        File "/usr/local/python3.10/lib/python3.10/distutils/command/build.py", line 135, in run
+          self.run_command(cmd_name)
+        File "/usr/local/python3.10/lib/python3.10/distutils/cmd.py", line 313, in run_command
+          self.distribution.run_command(command)
+        File "/usr/local/python3.10/lib/python3.10/distutils/dist.py", line 985, in run_command
+          cmd_obj.run()
+        File "/opt/BlogApp-Django/venv/lib/python3.10/site-packages/setuptools/command/build_ext.py", line 79, in run
+          _build_ext.run(self)
+        File "/usr/local/python3.10/lib/python3.10/distutils/command/build_ext.py", line 340, in run
+          self.build_extensions()
+        File "/tmp/pip-install-z9_lk6r0/pillow_7d07662ee6c349db9db31dd1bdfbe15d/setup.py", line 788, in build_extensions
+          raise RequiredDependencyException(f)
+      __main__.RequiredDependencyException: jpeg
+      
+      During handling of the above exception, another exception occurred:
+      
+      Traceback (most recent call last):
+        File "<string>", line 2, in <module>
+        File "<pip-setuptools-caller>", line 34, in <module>
+        File "/tmp/pip-install-z9_lk6r0/pillow_7d07662ee6c349db9db31dd1bdfbe15d/setup.py", line 1033, in <module>
+          raise RequiredDependencyException(msg)
+      __main__.RequiredDependencyException:
+      
+      The headers or library files could not be found for jpeg,
+      a required dependency when compiling Pillow from source.
+      
+      Please see the install instructions at:
+         https://pillow.readthedocs.io/en/latest/installation.html
+      
+      
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: legacy-install-failure
+
+× Encountered error while trying to install package.
+╰─> Pillow
+
+note: This is an issue with the package mentioned above, not pip.
+hint: See above for output from the failure.
+WARNING: You are using pip version 22.0.4; however, version 25.3 is available.
+You should consider upgrading via the '/opt/BlogApp-Django/venv/bin/python3.10 -m pip install --upgrade pip' command.
+(venv) root@vmi2859150:/opt/BlogApp-Django# 
+
+✅ What went wrong — blunt truth:
+
+You tried installing Pillow, but instead of using a pre-compiled wheel, pip fell back to building Pillow from source.
+You don’t have JPEG dev libraries installed, so the build fails. Pillow needs:
+
+libjpeg-dev
+
+zlib1g-dev
+
+other image-related deps
+
+Without them, Pillow basically says:
+
+“Bro… how do you expect me to handle JPEGs? Magic?”
+
+✅ Fastest fix (install dependencies first)
+
+Run this OUTSIDE the virtualenv:
+
+sudo apt update
+sudo apt install -y python3-dev python3-pip \
+    libjpeg-dev zlib1g-dev libfreetype6-dev \
+    liblcms2-dev libopenjp2-7-dev libtiff5-dev \
+    tk-dev libxcb1-dev
+
+
+Then inside the venv:
+
+pip install --upgrade pip
+pip install --no-cache-dir Pillow
+
+
+If Pillow still tries building from source, force the wheel install:
+
+pip install Pillow --prefer-binary
+
+✅ Why pip didn’t use wheels
+
+Most likely:
+
+Old pip version (you saw the warning)
+
+Mixed architecture or missing Python headers
+
+Cached failed build
+
+That’s why we upgraded pip and cleared cache.
+
+🚀 Confirm success
+
+Inside venv:
+
+python -c "from PIL import Image; print(Image.PILLOW_VERSION)"
+
+
+If that prints a version (not an error) → you’re good.
+
+My Devil’s Advocate punch
+
+If this is “local dev” — why are you running commands as root?
+
+That’s how people brick environments accidentally.
+Only use sudo when installing system dependencies — not inside venv.
+
+Want me to check why pip fell back to source build in the first place?
+Show me:
+
+pip install -v Pillow
