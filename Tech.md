@@ -14419,7 +14419,7 @@ use wordpress;
 show tables;
 use wp-pluggable.php with below contents
 
-update  wp_users set user_pass='$wp$2y$10$jKvhGJ0ZeLgpvPgXOp2MdupjlCC2oEYOAHjr6/gB873euoQ3iFSGC' where ID=1;
+update wp_users set user_pass='$wp$2y$10$jKvhGJ0ZeLgpvPgXOp2MdupjlCC2oEYOAHjr6/gB873euoQ3iFSGC' where ID=1;
 EXIT
 or similary use python as below
 import bcrypt
