@@ -18395,3 +18395,35 @@ To install the latest version, run:
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo systemctl status docker
 sudo systemctl start docker
+#To increase the max_input_vars value in PHP to the required 10000, you can modify either the php.ini file or the .htaccess file, depending on your server setup and access level. 
+Method 1: Modifying php.ini (Recommended if you have server access)
+Locate php.ini: The location of php.ini varies depending on your operating system and PHP installation. Common locations include /etc/php/PHP_VERSION/apache2/php.ini (Ubuntu/Debian with Apache), /etc/php.ini (CentOS/RHEL), or within your XAMPP/WAMP/MAMP installation directory.
+Open php.ini: Open the file using a text editor (e.g., nano, vi, or a graphical editor).
+Find max_input_vars: Search for the line containing max_input_vars.
+Modify the value: If the line is commented out (starts with a semicolon ;), remove the semicolon and change the value to 10000. If it's not commented, simply change the value.
+Code
+
+    max_input_vars = 10000
+Save and Close: Save the changes to the php.ini file.
+Restart Web Server: For the changes to take effect, you must restart your web server (e.g., Apache, Nginx) and/or PHP-FPM. The command depends on your system, but common examples include:
+Code
+
+    sudo systemctl restart apache2
+    sudo systemctl restart nginx
+    sudo systemctl restart php-fpm
+Method 2: Modifying .htaccess (If you don't have server access or need per-directory settings)
+Locate .htaccess: Find the .htaccess file in the root directory of your website or the specific directory where you need the setting applied.
+Open .htaccess: Open the file using a text editor.
+Add the directive: Add the following line to the file:
+Code
+
+    php_value max_input_vars 10000
+Save and Close: Save the changes to the .htaccess file. No server restart is typically required for .htaccess changes.
+Verification:
+After making the changes, create a new PHP file (e.g., info.php) in your web root with the following content:
+Code
+
+<?php
+phpinfo();
+?>
+
