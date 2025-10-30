@@ -18426,4 +18426,189 @@ Code
 <?php
 phpinfo();
 ?>
+bulk plugin istallation using wp commandline utility
+Nice 😎 — you’re diving into WP-CLI, the WordPress Command Line Interface. It’s the pro way to manage WordPress without touching the browser. You can bulk install and activate plugins in seconds.
+
+Let’s walk through it step-by-step like a sysadmin boss 👇
+
+🧰 1. Make sure WP-CLI is installed
+
+Run:
+
+wp --info
+If you get output showing the WP-CLI version, you’re good.
+If not, install it (as root or with sudo):
+
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+php wp-cli.phar --info
+chmod +x wp-cli.phar
+mv wp-cli.phar /usr/local/bin/wp
+Now wp works globally.
+
+🪄 2. Move into your WordPress directory
+
+Go to the directory where wp-config.php lives, e.g.:
+
+cd /var/www/html/yourwordpresssite/
+📦 3. Bulk install your local plugin ZIPs
+
+If all those .zip files are in:
+
+/home/hulbert/Downloads/minimog-396/thememove_minimogWP/plugins/plugins
+
+
+You can bulk install them all with one line:
+
+wp plugin install /home/hulbert/Downloads/minimog-396/thememove_minimogWP/plugins/plugins/*.zip --activate
+That command will:
+
+Install all ZIPs in that directory
+
+Automatically activate them after install
+
+⚙️ 4. (Optional) If you want to install but not activate
+
+Just remove --activate:
+wp plugin install /path/to/plugins/*.zip
+Then later you can activate all at once:
+
+wp plugin activate --all
+🧹 5. Check what’s installed
+wp plugin list
+
+
+You’ll see a nice table of all active/inactive plugins.
+🚀 Bonus Tip: for remote servers
+
+If you’re working over SSH and have WP-CLI installed both locally and remotely, you can even target a remote site directly:
+
+wp @staging plugin install myplugin.zip --activate
+
+
+(using a WP-CLI config file with defined aliases).
+🔥 Alright — you’re super close, bro. You’re running into two common WP-CLI roadblocks:
+
+File permissions / ownership issues
+
+Shell expansion of *.zip not working inside wp plugin install
+
+Let’s fix this cleanly and professionally. 👇
+
+🧩 1. Fix Permissions and Ownership
+
+You’re running WordPress under www-data, but your user is hulbert.
+You need to make sure WordPress directories are writable by both WP-CLI and PHP.
+
+Run this as root:
+
+# Set correct ownership
+chown -R www-data:www-data /var/www/html/wordpress
+
+# Give group (www-data) write access
+chmod -R g+rwX /var/www/html/wordpress
+
+# Add your user to the www-data group (you already did this)
+usermod -aG www-data hulbert
+
+# Then re-login so group permissions take effect
+su - hulbert
+🪄 2. Handle the “*.zip” Expansion Issue
+
+Bash sometimes doesn’t expand *.zip correctly when passed inside WP-CLI.
+Instead of relying on the wildcard, feed each file explicitly using a for loop.
+
+From your wordpress directory, run this:
+
+for plugin in /home/hulbert/Downloads/minimog-396/thememove_minimogWP/plugins/plugins/*.zip; do
+  echo "Installing $plugin..."
+  wp plugin install "$plugin" --activate --allow-root
+done
+🧠 If you’re not root, remove the --allow-root flag:
+
+for plugin in /home/hulbert/Downloads/minimog-396/thememove_minimogWP/plugins/plugins/*.zip; do
+  echo "Installing $plugin..."
+  wp plugin install "$plugin" --activate
+done
+
+
+This makes WP-CLI handle each ZIP one-by-one and avoids shell expansion issues.
+🧰 3. Verify Installation
+
+Once the loop finishes:
+
+wp plugin list
+
+
+You should see all plugins listed and active.
+
+🧹 Optional (if permissions still complain)
+
+If you still get “Could not create directory” warnings, just temporarily make the upgrade and plugin directories world-writable (safe for local/dev):
+chmod -R 777 /var/www/html/wordpress/wp-content/{plugins,upgrade}
+Then install again. Once everything works, revert to secure permissions:
+
+bash
+Copy code
+chmod -R 755 /var/www/html/wordpress/wp-content/{plugins,upgrade}
+##error This tool won't be able to do anything because your server doesn't support image editing which means that WordPress can't create thumbnail images. Please ask your host to install the Imagick or GD PHP extensions.
+💯 Perfect — that message means your PHP environment is missing an image-processing library that WordPress needs to handle images (like thumbnails, cropping, and resizing).
+
+It’s an easy fix, and you’ve got two main options: Imagick or GD.
+Either one will work — but Imagick is more advanced.
+
+Let’s go step-by-step 👇
+🧰 1. Check what PHP version you’re using
+
+Run this:
+
+php -v
+You’ll see something like:
+PHP 8.2.12 (cli) ...
+
+Let’s assume it’s PHP 8.2 — replace 8.2 below with your version if it’s different.
+
+🪄 2. Install the missing extensions
+✅ For Debian/Ubuntu:
+sudo apt update
+sudo apt install php8.2-imagick php8.2-gd -y
+
+✅ For RHEL/CentOS/Fedora:
+sudo dnf install php-imagick php-gd -y
+
+✅ For Arch-based:
+sudo pacman -S php-imagick php-gd
+
+
+🔄 3. Restart your web server (so PHP reloads extensions)
+If you’re using Apache:
+sudo systemctl restart apache2
+
+If you’re using Nginx with PHP-FPM:
+sudo systemctl restart php8.2-fpm
+sudo systemctl restart nginx
+
+
+🧩 4. Verify the extensions loaded
+Check with:
+php -m | grep -E 'gd|imagick'
+
+Expected output:
+gd
+imagick
+
+If you see those, you’re golden. ✅
+
+🖼️ 5. Test in WordPress
+
+
+Go to Dashboard → Tools → Site Health → Info → Server
+
+
+Check under Media Handling — it should now show “Image editor: GD or Imagick” instead of that warning.
+
+
+
+If you want, I can help you quickly detect which PHP version Apache or Nginx is actually using (sometimes it differs from the CLI version — that’s why fixes don’t always “stick”).
+Want me to show you how to check that next?
+
 
