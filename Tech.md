@@ -18611,4 +18611,67 @@ Check under Media Handling — it should now show “Image editor: GD or Imagick
 If you want, I can help you quickly detect which PHP version Apache or Nginx is actually using (sometimes it differs from the CLI version — that’s why fixes don’t always “stick”).
 Want me to show you how to check that next?
 
+#Static local ip set using commandline on linux
+To set a local IP on a Linux machine and remove an existing one (ending in .101), you should use the ip command for a temporary change or the appropriate network management tool (netplan, NetworkManager, etc.) for a permanent one. 
+Temporary Change (Immediate but Lost on Reboot)
+These commands are quick for immediate use (e.g., in a script or for testing) but the configuration will be lost after a reboot. 
+Identify your network interface name (e.g., eth0, enp0s3):
+bash
+ip addr show
+Look for the device name that has the current .101 IP address.
+Remove the current IP address (replace <interface-name> and <current-ip/prefix> with your actual values, e.g., 192.168.1.101/24):
+bash
+sudo ip addr del <current-ip/prefix> dev <interface-name>
+Alternatively, to remove all IPs from the interface:
+bash
+sudo ip addr flush dev <interface-name>
+Add the new static IP address (replace with your desired IP and prefix, e.g., 192.168.1.102/24):
+bash
+sudo ip addr add <new-ip/prefix> dev <interface-name>
+Set the default gateway (replace with your router's IP):
+bash
+sudo ip route add default via <gateway-ip> dev <interface-name>
+ 
+Permanent Change (Recommended)
+The method for a permanent change depends on your Linux distribution's network management system (most modern systems use Netplan or NetworkManager). 
+Method 1: Using Netplan (Ubuntu, etc.)
+Identify the Netplan configuration file: Configuration files are usually in the /etc/netplan/ directory and end in .yaml (e.g., 00-installer-config.yaml or 50-cloud-init.yaml).
+bash
+ls /etc/netplan/
+Edit the configuration file using a text editor like nano (use sudo):
+bash
+sudo nano /etc/netplan/<filename>.yaml
+Modify the file to use a static IP, ensuring dhcp4: no is set and providing your desired IP address (in CIDR notation), gateway, and DNS servers. Be careful with indentation in YAML files.Example configuration:
+yaml
+network:
+  version: 2
+  renderer: networkd  # or NetworkManager if you are using a desktop GUI
+  ethernets:
+    <interface-name>:
+      dhcp4: no
+      addresses: [<new-ip/prefix>]  # e.g., [192.168.1.102/24]
+      gateway4: <gateway-ip>        # e.g., 192.168.1.1
+      nameservers:
+        addresses: [<dns-server-ip>, 8.8.8.8] # e.g.,
+Apply the changes:
+bash
+sudo netplan apply
+ 
+Method 2: Using nmcli (NetworkManager CLI) 
+If your system uses NetworkManager, nmcli is the command-line tool. 
+Identify your connection name:
+bash
+nmcli con show
+Note the connection NAME (e.g., "Wired connection 1" or the interface name).
+Modify the connection to manual (static) and set the new details:
+bash
+sudo nmcli con mod "<connection-name>" ipv4.method manual
+sudo nmcli con mod "<connection-name>" ipv4.addresses "<new-ip/prefix>" # e.g., 192.168.1.102/24
+sudo nmcli con mod "<connection-name>" ipv4.gateway "<gateway-ip>"      # e.g., 192.168.1.1
+sudo nmcli con mod "<connection-name>" ipv4.dns "<dns-server-ip>,8.8.8.8" # e.g., 192.168.1.1
+The old address will be automatically removed when the connection is brought up with the new configuration.
+Activate the connection for the changes to take effect:
+bash
+sudo nmcli con up "<connection-name>"
+Verify the new IP with ip addr show. 
 
