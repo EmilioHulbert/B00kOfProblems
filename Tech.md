@@ -18775,3 +18775,111 @@ Static DNS set in NetworkManager	Wrong IPs in resolv.conf	nmcli con mod ... ipv4
 Wrong symlink	/etc/resolv.conf doesn’t update	Link to /run/NetworkManager/resolv.conf
 Multiple managers conflicting	Random overwrites	Disable one (resolvconf or systemd-resolved)
 DHCP not providing DNS	nmcli dev show shows no DNS	Use public DNS manually (8.8.8.8, 1.1.1.1)
+
+#Disable mariadb database sensitivity on linux
+check if tables exist
+Run this:
+
+mysql -u user -p internetbanking -e "SHOW TABLES LIKE 'iB_SystemSettings';"
+if not 
+CREATE TABLE iB_SystemSettings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sys_name VARCHAR(255),
+    sys_tagline VARCHAR(255)
+);
+
+INSERT INTO iB_SystemSettings (sys_name, sys_tagline)
+VALUES ('MyBank', 'Your Digital Banking Partner');
+
+OPTION B — Import the original project SQL file (CORRECT FIX)
+
+A project like this ALWAYS comes with:
+
+_DB_Backup.sql
+
+database.sql
+
+internetbanking.sql
+
+or something similar.
+
+Find it and import it:
+
+mysql -u user -p internetbanking < /path/to/the/file.sql
+
+
+Then check again:
+
+SHOW TABLES LIKE 'iB_SystemSettings';
+
+
+If the SQL file is correct, the homepage will instantly work.
+#dit config to diable case sensitivity
+1. Edit MariaDB server config
+
+Open:
+
+nano /etc/mysql/mariadb.conf.d/50-server.cnf
+
+
+Inside the [mysqld] section add:
+
+lower_case_table_names=1
+
+
+So it looks like:
+
+[mysqld]
+lower_case_table_names=1
+
+2. Stop MariaDB completely
+systemctl stop mariadb
+
+3. Remove existing table metadata (MANDATORY)
+
+This setting requires that the data directory be lowercase-consistent.
+If you skip this step, MariaDB will FAIL to start.
+
+Navigate to the database dir:
+
+cd /var/lib/mysql/internetbanking
+
+
+Rename all table files to lowercase (you MUST do this):
+
+mv iB_SystemSettings.* ib_systemsettings.*
+
+
+(Do the same if you have any other mixed-case tables.)
+
+4. Start MariaDB
+systemctl start mariadb
+
+5. Verify
+mysql -u user -p -e "SHOW TABLES FROM internetbanking;"
+
+⚠️ Important warning
+
+Once you enable:
+
+lower_case_table_names=1
+And all new tables are forced to lowercase regardless of how your SQL writes them.
+
+✔️ Best solution (in your case)
+
+Given your database has:
+
+ib_systemsettings
+
+
+And your PHP code expects:
+
+iB_SystemSettings
+
+
+The safest fix is ONE LINE:
+
+RENAME TABLE ib_systemsettings TO iB_SystemSettings;
+
+
+Then reload the page — it will instantly work.
