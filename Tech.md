@@ -18883,3 +18883,6 @@ RENAME TABLE ib_systemsettings TO iB_SystemSettings;
 
 
 Then reload the page — it will instantly work.
+##Quick line commenting using sed
+sudo sed -i 's/^/#/' /etc/apt/sources.list.d/mynewt.list
+
