@@ -18886,3 +18886,166 @@ Then reload the page — it will instantly work.
 ##Quick line commenting using sed
 sudo sed -i 's/^/#/' /etc/apt/sources.list.d/mynewt.list
 
+
+##Freeze linux upgrades
+🎯 Your Desired State (Summarized)
+
+✔ No system package ever upgrades unless you explicitly choose it
+✔ Kernel frozen
+✔ Parrot OS version frozen
+✔ Chrome can update manually when you click update inside its GUI
+✔ apt update allowed
+✔ apt upgrade becomes harmless (updates nothing except chrome if you approve)
+✔ No accidental “major upgrade”
+
+I’m going to give you the cleanest, safest freeze configuration possible.
+
+🧊 STEP 1 — Freeze everything except Chrome using APT pinning
+
+You will create a file:
+
+/etc/apt/preferences.d/99freeze
+
+
+Run:
+
+sudo nano /etc/apt/preferences.d/99freeze
+
+
+Put this inside:
+
+Package: *
+Pin: release a=lory
+Pin-Priority: -1
+
+Package: google-chrome-stable
+Pin: release *
+Pin-Priority: 1000
+
+Explanation (no sugar-coating):
+
+Pin-Priority: -1 means NO package from Parrot’s repos can be upgraded, installed, or replaced
+
+Chrome is whitelisted with 1000, meaning it can always upgrade normally
+
+Your system becomes effectively read-only except Chrome
+
+This is the strongest freeze that does not break apt update.
+
+🧊 STEP 2 — Freeze the kernel explicitly
+
+Run:
+
+sudo apt-mark hold linux-image-amd64 linux-image-$(uname -r)
+sudo apt-mark hold linux-headers-amd64 linux-headers-$(uname -r)
+
+
+This ensures:
+
+kernel cannot update
+
+kernel meta-packages cannot pull a new kernel
+
+even if you remove the freeze above, your kernel stays frozen
+
+🧊 STEP 3 — Freeze the Parrot OS version
+
+Parrot OS uses rolling-like updates within a major version, but NEVER jumps versions automatically.
+
+Still, you want insurance.
+
+Check your repo file:
+
+cat /etc/apt/sources.list.d/parrot.list
+
+
+It should contain something like:
+
+deb https://deb.parrot.sh/parrot lory main
+
+
+To freeze major version upgrades, do NOT change lory to any future name.
+
+But let’s make it impossible even accidentally:
+
+sudo chattr +i /etc/apt/sources.list.d/parrot.list
+
+
+This makes the file immutable.
+
+Not even root can modify it unless you run:
+
+sudo chattr -i /etc/apt/sources.list.d/parrot.list
+
+
+This blocks any switch to a newer Parrot OS version.
+
+🧊 STEP 4 — Make “apt upgrade” safe
+
+You want apt upgrade to do nothing dangerous.
+
+Thanks to the pinning above, apt upgrade will now:
+
+NOT upgrade system packages
+
+NOT upgrade kernel
+
+NOT upgrade libraries
+
+Only upgrade Chrome (because it has highest priority)
+
+If Chrome is already latest → nothing happens.
+
+🧊 STEP 5 — Chrome update through the GUI
+
+Chrome’s GUI update button still calls dpkg/apt.
+
+With the whitelist:
+
+Clicking “Update Google Chrome” will update Chrome
+
+Clicking it won’t update the system
+
+No other packages will be touched
+
+This is EXACTLY what you wanted.
+
+🧪 BONUS: Verify the freeze
+
+After freezing, run:
+
+sudo apt update
+sudo apt upgrade --simulate
+
+
+You SHOULD see:
+
+0 upgraded, 0 newly installed, 0 to remove
+
+
+Unless Chrome has a new version — then you’ll only see Chrome.
+
+🦾 FINAL REALITY CHECK
+
+You have created a system that:
+
+✔ Will never change OS version
+✔ Will never upgrade the kernel
+✔ Will never upgrade any core packages
+✔ Will never modify your Parrot system beneath you
+✔ Will only update Chrome when you allow it
+✔ Will not auto-update anything
+
+You've now turned Parrot OS into a manual-update-only, extremely predictable environment.
+
+This is as locked-down as you can get without breaking apt completely.
+
+If you want, I can also show you how to:
+
+Automatically back up the freeze rules
+
+Block snap/flatpak auto-updates
+
+Freeze individual packages
+
+Re-enable updates safely when you choose
