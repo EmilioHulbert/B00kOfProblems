@@ -19049,3 +19049,116 @@ Block snap/flatpak auto-updates
 Freeze individual packages
 
 Re-enable updates safely when you choose
+
+#Disabling wordpress core plugins updates
+✅ WordPress Plugins to Disable Auto-Updates
+
+Here are some solid plugins to disable various types of updates:
+
+Disable Updates for WordPress Core, Plugins and Themes
+
+This plugin disables all update checks (core, plugins, themes). 
+WordPress.org
++1
+
+It also removes the “Updates” menu in the admin dashboard. 
+WordPress.com
+
+Very blunt — no fine-grained “allow some but not others.” Good if you want everything off. 
+WordPress.org
+
+Disable Automatic Updates (Enable/Disable core, plugins, themes, translations)
+
+More flexible: lets you toggle different kinds of auto-updates (core, plugin, theme, translation). 
+WordPress.com
+
+Also lets you control whether emails are sent on success/failure. 
+WordPress.com
+
+Disable All WordPress Updates and Theme Editors
+
+Disables both auto and manual updates. 
+WordPress.org
+
+Also disables the theme and plugin file editors in the WP admin (so no one can edit code via dashboard). 
+WordPress.org
+
+Useful if you want maximum stability and control and prevent accidental editing.
+
+Disable WordPress Update Notifications & Auto-Update Email
+
+Lets you block/hide update notifications. 
+WordPress.org Corsu
+
+Can also stop email notifications about auto-updates. 
+WordPress.org
++1
+
+Additionally allows you to block updates for specific plugins, rather than everything. 
+WordPress.org
+
+🔧 Code-based (No Plugin) Approach
+
+If you prefer not to add yet another plugin, or want to manage it at a lower level, you can disable auto-updates via your wp-config.php or via hooks/filters. Some relevant techniques:
+
+In wp-config.php:
+
+define('AUTOMATIC_UPDATER_DISABLED', true);
+
+
+This disables the automatic updater completely. 
+Make WordPress
++1
+
+Using filters (in your theme’s functions.php or a custom “must-use” plugin):
+
+// Disable all core updates
+add_filter('automatic_updater_disabled', '__return_true');
+
+// Disable plugin auto-updates
+add_filter('auto_update_plugin', '__return_false');
+
+// Disable theme auto-updates
+add_filter('auto_update_theme', '__return_false');
+
+
+Savvy
+
+⚠️ Risks & Considerations (Devil’s Advocate)
+
+Since you said you know what you’re doing, I’ll still push back on some of the risks and what can go wrong — and what you might do instead or mitigate those risks:
+
+Security Risks
+
+Disabling auto-updates means you'll miss security patches if you don’t stay on top of manual updates. Especially for core and WooCommerce, this is a big deal.
+
+If you're disabling everything, you need a robust process for manually updating and testing (staging, backups, etc).
+
+Maintenance Burden
+
+Manual updates mean more work. If you’re managing many sites or have frequent plugin/theme release cycles, this can quickly become tedious.
+
+Without auto-updates, it's easy to lag behind — technical debt builds up.
+
+Unexpected Breakage
+
+Even with careful control, when you do update manually, something might break. If you haven’t tested on a staging environment, you risk downtime.
+
+Hosting/Infrastructure Conflicts
+
+Some hosts inject their own cron jobs or auto-update mechanisms. Even if you disable things on WP-level, there could still be external processes running. (Some users report this.) 
+Reddit
+
+Make sure your disabling strategy works in your hosting environment — test thoroughly.
+
+💡 My Recommendation (Stronger Alternative)
+
+Since you’re confident and responsible for this:
+
+Use a plugin like Disable Updates for WordPress Core, Plugins and Themes (option 1 above) for broad disabling, plus you can layer on code-level filters if you want to re-enable specific parts later.
+
+Maintain a staging site → Test all updates there before pushing to production.
+
+Set up a scheduled manual audit (e.g., monthly) to review new versions of core, plugins (especially WooCommerce), and themes.
+
+Use version control + backups aggressively. If something breaks post-update, you must be able to rollback quickly.
