@@ -19162,3 +19162,33 @@ Maintain a staging site → Test all updates there before pushing to production.
 Set up a scheduled manual audit (e.g., monthly) to review new versions of core, plugins (especially WooCommerce), and themes.
 
 Use version control + backups aggressively. If something breaks post-update, you must be able to rollback quickly.
+
+##Udemy autoplay faster chrome extension
+https://chromewebstore.google.com/detail/udemy-faster-autoplay/fepcpdjalebcocminbnogcgfbphllkeh?utm_source=chatgpt.com&pli=1
+🔍 Some Useful Chrome Extensions for Udemy
+
+Udemy ™ Faster Autoplay
+
+Removes the 3-second delay before Udemy automatically starts the next lecture. 
+Chrome Web Store
++1
+
+Open-source. 
+Chrome Web Store
++1
+
+Very lightweight. 
+Chrome Web Store
+
+Udemy Smart Autoplay
+
+Also auto-advances to the next video without the pause. 
+Chrome Web Store
+
+No special permissions required, according to its description. 
+Chrome Web Store
+
+Udemy Playback Control
+
+Not exactly autoplay, but gives you keyboard shortcuts (even global ones) for play/pause, seek, etc. This is useful if you're coding or taking notes in another tab. 
+Chrome Web Store
