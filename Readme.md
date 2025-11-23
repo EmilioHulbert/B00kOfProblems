@@ -19192,3 +19192,134 @@ Udemy Playback Control
 
 Not exactly autoplay, but gives you keyboard shortcuts (even global ones) for play/pause, seek, etc. This is useful if you're coding or taking notes in another tab. 
 Chrome Web Store
+
+##using liveserver in vscode
+✅ STEP 1 — Confirm you installed the correct Live Server extension
+
+Go to:
+
+VS Code → Extensions → search: “Live Server”
+
+You MUST see this exact one:
+
+Live Server — by Ritwick Dey
+
+Icon is a purple/lightning symbol.
+
+If you see Live Preview, Five Server, Edge Tools, etc. →
+Those are NOT the right ones.
+
+Install the correct one.
+
+✅ STEP 2 — Reload VS Code
+
+After installing, click:
+
+Reload / Restart VS Code
+
+Many people skip this and the extension never activates.
+
+✅ STEP 3 — Make sure you opened the folder, not the file
+
+If you open VS Code like this:
+
+✗ Opening the HTML file directly → Live Server WILL NOT show
+✓ Opening the folder containing the file → Live Server works
+
+Do this:
+
+File → Open Folder → select your project folder "vue.js"
+
+Then open index.html inside the folder.
+
+Right-click again on the file.
+
+Now Open with Live Server should appear.
+
+❗ If it still doesn't appear — do this:
+
+Go to:
+
+Command Palette → press CTRL + SHIFT + P
+
+Type:
+
+Live Server: Open with Live Server
+
+If it appears there → your right-click menu is just hidden.
+
+If it DOESN’T appear → Live Server is not active at all.
+
+🔧 STEP 4 — Check if Live Server is disabled
+
+Go to:
+
+Extensions → Live Server → Gear icon → Disable
+If it is disabled → enable it.
+
+🔨 STEP 5 — Hard reset Live Server (forces activation)
+
+Go to Extensions
+
+Uninstall Live Server
+
+Restart VS Code
+
+Reinstall Live Server
+
+Restart VS Code again
+
+Now repeat:
+Right-click index.html.
+
+If STILL nothing works…
+
+Then you are 100% opening the wrong folder structure.
+
+##Use diffrent browser using live-server
+✅ Step 1 — Create or open VS Code folder settings
+
+Inside your project folder, create/edit:
+
+.vscode/settings.json
+
+
+If the folder doesn’t exist, create it manually.
+
+✅ Step 2 — Add this configuration
+
+Paste exactly this:
+
+{
+  "liveServer.settings.CustomBrowser": "firefox"
+}
+
+
+That’s it. No extra flags, no complications.
+
+⚠️ Important Notes
+
+“firefox” must match the browser name recognized by VS Code Live Server.
+
+If Firefox is installed normally on Linux or Windows, this works instantly.
+
+When you run Open with Live Server, it will ALWAYS launch Firefox, regardless of your system default browser.
+
+If Firefox does NOT open
+
+Tell me:
+
+your OS (Linux distro or Windows)
+
+the path to your Firefox executable
+
+Some Linux setups need this instead:
+
+{
+  "liveServer.settings.CustomBrowser": "/usr/bin/firefox"
+}
+
+
+But we won’t assume that unless you confirm it fails.
+
+If you're ready, test Live Server now — does Firefox open correctly?
