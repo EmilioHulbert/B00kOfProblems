@@ -19358,3 +19358,5 @@ Choose the method that best suits the reason for the "readonly" setting and your
 mkdir -p ssl
 openssl req -x509 -newkey rsa:4096 -keyout ssl/server.key -out ssl/server.crt -days 365 -nodes
 ```
+##Install postman on linux
+snap install postman
