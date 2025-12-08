@@ -19360,3 +19360,34 @@ openssl req -x509 -newkey rsa:4096 -keyout ssl/server.key -out ssl/server.crt -d
 ```
 ##Install postman on linux
 snap install postman
+##Fix to show apps installed via snap without rebooting the machine
+✅ Fix 1: Restart snapd (safe, no reboot)
+
+Run:
+
+sudo systemctl restart snapd.service
+
+
+Then refresh snap apps:
+
+snap refresh
+
+
+This often triggers the rescan.
+
+✅ Fix 2: Manually refresh desktop entries
+
+Run:
+
+sudo snap install --dangerous /var/lib/snapd/seed/snaps/*
+
+
+or just regenerate desktop entries:
+
+sudo update-desktop-database
+
+
+and:
+
+sudo update-mime-database /usr/share/mime
+
