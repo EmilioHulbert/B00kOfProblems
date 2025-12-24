@@ -19390,4 +19390,6 @@ sudo update-desktop-database
 and:
 
 sudo update-mime-database /usr/share/mime
+##Collapse folders in vscode explorer
+ctrl + k ctrl +s then set keybinding to ctrl +K ctrl +0
 
