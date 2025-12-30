@@ -19393,3 +19393,440 @@ sudo update-mime-database /usr/share/mime
 ##Collapse folders in vscode explorer
 ctrl + k ctrl +s then set keybinding to ctrl +K ctrl +0
 
+#installing php8.2 on trie debian
+You’re on Debian Trixie (testing/unstable).
+Debian doesn’t ship multiple PHP versions in the base repos, so php8.2 isn’t found. It’s normal.
+✅ Option 1 — Install PHP 8.2 via Sury repo (recommended)
+
+Run these exactly:
+
+1) Install prerequisites
+sudo apt update
+sudo apt install -y ca-certificates apt-transport-https software-properties-common lsb-release gnupg
+2) Add Sury PHP repository
+sudo gpg --keyserver keyserver.ubuntu.com --recv-keys 14AA40EC0831756756D7F66C4A0B291AF7D737FA
+sudo gpg --export 14AA40EC0831756756D7F66C4A0B291AF7D737FA | sudo tee /usr/share/keyrings/sury.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/sury.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list
+3) Update lists
+sudo apt update
+4) Install PHP 8.2 + extensions
+sudo apt install -y php8.2 php8.2-fpm php8.2-cli php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath
+✅ 5) Switch Nginx to PHP 8.2-FPM
+
+Edit your Nginx site config (for example):
+
+sudo nano /etc/nginx/sites-enabled/default
+
+
+Find:
+
+fastcgi_pass unix:/run/php/php-fpm.sock;
+or maybe
+
+fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+Change to:
+
+fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+✅ 6) Restart services
+sudo systemctl restart php8.2-fpm
+sudo systemctl restart nginx
+🧹 7) Clear Laravel caches
+
+From your project:
+
+php8.2 artisan optimize:clear
+
+
+Or if php points to another version:
+
+/usr/bin/php8.2 artisan optimize:clear
+🎯 After that
+
+Your deprecation warnings will disappear and /admin/logout should stop throwing 500.
+#issue
+You’re very close — the issue is simply:
+
+gpg is not installed
+
+the Sury repo key wasn’t actually added
+
+Debian testing uses sqv verification, so unsigned repo is rejected
+
+software-properties-common name in Debian testing may differ or not be needed
+
+Let’s fix cleanly.
+✅ Step 1 — install gnupg (this is the missing piece)
+
+Run:
+
+sudo apt update
+sudo apt install -y gnupg
+If it complains, also run:
+
+sudo apt install -y gnupg2 dirmngr
+
+✅ Step 2 — add the correct Sury PHP signing key
+
+Run these exactly:
+sudo gpg --keyserver keyserver.ubuntu.com --recv-keys 14AA40EC0831756756D7F66C4A0B291AF7D737FA
+sudo gpg --export 14AA40EC0831756756D7F66C4A0B291AF7D737FA | sudo tee /usr/share/keyrings/sury.gpg > /dev/null
+Your earlier attempt failed because gpg wasn’t installed, so the key file doesn’t exist.
+
+✅ Step 3 — make sure the repo entry is correct
+
+Edit the file:
+
+sudo nano /etc/apt/sources.list.d/sury-php.list
+Make sure it contains exactly:
+
+deb [signed-by=/usr/share/keyrings/sury.gpg] https://packages.sury.org/php/ trixie main
+Save and exit.
+
+✅ Step 4 — update apt again
+sudo apt update
+This time the signature warning should disappear.
+
+✅ Step 5 — install PHP 8.2 and extensions
+sudo apt install -y php8.2 php8.2-fpm php8.2-cli php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath
+✅ Step 6 — switch Nginx/PHP-FPM socket
+
+Update your site config:
+
+sudo nano /etc/nginx/sites-enabled/default
+
+
+Change any existing line like:
+
+fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+to:
+
+fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+
+
+Save.
+Reload services:
+
+sudo systemctl restart php8.2-fpm
+sudo systemctl restart nginx
+🎯 After this, please paste
+php -v
+php8.2 -v
+php-fpm8.2 -v
+php artisan --version
+Yep — clear situation:
+
+the repo entry exists
+
+the signing key never got added
+
+gpg fetch failed → “No data”
+
+apt is now blocking Sury because of missing key
+
+We’ll fix it the reliable way: download the key file directly instead of using keyservers.
+
+✅ Fix the broken Sury repo key (clean method)
+1) Install tools you actually need
+sudo apt update
+sudo apt install -y gnupg curl ca-certificates
+If gnupg is already installed, this will just say “already newest”.
+
+2) Download the Sury key file directly (no keyserver)
+curl -fsSL https://packages.sury.org/php/apt.gpg | sudo tee /usr/share/keyrings/sury-php.gpg > /dev/null
+3) Make sure your repo file points to this key
+
+Edit:
+
+sudo nano /etc/apt/sources.list.d/sury-php.list
+
+
+Content must be exactly:
+
+deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ trixie main
+Save & exit.
+
+4) Update apt again
+sudo apt update
+✅ Install PHP 8.2 now
+sudo apt install -y php8.2 php8.2-fpm php8.2-cli php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath
+Two separate issues are happening:
+
+The Sury key is not actually installed where APT expects it
+
+You’re on Debian trixie (testing), which Sury does not currently target — so you actually don’t need Sury at all. Debian trixie already ships modern PHP (8.2/8.3) natively.
+
+Right now APT is complaining because:
+
+your sources.list.d/sury-php.list references
+signed-by=/usr/share/keyrings/sury.gpg
+
+but you downloaded the key as
+/usr/share/keyrings/sury-php.gpg
+
+plus, sury repo signatures don’t match Debian trixie keys
+
+So you’re stuck in verification failure.
+
+Let’s fix this cleanly.
+
+✅ Best solution: remove Sury repo and install PHP from Debian trixie
+
+Debian trixie already supports PHP 8.2+ — so adding Sury is unnecessary and currently incompatible.
+
+👉 Step 1 — remove the broken Sury repository
+sudo rm /etc/apt/sources.list.d/sury-php.list
+
+👉 Step 2 — remove any leftover Sury keyrings
+sudo rm /usr/share/keyrings/sury.gpg
+sudo rm /usr/share/keyrings/sury-php.gpg
+👉 Step 3 — clean APT cache
+sudo apt update
+You should no longer see sury.org in output.
+
+🎯 Now install PHP directly from Debian trixie
+
+First search PHP versions available:
+
+apt policy php
+
+
+Then install PHP and required extensions:
+
+sudo apt install -y php php-fpm php-cli php-mysql php-xml php-mbstring php-curl php-zip php-gd php-bcmath
+This will likely install PHP 8.3 (testing branch default). Laravel works fine with 8.2/8.3.
+
+Check version:
+
+php -v
+Enable and start FPM:
+
+sudo systemctl enable php*-fpm
+sudo systemctl start php*-fpm
+
+⚠️ If you MUST use Sury (not recommended on trixie)
+
+Then the correct fix is:
+
+make the key name match
+
+use .gpg dearmored
+
+reference correct filename
+
+Correct sequence:
+sudo rm /usr/share/keyrings/sury*.gpg
+
+curl -fsSL https://packages.sury.org/php/apt.gpg | sudo gpg --dearmor -o /usr/share/keyrings/sury.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/sury.gpg] https://packages.sury.org/php/ bookworm main" | sudo tee /etc/apt/sources.list.d/sury-php.list
+Note: Sury supports bookworm, not trixie — that’s why you should avoid mixing.
+
+✅ What I recommend for you
+
+Because:
+
+you’re on De­bian trixie
+
+sury repo is not needed
+
+signature validation keeps breaking
+Got it — you want:
+
+keep your existing PHP 8.4 (WordPress already running on it)
+
+add PHP 8.2 side-by-side only for this Laravel project
+
+undo the last install noise if possible
+
+Good plan. You do not need to remove 8.4 to use 8.2 — you can run multiple PHP-FPM versions at the same time and map different vhosts/sites to different versions.
+
+✅ First: “Undo” what just happened
+
+You only installed meta packages (php, php-cli, php-gd, php-bcmath). Your WP site is already using php8.4-fpm, so safest cleanup:
+
+sudo apt remove php php-cli php-gd php-bcmath
+sudo apt autoremove
+
+
+This will NOT remove php8.4-fpm or break WP. It just removes top-level meta packages.
+
+Check PHP version still there:
+
+php -v
+
+
+Your FPM pools:
+
+ls /etc/php
+
+
+You should currently see:
+
+8.4
+
+🎯 Goal
+
+Install PHP 8.2 alongside 8.4 on Debian trixie.
+
+Debian trixie does NOT ship PHP 8.2, so we must use:
+
+👉 Sury repo pinned to bookworm (safe way)
+👉 NOT the trixie repo you tried earlier
+
+✅ Step 1 — add correct Sury key (fixed method)
+sudo mkdir -p /usr/share/keyrings
+curl -fsSL https://packages.sury.org/php/apt.gpg \
+| sudo gpg --dearmor -o /usr/share/keyrings/sury.gpg
+
+✅ Step 2 — add bookworm sury repo explicitly
+echo "deb [signed-by=/usr/share/keyrings/sury.gpg] https://packages.sury.org/php/ bookworm main" \
+| sudo tee /etc/apt/sources.list.d/sury-php.list
+
+
+we deliberately use bookworm, not trixie** — that avoids the key error
+
+✅ Step 3 — update package lists
+sudo apt update
+
+
+You should now see packages.sury.org/php bookworm
+
+🎉 Step 4 — install PHP 8.2 next to 8.4
+
+Run:
+
+sudo apt install php8.2 php8.2-fpm php8.2-cli php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath
+
+
+Check version:
+
+php8.2 -v
+php8.4 -v
+
+
+Enable FPM service:
+
+sudo systemctl enable php8.2-fpm
+sudo systemctl start php8.2-fpm
+
+
+Status:
+
+systemctl status php8.2-fpm
+
+✅ Last piece: use PHP 8.2 only for the Laravel site
+
+Your Nginx (example):
+
+fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+
+
+Your WordPress vhost stays:
+
+fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+
+
+So both run happily side-by-side.
+
+🧭 Summary (what you now have)
+
+PHP 8.4 → continues powering WordPress
+
+PHP 8.2 → dedicated FPM pool for Laravel
+
+No breaking changes
+
+No removing your existing site
+
+If anything fails, paste:
+ls /run/php
+ls /etc/php
+systemctl status php8.2-fpm
+You are very close now. The only problem is this line:
+
+php8.2-zip : Depends: libzip4 (>=1.7.0) but it is not installable
+
+You are on Debian Trixie (Debian 13).
+PHP 8.2 packages from Sury are built for Debian 12 (Bookworm) and expect libzip4, while Trixie ships libzip5. So only the zip extension blocks the install — everything else can install fine.
+
+We’ll fix that cleanly.
+
+✅ Quick win first — install PHP 8.2 without zip
+
+This confirms 8.2 is working:
+
+sudo apt install php8.2 php8.2-fpm php8.2-cli php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-gd php8.2-bcmath
+
+
+Ignore zip for now.
+
+Check:
+
+php8.2 -v
+
+
+If that works, FPM:
+
+systemctl status php8.2-fpm
+
+
+Laravel does not require zip to run, only Composer sometimes needs it when installing packages. So you can already bind Nginx to 8.2.
+
+⭐ To also get php8.2-zip working (correct fix)
+
+We will pull only libzip4 from Debian 12 (Bookworm) safely using APT pinning.
+
+✅ Step 1 — add Debian 12 Bookworm repo (restricted)
+echo "deb http://deb.debian.org/debian bookworm main" | sudo tee /etc/apt/sources.list.d/bookworm.list
+
+✅ Step 2 — pin Bookworm low priority (prevents mass downgrades)
+sudo tee /etc/apt/preferences.d/limit-bookworm <<'EOF'
+Package: *
+Pin: release n=bookworm
+Pin-Priority: 100
+EOF
+
+✅ Step 3 — update package lists
+sudo apt update
+
+✅ Step 4 — install ONLY the needed libzip4 from bookworm
+sudo apt install -t bookworm libzip4
+
+✅ Step 5 — now install php8.2-zip
+sudo apt install php8.2-zip
+
+
+Done — dependency solved safely, rest of system stays Trixie.
+
+🎯 After this, you will have:
+
+PHP 8.2 FPM for Laravel
+
+PHP 8.4 FPM still serving WordPress
+
+No downgrades, no breakage
+
+👉 Final binding in Nginx
+
+WordPress server block:
+
+fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+
+
+Laravel project server block:
+
+fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+
+
+Reload:
+
+sudo systemctl reload nginx
+
+If anything fails again paste:
+apt policy libzip4 libzip5
+ls /etc/apt/sources.list.d
+ls /run/php
+systemctl status php8.2-fpm
+
+
+We’ll finish it step-by-step.
