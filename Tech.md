@@ -20168,3 +20168,222 @@ That field is what WooCommerce and most themes read from when generating the pro
 ---
 
 Do you want me to give you a **one-line PHP/WP-CLI script** you can safely drop in (with rollback support) to handle this syncing automatically next time you bulk update?
+
+#pruning docker volumes
+If you want to **prune (delete) all unused Docker volumes**, you can run:
+
+```bash
+docker volume prune
+```
+
+This will **prompt for confirmation**, and then remove all unused volumes (volumes not referenced by any container).
+
+If you want to **force deletion without confirmation**, use:
+
+```bash
+docker volume prune -f
+```
+
+⚠ **Be careful!**
+This will permanently delete any volume not currently used by a container. You may lose persistent data stored in those volumes.
+
+---
+
+👉 **If you want to delete *all* volumes, even those attached to containers**, you'll need to stop and remove the containers first:
+
+```bash
+docker rm -f $(docker ps -aq)
+docker volume rm $(docker volume ls -q)
+```
+
+That will:
+1️⃣ Remove all containers (`docker rm -f …`)
+2️⃣ Remove all volumes (`docker volume rm …`)
+
+Let me know if you want a safer cleanup script or something that targets only specific volumes!
+#removing images
+Sure! Here’s how you can **remove Docker images** — with care to avoid surprises:
+
+---
+
+### 🗑 **Remove a specific image**
+
+If you know the image ID or name:
+
+```bash
+docker rmi <image_id_or_name>
+```
+
+Example:
+
+```bash
+docker rmi ubuntu:22.04
+docker rmi abc123def456
+```
+
+---
+
+### 🗑 **Remove multiple images**
+
+```bash
+docker rmi <image1> <image2> ...
+```
+
+Example:
+
+```bash
+docker rmi ubuntu:22.04 mysql:8.0
+```
+
+---
+
+### 🗑 **Remove all images**
+
+👉 This will delete *all* images on your system (⚠ use with caution!):
+
+```bash
+docker rmi $(docker image ls -q)
+```
+
+If some images are in use by containers, you’ll get errors — you’ll need to stop/remove the containers first:
+
+```bash
+docker rm -f $(docker ps -aq)
+docker rmi $(docker image ls -q)
+```
+
+---
+
+### 🗑 **Remove dangling images**
+
+Dangling images = `<none>` as repository/tag (leftover build layers):
+
+```bash
+docker image prune
+```
+
+or force without confirmation:
+
+```bash
+docker image prune -f
+```
+
+---
+
+### 🗑 **Remove *all unused* images**
+
+Remove images not used by any container:
+
+```bash
+docker image prune -a
+```
+
+or
+
+```bash
+docker image prune -a -f  # skip confirmation
+```
+
+---
+
+✅ **Summary:**
+
+| Command                            | Effect                   |
+| ---------------------------------- | ------------------------ |
+| `docker rmi <id>`                  | Remove specific image    |
+| `docker rmi $(docker image ls -q)` | Remove all images        |
+| `docker image prune`               | Remove dangling images   |
+| `docker image prune -a`            | Remove all unused images |
+
+If you'd like, I can generate a safe cleanup script that removes unused images + volumes in one go. Let me know! 🚀
+#fixing blueman issues in parrot
+What you're seeing is a **policykit (polkit) authentication prompt** that appears because `Blueman` (the Bluetooth manager) is trying to change the RFKill state (enable/disable Bluetooth or wireless radio) at startup — and this action requires root privileges.
+
+---
+
+### ⚡ **Why does this pop up at boot?**
+
+* Blueman tries to restore Bluetooth state or manage hardware radios.
+* Your current polkit policy doesn’t allow it automatically, so it asks for root.
+* This can happen on some desktop environments or distros where the default policy is strict.
+
+---
+
+### ✅ **Solutions**
+
+#### 1️⃣ **Allow Blueman to set RFKill without asking password**
+
+You can create a polkit rule:
+
+```bash
+sudo nano /etc/polkit-1/rules.d/50-blueman.rules
+```
+
+Add this:
+
+```javascript
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.blueman.rfkill.setstate" &&
+        subject.isInGroup("bluetooth")) {
+        return polkit.Result.YES;
+    }
+});
+```
+
+Or, if you want *all users*:
+
+```javascript
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.blueman.rfkill.setstate") {
+        return polkit.Result.YES;
+    }
+});
+```
+
+➡ Save + exit (Ctrl+O, Enter, Ctrl+X)
+
+Then either reboot or restart polkit:
+
+```bash
+sudo systemctl restart polkit
+```
+
+> **Note:** You might need to create a `bluetooth` group and add yourself:
+>
+> ```bash
+> sudo groupadd bluetooth
+> sudo usermod -aG bluetooth $USER
+> ```
+
+---
+
+#### 2️⃣ **Disable Blueman auto start (if you don't use Bluetooth)**
+
+If you don’t need Blueman:
+
+```bash
+sudo systemctl disable blueman-mechanism
+```
+
+or remove Blueman entirely:
+
+```bash
+sudo apt remove blueman
+```
+
+---
+
+#### 3️⃣ **Check for misconfigured startup scripts**
+
+Sometimes custom scripts (e.g. `rfkill unblock`) or desktop autostart entries can trigger this. Check:
+
+```bash
+cat ~/.config/autostart/*
+```
+
+or your DE’s startup applications list.
+
+---
+
+💡 **Summary:** The cleanest solution is to add a polkit rule so it stops prompting. Let me know if you want me to generate the exact rule file content for your user/group!
+
