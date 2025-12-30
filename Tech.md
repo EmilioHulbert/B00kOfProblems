@@ -19830,3 +19830,270 @@ systemctl status php8.2-fpm
 
 
 We’ll finish it step-by-step.
+
+##android app adb grant permissions
+Good — you’re thinking the right way: if the GUI (MX Player permission popup) is stuck or not showing, command-line and ADB are your way out. But before I give you a solution, let’s clarify a few things so we don’t just spray commands blindly.
+
+**Clarify for me:**
+
+1. You have **ADB access to the Android TV**, right? (e.g. you can run `adb shell` from your PC or terminal and get a prompt like `shell@<device>`).
+2. What permission exactly is MX Player asking for — **storage**, **media access**, or something else (overlay, files, etc.)?
+3. Which Android TV version or OS (e.g. Android TV 11, Google TV 12, etc.)?
+
+Once you confirm those, here’s the approach in principle: you can **manually grant app permissions** from ADB without any popup — the same result as if you accepted the GUI dialog.
+
+---
+
+### 🔧 If you already have ADB shell access:
+
+Run this to verify the package name:
+
+```bash
+adb shell pm list packages | grep mx
+```
+
+You’ll likely get something like:
+
+```
+package:com.mxtech.videoplayer.ad
+```
+
+or for the Pro version:
+
+```
+package:com.mxtech.videoplayer.pro
+```
+
+Then, manually grant the needed permissions:
+
+#### Example: Storage / Media Access
+
+```bash
+adb shell pm grant com.mxtech.videoplayer.ad android.permission.READ_EXTERNAL_STORAGE
+adb shell pm grant com.mxtech.videoplayer.ad android.permission.WRITE_EXTERNAL_STORAGE
+```
+
+#### For Scoped Storage (Android 11+)
+
+```bash
+adb shell appops set com.mxtech.videoplayer.ad MANAGE_EXTERNAL_STORAGE allow
+```
+
+#### For Overlay Permissions (if it needs to draw over other apps)
+
+```bash
+adb shell appops set com.mxtech.videoplayer.ad SYSTEM_ALERT_WINDOW allow
+```
+
+#### To confirm granted permissions:
+
+```bash
+adb shell dumpsys package com.mxtech.videoplayer.ad | grep granted=true
+```
+
+---
+
+### 🧠 Devil’s Advocate Check
+
+If that doesn’t work:
+
+* On Android 11+, **`WRITE_EXTERNAL_STORAGE`** doesn’t grant true file access anymore — you need **`MANAGE_EXTERNAL_STORAGE`**, but MX Player must have declared it in its manifest, or you’ll get a “permission not requested” error.
+* Some Android TV builds (especially OEM ones like TCL, Hisense) restrict “MANAGE_EXTERNAL_STORAGE” unless sideloaded apps are marked as **system** or the feature is toggled manually in `Settings → Apps → Special app access → All files access`. You can reach that via:
+
+  ```bash
+  adb shell am start -a android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION
+  ```
+
+  Then manually pick MX Player.
+
+---
+
+### ⚙️ If You Want to Force the Permission Dialog
+
+You can trigger the permission dialog manually:
+
+```bash
+adb shell am start -a android.settings.APPLICATION_DETAILS_SETTINGS -d package:com.mxtech.videoplayer.ad
+```
+
+That opens the app’s settings page where you can toggle permissions with your remote.
+
+---
+
+### 🧨 If none of the above works
+
+You can **reinstall MX Player with pre-granted permissions** using:
+
+```bash
+adb install -g mxplayer.apk
+```
+
+(`-g` = grant all runtime permissions automatically).
+
+---
+
+Once you confirm your Android TV version + what exact permission you’re trying to grant, I’ll give you the **minimal working adb sequence** tailored for your case.
+
+So—what’s the target permission you’re trying to force through terminal?
+
+#mysql issues dump db fixes
+Good — you gave full logs, which make the root cause clear. The key part is here:
+
+```
+[ERROR] InnoDB: Cannot apply log to [page id: space=2285, page number=3] of corrupted file './wordpress/wp_actionscheduler_claims.ibd'
+[ERROR] InnoDB: Plugin initialization aborted with error Data structure corruption
+[ERROR] Plugin 'InnoDB' registration as a STORAGE ENGINE failed.
+[ERROR] Unknown/unsupported storage engine: InnoDB
+[ERROR] Aborting
+```
+
+So MariaDB crashed because **an InnoDB table file (`wp_actionscheduler_claims.ibd`) is corrupted**, and InnoDB refuses to start until this is resolved.
+The “journal has been rotated” notice is irrelevant — that’s just systemd saying logs were rotated; the *real* problem is the corrupted InnoDB file.
+
+---
+
+### 🔍 Root Cause:
+
+`./wordpress/wp_actionscheduler_claims.ibd` (a WordPress table used by the Action Scheduler plugin) got corrupted.
+When InnoDB tries to recover from its redo logs, it fails to apply changes to that file.
+
+This stops the entire InnoDB engine from initializing, which means *MariaDB cannot even start.*
+
+---
+
+### ⚙️ Step-by-step Recovery Plan
+
+#### Step 1: Confirm the file’s location
+
+```bash
+cd /var/lib/mysql/wordpress/
+ls -lh wp_actionscheduler_claims.*
+```
+
+If you see both `.frm` and `.ibd`, that’s your corrupted table.
+
+---
+
+#### Step 2: Try to start MariaDB with InnoDB recovery mode
+
+Edit your MariaDB config:
+
+```bash
+nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+
+Under `[mysqld]`, add:
+
+```ini
+innodb_force_recovery = 1
+```
+
+> Values range 1–6.
+>
+> * `1` = very safe, minimal recovery
+> * `6` = maximum force, data loss likely
+>   Start low and increase if necessary.
+
+Then:
+
+```bash
+systemctl restart mariadb
+```
+
+If it starts — good. Immediately **dump your databases**:
+
+```bash
+mysqldump --all-databases > /root/all_dbs_backup.sql
+```
+
+Then shut down MariaDB and remove the recovery option from the config file.
+
+---
+
+#### Step 3: If recovery level 1 doesn’t work
+
+Try incrementally:
+
+```ini
+innodb_force_recovery = 2
+```
+
+… up to 6, restarting MariaDB each time:
+
+```bash
+systemctl restart mariadb
+```
+
+If it only starts at 3 or higher, expect corruption in more tables.
+
+---
+
+#### Step 4: Once MariaDB starts
+
+If it starts, try to **drop** the corrupted table:
+
+```sql
+DROP TABLE wordpress.wp_actionscheduler_claims;
+```
+
+If that fails, move its files manually (with MariaDB stopped):
+
+```bash
+systemctl stop mariadb
+mv /var/lib/mysql/wordpress/wp_actionscheduler_claims.* /root/
+systemctl start mariadb
+```
+
+MariaDB should then start cleanly — that table will be gone, but the rest of the DB will work.
+
+---
+
+#### Step 5: Recreate the missing table (if it’s WordPress)
+
+Once it runs again, log into WordPress admin → disable/re-enable the “Action Scheduler” plugin (usually WooCommerce).
+It will automatically recreate the missing table.
+
+---
+
+#### Step 6: Clean up
+
+After everything works:
+
+1. Remove `innodb_force_recovery` line from config.
+2. Run:
+
+   ```bash
+   systemctl restart mariadb
+   mysqlcheck -A --auto-repair
+   ```
+3. Backup again:
+
+   ```bash
+   mysqldump --all-databases > /root/final_backup.sql
+   ```
+
+---
+
+### 🧠 Why this happens
+
+* Unclean shutdowns (power loss, OOM kills)
+* Disk full or bad sectors under `/var/lib/mysql`
+* Filesystem corruption (check with `dmesg | grep -i ext4` or `xfs_repair`)
+* MariaDB crash during plugin write
+
+---
+
+### ❗One more check
+
+You said you were under `/var/www/html/phptutorials/leave`. Make sure MariaDB’s **data directory** is intact:
+
+```bash
+ls -ld /var/lib/mysql
+df -h /var/lib/mysql
+```
+
+If `/var/lib/mysql` ran out of space, fix that before retrying.
+
+---
+
+Would you like me to give you the **exact recovery commands sequence** (safe, minimal data loss) for Debian 12/MariaDB 10.11.x — including how to temporarily bypass InnoDB startup and dump all usable data?
