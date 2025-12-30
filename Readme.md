@@ -20097,3 +20097,74 @@ If `/var/lib/mysql` ran out of space, fix that before retrying.
 ---
 
 Would you like me to give you the **exact recovery commands sequence** (safe, minimal data loss) for Debian 12/MariaDB 10.11.x — including how to temporarily bypass InnoDB startup and dump all usable data?
+
+#wordpress ecommerce data updates
+Perfect — that confirms the root cause 💥
+
+Your `_price` field is stale (`5999`), while `_sale_price` is the updated value (`7266`).
+WooCommerce **uses `_price`** to render front-end prices — so until that’s updated, the storefront will keep showing KShs 5,999 no matter what.
+
+Let’s fix this cleanly.
+
+---
+
+## ✅ Option 1 — Fix this single product (quick)
+
+Run this SQL in MariaDB:
+
+```sql
+UPDATE wp_postmeta 
+SET meta_value = '7266'
+WHERE post_id = 6330 AND meta_key = '_price';
+```
+
+Then regenerate lookup tables:
+
+```bash
+wp wc tool run regenerate_product_lookup_tables --user=1
+```
+
+And flush caches:
+
+```bash
+wp cache flush
+wp transient delete --all
+```
+
+Check again — that product’s price should now match 7,266 front and backend.
+
+---
+
+## ✅ Option 2 — Fix *all* products automatically (recommended)
+
+Run this once — it syncs `_price` to `_sale_price` for every product that has one:
+
+```sql
+UPDATE wp_postmeta AS price
+JOIN wp_postmeta AS sale
+  ON price.post_id = sale.post_id
+  AND sale.meta_key = '_sale_price'
+SET price.meta_value = sale.meta_value
+WHERE price.meta_key = '_price';
+```
+
+Then immediately run:
+
+```bash
+wp wc tool run regenerate_product_lookup_tables --user=1
+wp cache flush
+wp transient delete --all
+```
+
+That ensures every product’s `_price` matches its `_sale_price`.
+
+---
+
+## ⚠️ Why it happened
+
+When you bulk-updated the sale prices (via CSV, SQL, or plugin), WooCommerce didn’t trigger its internal “price sync” hook — so `_price` never changed.
+That field is what WooCommerce and most themes read from when generating the product HTML, so it’s critical to keep it consistent.
+
+---
+
+Do you want me to give you a **one-line PHP/WP-CLI script** you can safely drop in (with rollback support) to handle this syncing automatically next time you bulk update?
