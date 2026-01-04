@@ -20947,3 +20947,256 @@ If you want, I’ll now:
 * produce commands to turn your nft rule into a `reject` (send TCP RST) so testing shows immediate rejection (makes it easier to see blocked attempts in the client).
 
 Which of those do you want? Be explicit — I’ll be blunt and make the test rig or rollback script idiot-proof.
+
+#Installing php7.2 on docker.Prequisite to get a laravel application running
+cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js
+✅ Best solution (recommended): Run PHP 7.2 in Docker
+
+This avoids breaking Parrot, works immediately, and keeps other PHP versions untouched.
+
+1) Install Docker (if not already)
+apt install docker.io
+systemctl enable --now docker
+3) Run it in a project directory
+
+Replace /path/to/project with your app folder:
+
+docker run -v /path/to/project:/var/www/html -p 9000:9000 -d php:7.2-fpm
+
+
+Now you have pure PHP 7.2 isolated and safe.
+
+You can exec into it:
+
+docker exec -it $(docker ps -q --filter ancestor=php:7.2-fpm) bash
+
+
+Check version:
+
+php -v
+
+Version 1 Dockerfile
+
+FROM php:7.4-fpm
+
+# Avoid errors due to missing apt packages
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+    git \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+ && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /var/www/html
+Version 1 docker-compose.yml
+
+version: '3.8'
+
+services:
+
+  app:
+    build: .
+    container_name: laravel_php74
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8000:8000"  # add this line for port exposure
+    networks:
+      - laravel
+
+  node:
+    image: node:lts
+    container_name: laravel_node
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql57
+    restart: always
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel
+
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+volumes:
+  mysql_data:
+
+networks:
+  laravel:
+    driver: bridge
+
+#building images
+for first time
+docker compose up -d --build
+or to rebuild
+docker-compose build --no-cache app
+docker-compose up -d
+#rebuild specific service container
+docker-compose build --no-cache app
+
+#version 1 nginx.conf
+server {
+    listen 80;
+    index index.php index.html;
+    server_name localhost;
+
+    root /var/www/html/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+
+#installing composer
+— Install Composer inside PHP container
+
+Enter PHP container:
+
+docker exec -it laravel_php72 bash
+
+
+Inside container, install tools Laravel 7 era needs:
+
+apt update
+apt install -y unzip git
+
+
+Install Composer:
+
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+rm composer-setup.php
+
+
+Verify:
+
+composer --version
+— Install Laravel PHP dependencies
+
+Still INSIDE php container:
+
+composer install
+
+✔️ Step 6 — Install Node dependencies using Node container
+
+Open node container shell:
+docker exec -it laravel_node bash
+Run:
+
+nginx
+Copy code
+npm install
+To build assets (if Laravel Mix or Vite):
+
+arduino
+Copy code
+npm run dev
+or for production:
+
+arduino
+Copy code
+npm run prod
+Configure .env
+
+Ensure DB looks like:
+
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=laravel
+
+
+💡 Notice:
+
+hostname is not 127.0.0.1
+
+hostname is mysql (special Docker DNS service name)
+
+That answers your DNS-name question ✔️
+— Run migrations and seeders
+
+Back inside PHP container:
+
+docker exec -it laravel_php72 bash
+
+
+Run:
+
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+php artisan storage:link
+— Run Laravel server inside PHP container
+
+Still inside PHP container:
+
+php artisan serve --host=0.0.0.0 --port=8000
+#inject sql data to db inside container
+docker exec -i mysql57 mysql -u root -proot ecommerceadvlara < "/home/hulbert/Desktop/comm/Ecommerce-Laravel/DATABASE FILE/ecommerceadvlara.sql"
+Option 2: Copy the SQL into the container first
+docker cp "/home/hulbert/Desktop/comm/Ecommerce-Laravel/DATABASE FILE/ecommerceadvlara.sql" mysql57:/tmp/ecommerceadvlara.sql
+
+docker exec -i mysql57 mysql -u root -proot ecommerceadvlara < /tmp/ecommerceadvlara.sql
+
+
+Useful if the file is very large; avoids path issues.
+#mysql db access 
+docker exec -it mysql57 mysql -uroot -proot
+(no space between -p and password)
+#access php container
+docker exec -it $(docker ps -q --filter ancestor=php:7.4-fpm) bash
+
+
+Option B – interactive way
+docker exec -it mysql57 bash
+mysql -u root -p
+
+
+When it asks for password, type:
+
+root
+
+
+(not visible while typing, that’s normal)
+#run project
+docker exec -it laravel_php74 php artisan serve --host=0.0.0.0 --port=8000
