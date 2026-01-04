@@ -21200,3 +21200,139 @@ root
 (not visible while typing, that’s normal)
 #run project
 docker exec -it laravel_php74 php artisan serve --host=0.0.0.0 --port=8000
+#check
+docker-compose down -v
+-v deletes (The -v is critical—it deletes the database volume so it can be recreated fresh).
+
+#fix npm run dev issues
+export NODE_OPTIONS=--openssl-legacy-provider
+npm run dev
+
+#doing builds
+docker-compose up -d --build
+docker-compose exec node rm -rf node_modules (clean start)
+docker-compose exec node npm install
+
+#repull from docker-compose.yml file
+How to "Rebuild" (Re-pull) MySQL
+If you want to make sure you have the latest version of that MySQL image or refresh it, you don't use build. You use pull:
+
+Bash
+
+docker-compose pull mysql
+#stopping and removing volumes
+Stop and remove volumes:
+
+Bash
+
+docker-compose down -v
+(The -v is critical—it deletes the database volume so it can be recreated fresh).
+
+Start again:
+
+Bash
+
+docker-compose up -d
+
+#fixing permissions
+docker exec -it laravel_php74 chown -R www-data:www-data /var/www/html/storage /var/www/html/public
+
+1. How to apply the nginx.conf changes
+Since you already stopped the container, simply start it again:
+
+Bash
+
+docker-compose up -d nginx
+If the container was already running and you didn't want to stop it, you could also use this "reload" command to apply config changes without downtime:
+
+Bash
+
+docker exec -it laravel_nginx nginx -s reload
+2. Why the Images might still be missing (The Symlink Trap)
+You mentioned that php artisan storage:link said the link "already exists." In Docker, this can be a "false positive" if the link was created on your Windows/Linux host but is broken inside the Docker container.
+
+Try this to force a clean link inside the container:
+
+Bash
+
+# 1. Remove the existing link (it might be a broken shortcut from your host)
+docker exec -it laravel_php74 rm public/storage
+
+# 2. Re-create it fresh inside the container environment
+docker exec -it laravel_php74 php artisan storage:link
+3. Check the Nginx root path
+For images to show up, Nginx must be looking in the /public folder. Check your nginx.conf (the one on your Desktop). It should have these specific lines:
+
+Nginx
+
+server {
+    listen 80;
+    # THIS LINE IS CRITICAL:
+    root /var/www/html/public; 
+    
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # ... rest of your config
+}
+4. How to Debug the "Broken" Image
+If you start Nginx and the images still don't show, run this command to see what Nginx is "seeing":
+
+Bash
+
+docker exec -it laravel_nginx ls -la /var/www/html/public/storage
+If it says "No such file or directory": Your volume mapping in docker-compose.yml is wrong.
+
+If it shows files but they are red/blinking: The symlink is broken (repeat Step 2 above).
+
+Once you run docker-compose up -d nginx, open your browser and tell me: do you see a "404 Not Found" or a "403 Forbidden" when you try to open an image URL directly?
+To verify your changes are inside the container, run:
+
+Bash
+
+docker exec -it laravel_nginx cat /etc/nginx/conf.d/default.conf
+#checking for logs
+docker logs laravel_nginx
+
+#nginx case insensitive, but does not work
+# The ~* makes the match case-insensitive
+location ~* ^/storage/(.*) {
+    alias /var/www/html/storage/app/public/$1;
+    access_log off;
+    log_not_found off;
+    expires max;
+}
+
+#CAUTION
+#stopping all docker containers and removing images
+gracefully before removing them: 
+Stop all running containers:
+bash
+docker stop $(docker ps -a -q)
+Remove all containers (stopped and running) and their volumes:
+bash
+docker rm -vf $(docker ps -a -q)
+Remove all images:
+bash
+docker rmi -f $(docker images -a -q)
+ 
+Caution: These commands are destructive and will result in data loss if you have any data in containers or volumes that you want to keep. They are best suited for development or test environments where you need to clear everything out. 
+
+#key points
+we build
+docker compose up -d --build app
+if we dont use an image
+we use docker-compose down -v and docker-compose up -d for containers made from images
+
+🧭 Summary in plain words
+
+docker build prepares your kitchen (stove, gas, tools)
+
+volume mount brings in your groceries live from your house
+
+if the groceries overlay the fridge in the kitchen → what was there disappears
+
+therefore you still need the kitchen built, even if groceries are mounted
