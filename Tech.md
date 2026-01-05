@@ -21336,3 +21336,7 @@ volume mount brings in your groceries live from your house
 if the groceries overlay the fridge in the kitchen → what was there disappears
 
 therefore you still need the kitchen built, even if groceries are mounted
+
+#start and stop containers made from images
+docker stop mysql57 laravel_php74 #names as per docker ps in NAMES column
+docker-compose up -d  app mysql #names as per name in docker-compose.yml file
