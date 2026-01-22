@@ -21413,3 +21413,7 @@ Policy Enforcement (Group Policy): Applies settings, security configurations, an
 Provides Domain Controllers: Special servers (Domain Controllers) host the AD database and handle authentication requests. 
 Analogy:
 Think of a Domain as a large building (like a university campus), and Active Directory as the security desk and directory within that building, managing who can enter which rooms (resources) and what they can do there. 
+
+#connecting using rdesktop into a machine using domain
+rdesktop -u SOME-NAME -d domain-name -p 'PASSWORD' 10.80.3.102
+
