@@ -21417,3 +21417,7 @@ Think of a Domain as a large building (like a university campus), and Active Dir
 #connecting using rdesktop into a machine using domain
 rdesktop -u SOME-NAME -d domain-name -p 'PASSWORD' 10.80.3.102
 
+#hackthebox / htb achievements
+https://app.letsdefend.io/my-rewards/detail/4875665c7ca240c7a58aa5fbf7e92ba4
+https://academy.hackthebox.com/achievement/2115311/18
+https://academy.hackthebox.com/achievement/2115311/49
