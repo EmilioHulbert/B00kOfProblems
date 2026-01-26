@@ -22094,3 +22094,8 @@ You used **`2>/dev/null`** because you wanted to **hide** the errors (like "Perm
 If you had used **`2>&1`** instead, you would see every single "Permission Denied" error mixed in with your grep results, which is usually the opposite of what you want when searching for text!
 
 Would you like to see how to use `tee` to show the results on your screen **and** save them to a file at the same time?
+
+#useful sites to perfrom security operations
+https://mxtoolbox.com/
+https://talosintelligence.com/
+
