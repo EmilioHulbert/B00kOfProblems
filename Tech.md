@@ -22099,3 +22099,17 @@ Would you like to see how to use `tee` to show the results on your screen **and*
 https://mxtoolbox.com/
 https://talosintelligence.com/
 
+##Some multi copy paste functionalities for windows to copy clipboard history
+Copy multiple things using Ctrl + C
+
+Press Win + V → clipboard history opens
+
+Click one item → it pastes
+
+Repeat for the next item
+
+❌ No multi-select
+❌ No “paste all”
+❌ No batch paste
+
+Microsoft simply didn’t implement it.
