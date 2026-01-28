@@ -22096,8 +22096,8 @@ If you had used **`2>&1`** instead, you would see every single "Permission Denie
 Would you like to see how to use `tee` to show the results on your screen **and** save them to a file at the same time?
 
 #useful sites to perfrom security operations
-https://mxtoolbox.com/
-https://talosintelligence.com/
+https://mxtoolbox.com/ lookup and check on domains
+https://talosintelligence.com/ for reputation lookup regarding a particular domain or ip
 
 ##Some multi copy paste functionalities for windows to copy clipboard history
 Copy multiple things using Ctrl + C
