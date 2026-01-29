@@ -22210,3 +22210,180 @@ netcfg -d
 echo Reboot REQUIRED.
 pause
 goto menu
+
+##Troubleshoot in independent stages
+All powerful CMD commands you should know (grouped by purpose)
+
+A “high-success” troubleshooting flow (what to try & when)
+
+A SUPER POWERFUL interactive .bat script you can actually deploy
+(menu-driven, safe, aggressive only when needed)
+
+Exact steps to run it
+
+1️⃣ ESSENTIAL + ADVANCED NETWORK TROUBLESHOOTING COMMANDS (Windows)
+🔹 BASIC IP & ADAPTER CHECKS
+ipconfig
+ipconfig /all
+ipconfig /allcompartments /all
+
+
+Use to:
+
+Confirm DHCP vs static
+
+Check DNS servers
+
+Detect wrong gateway
+
+Spot 169.254.x.x (DHCP failure)
+
+🔹 DHCP / IP LEASE REPAIR
+ipconfig /release
+ipconfig /renew
+
+
+For stubborn adapters:
+
+ipconfig /release *
+ipconfig /renew *
+
+🔹 DNS TROUBLESHOOTING (VERY COMMON AT KUTRRH)
+ipconfig /flushdns
+ipconfig /displaydns
+
+
+Test DNS resolution:
+
+nslookup google.com
+nslookup google.com 8.8.8.8
+
+
+If nslookup works but browser doesn’t → Winsock / LSP issue
+
+🔹 WINSOCK & TCP/IP RESET (HEAVY HITTERS)
+netsh winsock show catalog
+netsh winsock reset
+
+
+Reset TCP/IP stack:
+
+netsh int ip reset
+netsh int ipv4 reset
+netsh int ipv6 reset
+
+
+⚠️ Requires reboot afterward.
+
+🔹 NETWORK ADAPTER CONTROL
+netsh interface show interface
+
+
+Disable / Enable adapter (great for stuck NICs):
+
+netsh interface set interface "Ethernet" disable
+netsh interface set interface "Ethernet" enable
+
+
+(Wi-Fi example)
+
+netsh interface set interface "Wi-Fi" disable
+netsh interface set interface "Wi-Fi" enable
+
+🔹 ROUTING & GATEWAY CHECKS
+route print
+arp -a
+
+
+Clear ARP cache (helps with gateway conflicts):
+
+arp -d *
+
+🔹 CONNECTIVITY TESTS (ORDER MATTERS)
+ping 127.0.0.1
+ping <local-ip>
+ping <gateway-ip>
+ping 8.8.8.8
+ping google.com
+
+
+Trace failures:
+
+tracert 8.8.8.8
+pathping 8.8.8.8
+
+🔹 PROXY / FIREWALL / POLICY ISSUES
+netsh winhttp show proxy
+netsh winhttp reset proxy
+
+
+Firewall reset (last resort):
+
+netsh advfirewall reset
+
+🔹 WLAN-SPECIFIC (VERY IMPORTANT IN HOSPITALS)
+netsh wlan show interfaces
+netsh wlan show profiles
+netsh wlan delete profile name="ProfileName"
+
+
+Reset Wi-Fi profiles completely:
+
+netsh wlan delete profile name=*
+
+🔹 SERVICE CHECKS (DNS/DHCP FAILURES)
+sc query dhcp
+sc query dnscache
+
+
+Restart services:
+
+net stop dhcp
+net start dhcp
+
+net stop dnscache
+net start dnscache
+
+🔹 SYSTEM & DRIVER SANITY
+netcfg -d
+
+
+NUCLEAR OPTION – removes & reinstalls all network adapters
+Requires reboot.
+
+2️⃣ HIGH-SUCCESS TROUBLESHOOTING FLOW (REAL WORLD)
+
+Follow this order — it saves time:
+
+ipconfig /all
+→ Check IP, gateway, DNS
+
+If DNS suspected
+→ ipconfig /flushdns + nslookup
+
+If browser/apps broken but ping works
+→ netsh winsock reset
+
+If no IP / 169.254
+→ ipconfig /release + /renew
+
+If Wi-Fi weird / connects no internet
+→ Delete WLAN profiles
+
+If machine still cursed
+→ TCP/IP reset → reboot
+
+Absolute last
+→ netcfg -d
+
+3️⃣ 🔥 SUPER POWERFUL INTERACTIVE NETWORK FIX .BAT
+
+This script:
+
+Runs menu-based
+
+Applies safe fixes first
+
+Escalates only if needed
+
+Logs everything
