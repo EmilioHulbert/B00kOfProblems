@@ -22113,3 +22113,100 @@ Repeat for the next item
 ❌ No batch paste
 
 Microsoft simply didn’t implement it.
+
+#Windows network troubleshooter batch file
+-> Network_Fix_Tool.bat
+@echo off
+title KUTRRH Network Intelligent Repair Tool
+color 0A
+
+:: Admin check
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo [!] Please run this script as ADMIN.
+    pause
+    exit
+)
+
+:menu
+cls
+echo ==========================================
+echo      KUTRRH INTELLIGENT NETWORK FIX
+echo ==========================================
+echo 1. Basic IP Refresh (Release/Renew + DNS)
+echo 2. DNS Repair Only
+echo 3. Winsock + TCP/IP Reset (REBOOT REQUIRED)
+echo 4. Restart Network Services (DHCP/DNS)
+echo 5. Reset Wi-Fi Profiles
+echo 6. Disable/Enable Network Adapter
+echo 7. Full Network Reset (NUCLEAR)
+echo 8. Exit
+echo ==========================================
+set /p choice=Select option [1-8]:
+
+if "%choice%"=="1" goto basic
+if "%choice%"=="2" goto dns
+if "%choice%"=="3" goto winsock
+if "%choice%"=="4" goto services
+if "%choice%"=="5" goto wifi
+if "%choice%"=="6" goto adapter
+if "%choice%"=="7" goto nuclear
+if "%choice%"=="8" exit
+
+goto menu
+
+:basic
+echo Running basic IP refresh...
+ipconfig /release
+ipconfig /renew
+ipconfig /flushdns
+pause
+goto menu
+
+:dns
+echo Fixing DNS...
+ipconfig /flushdns
+net stop dnscache
+net start dnscache
+pause
+goto menu
+
+:winsock
+echo Resetting Winsock & TCP/IP...
+netsh winsock reset
+netsh int ip reset
+echo Reboot REQUIRED.
+pause
+goto menu
+
+:services
+echo Restarting DHCP ^& DNS services...
+net stop dhcp
+net start dhcp
+net stop dnscache
+net start dnscache
+pause
+goto menu
+
+:wifi
+echo Removing all Wi-Fi profiles...
+netsh wlan delete profile name=*
+pause
+goto menu
+
+:adapter
+netsh interface show interface
+set /p iface=Enter interface name EXACTLY:
+netsh interface set interface "%iface%" disable
+timeout /t 3 >nul
+netsh interface set interface "%iface%" enable
+pause
+goto menu
+
+:nuclear
+echo WARNING: This will RESET ALL NETWORK ADAPTERS!
+pause
+netcfg -d
+echo Reboot REQUIRED.
+pause
+goto menu
