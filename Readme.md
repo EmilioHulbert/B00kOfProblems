@@ -22387,3 +22387,149 @@ Applies safe fixes first
 Escalates only if needed
 
 Logs everything
+
+##Resetting windows executable permissions back to normal
+What’s wrong right now (clear diagnosis)
+magnify.exe (CORRECT)
+
+Owner:
+
+NT SERVICE\TrustedInstaller
+
+
+Permissions:
+
+TrustedInstaller → Full
+
+SYSTEM → Read
+
+Administrators → Read
+
+Users → Read
+
+sethc.exe (BROKEN / MODIFIED)
+
+Owner:
+
+SYSTEM (implicitly, since it has Full)
+
+
+Permissions:
+
+SYSTEM → Full
+
+Administrators → Full ❌ (should NOT be Full)
+
+TrustedInstaller → MISSING ❌
+
+This usually happens after sticky keys backdoor / debugging / hardening experiments.
+Windows expects TrustedInstaller ownership for many binaries. When it’s wrong, shell-launch behavior breaks — exactly what you saw with VS Code.
+
+IMPORTANT RULE BEFORE FIXING
+
+Use icacls, not cacls (deprecated)
+
+Run CMD as Administrator
+
+Follow the order exactly
+
+STEP 1: Take ownership (temporary, required)
+
+You already know this part, but we’ll do it cleanly:
+
+takeown /f C:\Windows\System32\sethc.exe
+
+
+This makes Administrators the owner (temporarily).
+
+STEP 2: Set owner back to TrustedInstaller (CRITICAL)
+
+This is the step most people skip.
+
+icacls C:\Windows\System32\sethc.exe /setowner "NT SERVICE\TrustedInstaller"
+
+
+✔ Now ownership matches magnify.exe
+
+STEP 3: Reset permissions completely
+
+This wipes custom ACLs and restores defaults inherited from System32:
+
+icacls C:\Windows\System32\sethc.exe /reset
+
+STEP 4: Explicitly match magnify.exe ACLs (to be precise)
+
+Now we force exact parity.
+
+icacls C:\Windows\System32\sethc.exe ^
+/grant "NT SERVICE\TrustedInstaller":F ^
+/grant SYSTEM:R ^
+/grant Administrators:R ^
+/grant Users:R ^
+/grant "APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES":R ^
+/grant "APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES":R
+
+STEP 5: Verify (this should now match)
+icacls C:\Windows\System32\sethc.exe
+
+
+Expected output (very close to this):
+
+NT SERVICE\TrustedInstaller:(F)
+NT AUTHORITY\SYSTEM:(R)
+BUILTIN\Administrators:(R)
+BUILTIN\Users:(R)
+APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(R)
+APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES:(R)
+
+STEP 6: System integrity check (DO NOT SKIP)
+
+Because modifying sethc.exe often breaks more than one binary:
+
+sfc /scannow
+
+
+If it reports fixes → reboot.
+
+If it reports unfixable files:
+
+DISM /Online /Cleanup-Image /RestoreHealth
+
+
+Then reboot again.
+
+Why this mattered for VS Code (connecting the dots)
+
+VS Code launcher uses ShellExecute
+
+ShellExecute depends on system accessibility binaries
+
+Corrupt ACLs on sethc.exe can:
+
+break shell process spawning
+
+cause weird “opens only via _ folder” behavior
+
+cause Electron ICU initialization failures
+
+So yeah — this wasn’t random at all.
+
+Final recommendation (expert-level)
+
+After you fix sethc.exe, I strongly suggest checking these too:
+
+where sethc.exe
+where utilman.exe
+where osk.exe
+
+
+And verify they all:
+
+exist only in System32
+
+are owned by TrustedInstaller
+
+do NOT grant Administrators Full
+##COmmand key to open active directory inw windows
+dsa.msc
+
