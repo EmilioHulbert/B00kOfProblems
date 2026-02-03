@@ -22530,6 +22530,6 @@ exist only in System32
 are owned by TrustedInstaller
 
 do NOT grant Administrators Full
-##COmmand key to open active directory inw windows
+##Command key to open active directory in windows
 dsa.msc
 
