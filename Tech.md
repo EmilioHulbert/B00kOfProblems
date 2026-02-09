@@ -22585,3 +22585,87 @@ chattr +i /etc/apt/sources.list.d/parrot.list
 STEP 4 — Clean and update APT (no errors allowed)
 apt clean
 apt update
+
+##Importing wireguard file using nmcli
+ nmcli connection import type wireguard file /etc/wireguard/amazon.conf
+ nmcli con up amazon
+ Got it — you want to **stop your WireGuard interface (`amazon`) from auto-starting** and figure out what’s causing it. Let’s go step by step.
+
+---
+
+### 1. Check if it’s enabled via `systemd`
+
+WireGuard interfaces can auto-start if there’s a systemd service like `wg-quick@amazon.service` enabled. Check its status:
+
+```bash
+systemctl status wg-quick@amazon
+```
+
+If it shows **enabled**, that’s why it starts automatically.
+
+* To **disable auto-start**:
+
+```bash
+systemctl disable wg-quick@amazon
+```
+
+* To **stop it immediately**:
+
+```bash
+systemctl stop wg-quick@amazon
+```
+
+---
+
+### 2. Check NetworkManager
+
+If you configured WireGuard via NetworkManager (`nmcli`), it could also auto-connect. List connections:
+
+```bash
+nmcli connection show
+```
+
+Look for a connection named `amazon` or similar. If it exists:
+
+* To **prevent auto-connect**:
+
+```bash
+nmcli connection modify amazon connection.autoconnect no
+```
+
+* To **verify the change**:
+
+```bash
+nmcli connection show amazon | grep autoconnect
+```
+
+It should show `no`.
+
+---
+
+### 3. Check for scripts in `/etc/network/` or cron jobs
+
+Some systems use hooks to bring up interfaces automatically:
+
+* `/etc/network/interfaces` (Debian/Ubuntu) – look for `auto amazon`.
+* `/etc/rc.local` or `/etc/rc.d/` scripts.
+* Cron jobs:
+
+```bash
+crontab -l
+sudo crontab -l
+```
+
+---
+
+### ✅ Recommended Approach
+
+1. Run `systemctl status wg-quick@amazon` → if enabled, **disable it**.
+2. Run `nmcli connection show` → if auto-connect is on, **disable it**.
+
+After doing these, the interface won’t auto-start on boot or network reload.
+
+---
+
+If you want, I can give you a **one-line command that completely disables all auto-starts for WireGuard interfaces** on your system. This is cleaner than hunting NetworkManager and systemd separately. Do you want me to do that?
+systemctl disable --now wg-quick@amazon.service; nmcli connection modify amazon connection.autoconnect no
