@@ -22535,4 +22535,6 @@ dsa.msc
 
 ##Put interface into monitor mode using iwconfig
  iwconfig wlp1s0 mode monitor 11
+###using airmon-ng on a specific channel
+sudo airmon-ng start wlan0 6
 
