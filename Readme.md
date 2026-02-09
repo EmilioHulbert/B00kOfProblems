@@ -22537,4 +22537,51 @@ dsa.msc
  iwconfig wlp1s0 mode monitor 11
 ###using airmon-ng on a specific channel
 sudo airmon-ng start wlan0 6
+#Windows 7 loader/activator
+https://github.com/ntkernel/windows-activate/blob/master/Windows.Loader.7z
 
+##Fix parrot.list file is not editable
+STEP 1 — Confirm immutability (prove it)
+
+Run:
+
+lsattr /etc/apt/sources.list.d/parrot.list
+
+
+You will see something like:
+
+----i-------- /etc/apt/sources.list.d/parrot.list
+
+
+That i is the blocker.
+
+STEP 2 — Remove immutable flag (THIS IS THE FIX)
+chattr -i /etc/apt/sources.list.d/parrot.list
+
+
+Verify:
+
+lsattr /etc/apt/sources.list.d/parrot.list
+
+
+The i must be gone.
+
+STEP 3 — Now edit the file (will work)
+nano /etc/apt/sources.list.d/parrot.list
+
+
+Replace contents with exactly:
+
+deb https://deb.parrot.sh/parrot lory main contrib non-free non-free-firmware
+
+
+Save and exit.
+
+(Optional but recommended)
+Re-lock it after editing:
+
+chattr +i /etc/apt/sources.list.d/parrot.list
+
+STEP 4 — Clean and update APT (no errors allowed)
+apt clean
+apt update
