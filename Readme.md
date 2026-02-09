@@ -22533,3 +22533,6 @@ do NOT grant Administrators Full
 ##Command key to open active directory in windows
 dsa.msc
 
+##Put interface into monitor mode using iwconfig
+ iwconfig wlp1s0 mode monitor 11
+
