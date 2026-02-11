@@ -22669,3 +22669,11 @@ After doing these, the interface won’t auto-start on boot or network reload.
 
 If you want, I can give you a **one-line command that completely disables all auto-starts for WireGuard interfaces** on your system. This is cleaner than hunting NetworkManager and systemd separately. Do you want me to do that?
 systemctl disable --now wg-quick@amazon.service; nmcli connection modify amazon connection.autoconnect no
+#Using curl to check what my public ip is
+curl ifconfig.me
+curl ipconfig.io
+curl ipinfo.io/ip
+##using dig 
+dig +short myip.opendns.com @resolver1.opendns.com
+##Using host command
+host myip.opendns.com resolver1.opendns.com
