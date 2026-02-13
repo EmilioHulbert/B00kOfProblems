@@ -22677,3 +22677,5 @@ curl ipinfo.io/ip
 dig +short myip.opendns.com @resolver1.opendns.com
 ##Using host command
 host myip.opendns.com resolver1.opendns.com
+##Move multiple files using the mv command to a common destination
+mv accessSpecifiers classObject datatypes javaCollection src/
