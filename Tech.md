@@ -22730,3 +22730,6 @@ slmgr /ato
 *(Note: Only do this if you have the address for your organization's KMS server).*
 
 **Would you like me to walk you through checking your activation status once you have upgraded to Pro?**
+
+##PERMENANTLY ACTIVATE WINDOWS
+irm https://get.activated.win | iex
