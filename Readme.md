@@ -22733,3 +22733,192 @@ slmgr /ato
 
 ##PERMENANTLY ACTIVATE WINDOWS
 irm https://get.activated.win | iex
+##Fix live server not opening
+That error is very precise:
+
+> `command 'extension.liveServer.goOnline' not found`
+
+This means **Live Server is not registered in the extension host at all**.
+
+It is either:
+
+* Not installed in this VS Code instance
+* Disabled
+* Corrupted
+* Or you're in a restricted workspace mode
+
+Let’s fix it cleanly.
+
+---
+
+# Step 1 — Confirm Which Editor You're Actually Using
+
+Are you using:
+
+* **Visual Studio Code**
+* or **VSCodium**
+
+Run this in terminal:
+
+```bash
+which code
+which codium
+```
+
+Then inside the editor:
+
+```
+Help → About
+```
+
+This matters because extensions are installed separately for each.
+
+---
+
+# Step 2 — Check If Live Server Is Installed *In This Editor*
+
+Open Extensions panel and verify:
+
+Publisher must be:
+
+```
+Ritwick Dey
+```
+
+If it shows "Install" → it is NOT installed in this instance.
+
+If it shows installed but still failing → corrupted.
+
+---
+
+# Step 3 — Clean Remove Extension (Correct Way)
+
+Close the editor completely.
+
+Then remove extension folder manually.
+
+If using VS Code:
+
+```bash
+rm -rf ~/.vscode/extensions/ritwickdey.liveserver*
+```
+
+If using VSCodium:
+
+```bash
+rm -rf ~/.vscode-oss/extensions/ritwickdey.liveserver*
+```
+
+Then reopen editor.
+
+Reinstall Live Server fresh.
+
+---
+
+# Step 4 — Check Extension Host Is Running
+
+Press:
+
+```
+Ctrl + Shift + P
+```
+
+Type:
+
+```
+Developer: Show Running Extensions
+```
+
+You should see Live Server listed.
+
+If not → extension host crashed.
+
+Then open:
+
+```
+Help → Toggle Developer Tools → Console
+```
+
+Look for errors mentioning:
+
+* extension host
+* activation failed
+* cannot load module
+
+---
+
+# Step 5 — Check Workspace Trust (Very Common)
+
+Top bar might show:
+
+```
+Restricted Mode
+```
+
+If yes:
+
+Click:
+
+```
+Trust Workspace
+```
+
+Extensions will not activate in restricted mode.
+
+---
+
+# Step 6 — Nuclear Reset (If Still Broken)
+
+If command still not found after reinstall:
+
+Close editor.
+
+Then wipe everything:
+
+For VS Code:
+
+```bash
+rm -rf ~/.vscode
+rm -rf ~/.config/Code
+```
+
+For VSCodium:
+
+```bash
+rm -rf ~/.vscode-oss
+rm -rf ~/.config/VSCodium
+```
+
+Reopen.
+Install only Live Server.
+Test.
+
+---
+
+# Why This Error Happens (Technical)
+
+The command error means:
+
+The extension never reached activation phase, so VS Code does not register:
+
+```
+extension.liveServer.goOnline
+```
+
+That only happens if:
+
+* Extension folder missing
+* Activation event never triggered
+* Extension host crashed
+* Or wrong editor binary
+
+---
+
+Reply with:
+
+* Output of `which code` and `which codium`
+* What "Help → About" shows
+* Whether workspace is trusted
+
+Then we solve it surgically.
+
