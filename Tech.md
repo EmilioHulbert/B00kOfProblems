@@ -23270,3 +23270,184 @@ output + your host screen resolution.
 
 We’ll tune it precisely instead of guessing.
 
+##Fixing bridged wifi connection issue for a virtualbox vm
+You’re running **Ubuntu 14.04** inside what is clearly **VirtualBox** (MAC prefix `08:00:27` confirms it).
+
+Right now the VM only sees:
+
+* `eth0 → 192.168.56.3` (Host-Only)
+* `eth1 → 10.10.10.11` (NAT Network)
+* `lo`
+
+There is **no third NIC detected at OS level**, which means this is not yet a DHCP problem — it’s either:
+
+1. VirtualBox didn’t actually attach Adapter 3
+2. The interface exists but isn’t configured in `/etc/network/interfaces`
+3. Wi-Fi bridging limitation on your host
+
+Let’s narrow it down properly.
+
+---
+
+# Step 1 — Confirm the VM even sees a third NIC
+
+Inside the Ubuntu VM:
+
+```bash
+ip link
+```
+
+If you **don’t see `eth2`**, then the kernel never detected the bridged adapter.
+
+If you **do see `eth2` but no IP**, then it’s just a DHCP/config issue.
+
+---
+
+# Step 2 — Verify VirtualBox Adapter 3 Settings
+
+On your host:
+
+VM → Settings → Network → Adapter 3
+
+Confirm:
+
+* ✅ Enable Network Adapter
+* Attached to: **Bridged Adapter**
+* Name: **wlp1s0**
+* Promiscuous Mode: Allow All (temporarily for testing)
+
+If Adapter 3 was added while VM was running, shut down the VM completely and start it again.
+
+Old Ubuntu 14.04 does not hot-plug NICs cleanly.
+
+---
+
+# Step 3 — If `eth2` Exists But No IP
+
+Your `/etc/network/interfaces` only defines:
+
+```bash
+auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet dhcp
+```
+
+Add:
+
+```bash
+auto eth2
+iface eth2 inet dhcp
+```
+
+Then restart networking:
+
+```bash
+service networking restart
+```
+
+Or force DHCP:
+
+```bash
+dhclient eth2
+```
+
+---
+
+# Step 4 — Important: Wi-Fi Bridging Limitation
+
+This is where most people get stuck.
+
+Bridging over Wi-Fi is **not true L2 bridging**. Many wireless drivers (especially Intel on Linux) do not allow multiple MAC addresses behind a Wi-Fi interface.
+
+Your host interface:
+
+```
+wlp1s0 → 10.80.17.178
+```
+
+If your Wi-Fi driver doesn’t support proper promiscuous bridging, the VM won’t receive DHCP offers from your router.
+
+This explains why:
+
+* Parrot VM works (likely using different configuration)
+* Ubuntu 14.04 doesn’t get an IP
+
+Some distros auto-handle this better.
+
+---
+
+# Step 5 — The Clean Test
+
+On the Ubuntu VM:
+
+```bash
+tcpdump -i eth2 port 67 or port 68
+```
+
+Then run:
+
+```bash
+dhclient eth2
+```
+
+If you see DHCP Discover packets but **no Offer**, your Wi-Fi bridge is blocking.
+
+---
+
+# The Reliable Solution (What Actually Works)
+
+Instead of Bridged over Wi-Fi, use:
+
+### Option A — NAT Network + Port Forwarding
+
+More stable, no Wi-Fi driver issues.
+
+### Option B — Host-Only + NAT (your current setup)
+
+This is actually cleaner for lab work.
+
+### Option C — Use Ethernet instead of Wi-Fi
+
+True bridging works perfectly over wired interfaces.
+
+---
+
+# Why Your Parrot VM Works
+
+Most likely:
+
+* It has `predictable interface names` (like `enp0s8`)
+* Or it’s using a different adapter index
+* Or it’s configured with NetworkManager instead of `/etc/network/interfaces`
+
+Ubuntu 14.04 uses old networking stack.
+
+---
+
+# What I Suspect Strongly
+
+Your VM simply **does not detect Adapter 3**.
+
+Because `ifconfig` only shows two ethernet interfaces.
+
+So run:
+
+```bash
+ip link
+```
+
+If there is no `eth2`, the issue is VirtualBox side — not Ubuntu.
+
+---
+
+If you want, paste:
+
+```bash
+ip link
+VBoxManage showvminfo <vm-name>
+```
+
+and we’ll surgically pinpoint it.
+
