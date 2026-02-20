@@ -22922,3 +22922,351 @@ Reply with:
 
 Then we solve it surgically.
 
+##Fixing corrupted filesystem in virtualbox linux vm
+Alright. Blinking cursor on Kali in VirtualBox usually means one of these:
+
+1. GRUB is broken
+2. Filesystem corruption
+3. Wrong boot mode (EFI vs BIOS mismatch)
+4. Virtual disk/controller issue
+
+Since you’re already booted into the Kali ISO, let’s recover it properly and methodically.
+
+---
+
+# Step 1 — Make Sure You’re in **Live Mode**
+
+When you boot the ISO, choose:
+
+**Live system (amd64)**
+
+If it didn’t enter live mode and just dropped you somewhere odd, reboot the VM and explicitly select Live mode.
+
+Once inside live mode, open a terminal.
+
+---
+
+# Step 2 — Identify the Installed Disk
+
+Run:
+
+```bash
+lsblk -f
+```
+
+You’re looking for something like:
+
+* `/dev/sda`
+* `/dev/sda1`
+* `/dev/sda2`
+* maybe `/dev/sda3`
+
+Most Kali installs are:
+
+* `/dev/sda1` → EFI (if UEFI install)
+* `/dev/sda2` → root (ext4)
+
+If you’re unsure, run:
+
+```bash
+sudo fdisk -l
+```
+
+---
+
+# Step 3 — Check Filesystem Integrity (VERY IMPORTANT)
+
+Assume your root partition is `/dev/sda2` (replace if different).
+
+First unmount if mounted:
+
+```bash
+sudo umount /dev/sda2
+```
+
+Then run filesystem check:
+
+```bash
+sudo fsck.ext4 -f /dev/sda2
+```
+
+If it says superblock corrupted, try backup superblocks:
+
+Find them:
+
+```bash
+sudo dumpe2fs /dev/sda2 | grep -i superblock
+```
+
+Then repair using one of the backup blocks:
+
+```bash
+sudo fsck.ext4 -b 32768 /dev/sda2
+```
+
+(Replace 32768 with a backup block number shown.)
+
+Let it fix everything. Accept fixes.
+
+If this passes cleanly → filesystem probably not the issue.
+
+---
+
+# Step 4 — Mount System for GRUB Repair
+
+Mount root:
+
+```bash
+sudo mount /dev/sda2 /mnt
+```
+
+If you have EFI (check for `/dev/sda1` FAT32):
+
+```bash
+sudo mount /dev/sda1 /mnt/boot/efi
+```
+
+Now bind system directories:
+
+```bash
+sudo mount --bind /dev /mnt/dev
+sudo mount --bind /proc /mnt/proc
+sudo mount --bind /sys /mnt/sys
+```
+
+Enter chroot:
+
+```bash
+sudo chroot /mnt
+```
+
+---
+
+# Step 5 — Reinstall GRUB
+
+If BIOS install:
+
+```bash
+grub-install /dev/sda
+update-grub
+```
+
+If UEFI install:
+
+```bash
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Kali
+update-grub
+```
+
+Exit chroot:
+
+```bash
+exit
+```
+
+Unmount everything:
+
+```bash
+sudo umount -R /mnt
+```
+
+Reboot:
+
+```bash
+reboot
+```
+
+Remove ISO before rebooting.
+
+---
+
+# If It STILL Blinks
+
+Then we investigate deeper:
+
+### Check VirtualBox settings:
+
+* Is EFI enabled? (Must match how you installed)
+* Storage controller changed?
+* SATA vs IDE?
+* Did disk UUID change?
+
+Sometimes VirtualBox silently flips EFI and the system won’t boot.
+
+---
+
+# Critical Question
+
+Did this crash happen after:
+
+* Power loss?
+* Snapshot restore?
+* Disk resizing?
+* Kernel update?
+
+That detail determines whether this is filesystem corruption or GRUB misalignment.
+
+---
+
+Answer me with the output of:
+
+```bash
+lsblk -f
+```
+
+Let’s narrow it down precisely.
+
+##Part 2: Fixing display resolution issue
+Good. System’s alive — now this is almost certainly a **VirtualBox graphics / resolution mismatch**, not Kali itself.
+
+When login appears bottom-right and everything looks oversized, it’s usually one of these:
+
+* Guest Additions not loaded
+* Wrong graphics controller
+* Display scaling mismatch
+* Wrong resolution locked by Xorg
+
+We’ll fix this cleanly.
+
+---
+
+# Step 1 — Check VirtualBox Display Settings (Host Side)
+
+Power off the VM completely.
+
+Go to:
+
+**VirtualBox → Settings → Display**
+
+Set:
+
+* Graphics Controller → **VMSVGA**
+* Video Memory → **128MB**
+* Enable 3D Acceleration → ✅ (checked)
+
+If you see VBoxVGA selected → that’s usually the problem.
+
+Boot again and check.
+
+---
+
+# Step 2 — Install / Reinstall Guest Additions (Most Common Fix)
+
+Boot Kali.
+
+Inside Kali terminal:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential dkms linux-headers-$(uname -r)
+```
+
+Now in VirtualBox menu:
+
+Devices → Insert Guest Additions CD Image
+
+Mount it:
+
+```bash
+sudo mkdir -p /media/cdrom
+sudo mount /dev/cdrom /media/cdrom
+```
+
+Run installer:
+
+```bash
+sudo sh /media/cdrom/VBoxLinuxAdditions.run
+```
+
+Reboot:
+
+```bash
+sudo reboot
+```
+
+This normally fixes scaling + resolution completely.
+
+---
+
+# Step 3 — Check Resolution Directly (If Still Zoomed)
+
+Run:
+
+```bash
+xrandr
+```
+
+You’ll see something like:
+
+```
+Virtual1 connected 1024x768
+```
+
+If it’s stuck at 1024x768, manually set it:
+
+Example:
+
+```bash
+xrandr --output Virtual1 --mode 1920x1080
+```
+
+(Replace Virtual1 if named differently.)
+
+---
+
+# Step 4 — Check VirtualBox View Scaling
+
+In the running VM window:
+
+View → Scale Factor → 100%
+View → Auto-resize Guest Display → Enabled
+
+Also try toggling:
+View → Virtual Screen 1 → Resize to 1920x1080
+
+---
+
+# Step 5 — If Login Screen Is Still Misplaced
+
+This is usually LightDM/GDM misdetecting DPI.
+
+Check DPI:
+
+```bash
+xrdb -query | grep dpi
+```
+
+If DPI is like 192 or 240, it’s scaling wrong.
+
+You can force DPI:
+
+```bash
+echo "Xft.dpi: 96" | xrdb -merge
+```
+
+Then log out/in.
+
+---
+
+# Important Question
+
+Are you running:
+
+* Fullscreen?
+* On a 4K monitor?
+* On HiDPI laptop?
+
+VirtualBox + HiDPI often causes this exact issue.
+
+---
+
+Give me:
+
+```
+xrandr
+```
+
+output + your host screen resolution.
+
+We’ll tune it precisely instead of guessing.
+
