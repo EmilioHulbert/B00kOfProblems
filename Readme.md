@@ -23468,3 +23468,143 @@ Add XScreensaver.
 
 Set your shortcut Ctrl+Alt+L to run: xscreensaver-command -lock.
 
+
+#Renaming domain user using cmd
+Good catch. This is a tool behavior issue — not permissions.
+
+You’re getting:
+
+```
+dsmod failed: '-samid' is an unknown parameter
+```
+
+Because **`dsmod user` does NOT support changing `sAMAccountName`**.
+
+That parameter simply doesn’t exist for `dsmod`.
+
+---
+
+# 🧠 Why This Happens
+
+`dsmod` can modify:
+
+* `-upn`
+* `-fn`
+* `-ln`
+* `-display`
+* password options
+* profile paths
+
+But **it cannot modify `sAMAccountName`**.
+
+Microsoft never added that switch.
+
+So the command fails because `-samid` is invalid.
+
+---
+
+# ✅ The Correct Way in CMD
+
+To change the logon name (`sAMAccountName`) using pure CMD tools, you must use:
+
+```cmd
+dsmove
+```
+
+Because `sAMAccountName` is tied to the object's RDN (Relative Distinguished Name) when the CN matches the logon name pattern.
+
+---
+
+## 🔹 Step 1 — Confirm Current sAMAccountName
+
+Run:
+
+```cmd
+dsquery user -samid brian.njorege
+```
+
+If that still returns the DN, good.
+
+---
+
+## 🔹 Step 2 — Rename the Object Properly
+
+Since your CN is currently:
+
+```
+CN=brian Njoroge
+```
+
+If you truly want the CN to match the username format:
+
+```cmd
+dsmove "CN=brian Njoroge,DC=AD,DC=KUTRRH,DC=GO,DC=KE" -newname brian.njoroge
+```
+
+That renames the object.
+
+---
+
+## 🔹 Step 3 — Change UPN (Allowed by dsmod)
+
+```cmd
+dsmod user "CN=brian.njoroge,DC=AD,DC=KUTRRH,DC=GO,DC=KE" -upn brian.njoroge@AD.KUTRRH.GO.KE
+```
+
+---
+
+# 🚨 HOWEVER — The Clean & Reliable Method
+
+The **only guaranteed method to change `sAMAccountName` safely** from command line is PowerShell:
+
+```powershell
+Set-ADUser brian.njorege -SamAccountName brian.njoroge
+```
+
+CMD tools are old and limited.
+
+---
+
+# ⚠️ Important Clarification
+
+Right now your CN is:
+
+```
+brian Njoroge
+```
+
+That is a **display-style CN**, not username-style.
+
+Before changing anything, verify:
+
+```cmd
+dsget user "CN=brian Njoroge,DC=AD,DC=KUTRRH,DC=GO,DC=KE" -samid -upn -display
+```
+
+This will show:
+
+* Actual sAMAccountName
+* Actual UPN
+* Display name
+
+You may discover only the UPN is wrong.
+
+---
+
+# 🔥 My Recommendation (Production Safe)
+
+If this is a production hospital domain (judging by KUTRRH),
+do it this way:
+
+1. Change `sAMAccountName`
+2. Change UPN
+3. Wait for replication
+4. Inform user to log out/in
+
+If you want, tell me:
+
+* Is this a live production account?
+* Single DC or multiple DCs?
+* Is Exchange involved?
+
+I’ll give you the safest zero-impact sequence.
