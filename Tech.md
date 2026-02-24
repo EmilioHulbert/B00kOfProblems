@@ -23404,7 +23404,8 @@ Instead of Bridged over Wi-Fi, use:
 
 More stable, no Wi-Fi driver issues.
 
-### Option B — Host-Only + NAT (your current setup)
+### Option B — Host-Only + NAT (your current setup)r
+
 
 This is actually cleaner for lab work.
 
@@ -23450,4 +23451,20 @@ VBoxManage showvminfo <vm-name>
 ```
 
 and we’ll surgically pinpoint it.
+
+#Install and configure xscreensaver
+
+
+The most stable solution for a Parrot OS user:
+Switch from mate-screensaver to xscreensaver. It’s uglier (very 90s retro), but it never hangs because it runs every authentication check as a separate process.
+
+sudo apt install xscreensaver
+
+Open Startup Applications.
+
+Uncheck MATE Screensaver.
+
+Add XScreensaver.
+
+Set your shortcut Ctrl+Alt+L to run: xscreensaver-command -lock.
 
