@@ -23608,3 +23608,172 @@ If you want, tell me:
 * Is Exchange involved?
 
 I’ll give you the safest zero-impact sequence.
+
+
+Good — and this is exactly the kind of thing that separates **legacy AD tools** from modern AD management.
+
+You fixed it correctly with:
+
+```
+Set-ADUser brian.njorege -SamAccountName brian.njoroge
+```
+
+Now let’s explain *why CMD didn’t work*, even though `dsmove` and `dsmod` “succeeded”.
+
+---
+
+# 🔎 The Core Reason
+
+Because:
+
+**`dsmove` renames the CN (object name)**
+**`dsmod -upn` changes the UPN**
+
+But neither of them changes:
+
+```
+sAMAccountName
+```
+
+And `net user /domain` displays the **sAMAccountName**.
+
+So you were looking at the wrong attribute.
+
+---
+
+# 🧠 What Actually Happened
+
+After:
+
+```
+dsmove → changed CN
+dsmod -upn → changed UserPrincipalName
+```
+
+Your object looked like this:
+
+| Attribute      | Value                                                                 |
+| -------------- | --------------------------------------------------------------------- |
+| CN             | brian.njoroge                                                         |
+| UPN            | [brian.njoroge@AD.KUTRRH.GO.KE](mailto:brian.njoroge@AD.KUTRRH.GO.KE) |
+| sAMAccountName | brian.njorege ❌                                                       |
+
+So from AD’s perspective:
+
+* Login via `user@domain` would work with new spelling
+* But legacy login `DOMAIN\brian.njorege` still existed
+* `net user /domain` still showed old name
+
+Because `net user` reads **sAMAccountName**, not CN, not UPN.
+
+---
+
+# 🔬 Why CMD Couldn’t Change It
+
+The old DS tools (`dsmod`, `dsmove`) are from Windows Server 2003 era.
+
+They:
+
+* Do NOT support modifying `sAMAccountName`
+* Treat CN and sAMAccountName as separate attributes
+* Cannot directly edit sAMAccountName
+
+Only modern AD cmdlets can safely modify it.
+
+That’s why:
+
+```
+dsmod failed:'-samid' is an unknown parameter
+```
+
+Because that switch literally does not exist.
+
+---
+
+# ⚙️ Why PowerShell Worked
+
+`Set-ADUser` talks to AD through:
+
+* Active Directory Web Services (ADWS)
+* Full LDAP attribute control
+
+So when you ran:
+
+```
+Set-ADUser brian.njorege -SamAccountName brian.njoroge
+```
+
+It directly updated the attribute:
+
+```
+sAMAccountName
+```
+
+Which is what `net user /domain` displays.
+
+---
+
+# 🧠 Deep AD Insight (Important)
+
+In Active Directory:
+
+* CN = object naming container label
+* UPN = userPrincipalName attribute
+* sAMAccountName = legacy NT logon name
+* SID = true identity anchor
+
+Changing CN does NOT change sAMAccountName.
+Changing UPN does NOT change sAMAccountName.
+
+They are independent attributes.
+
+This is why production AD renames must always include:
+
+1. sAMAccountName
+2. UPN
+3. CN (optional, cosmetic)
+4. Mail attribute (if Exchange)
+5. ProxyAddresses (if Exchange)
+
+---
+
+# 🔥 Why You Still Saw Old Name
+
+Because:
+
+```
+net user /domain
+```
+
+→ Queries sAMAccountName
+→ Which you hadn’t changed yet
+
+So system was behaving correctly.
+
+---
+
+# 🧠 Strategic Takeaway
+
+For modern AD:
+
+* ❌ Avoid dsmod/dsmove for identity renames
+* ✅ Use PowerShell AD module
+* ✅ Always verify attributes with:
+
+```
+Get-ADUser username -Properties *
+```
+
+The DS tools are effectively legacy compatibility utilities now.
+
+---
+
+You actually debugged this properly.
+
+If you want, I can also explain:
+
+* What would have broken if this was hybrid Azure AD
+* Or how Exchange mailboxes behave when renaming sAMAccountName
+* Or how profile paths behave after rename
+
+Your move.
