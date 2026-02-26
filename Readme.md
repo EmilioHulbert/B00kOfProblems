@@ -24043,3 +24043,147 @@ If the script doesn't clear enough space, check these two "hidden" space hogs:
 `compact.exe /CompactOS:always`
 
 **Would you like me to add a line to the script that specifically targets Chrome or Edge browser caches as well?**
+##Run command as adn admin on windows even when run as admin right click fails
+This is a classic headache on domain-joined machines. Even if your user account is in the "Domain Admins" or local "Administrators" group, Windows 10 uses **User Account Control (UAC) Admin Approval Mode**, which strips your "full" admin token for safety until you explicitly elevate.
+
+If you are getting the "Administrator has blocked you" red banner even when right-clicking and selecting **Run as Administrator**, it’s likely a specific security policy (like AppLocker or Software Restriction Policies) or a corrupted UAC state.
+
+Here is how to bypass it, ranked from "quickest fix" to "system-wide change."
+
+### 1. The "Command Line" Bypass (Quickest)
+
+This is the most reliable way to force an app to run when the UI is blocking you.
+
+1. Open the Start menu, type `cmd`.
+2. Right-click **Command Prompt** and select **Run as Administrator**.
+3. In the black window, type the full path to your app (e.g., `C:\Downloads\Installer.exe`) and press **Enter**.
+* *Tip:* You can just drag the `.exe` file into the CMD window to paste the path automatically.
+
+
+
+### 2. The `__COMPAT_LAYER` Trick
+
+If the regular admin prompt is failing, you can try forcing the app to ignore the "RunAs" requirement using a temporary environment variable:
+
+1. Open **CMD (Admin)** as shown above.
+2. Type the following and hit Enter:
+```cmd
+set __COMPAT_LAYER=RunAsInvoker
+
+```
+
+
+3. Then, type the path to your app in that same window (e.g., `app.exe`) and press **Enter**. This tells Windows to run the app using your current permissions without triggering the "Blocked" check.
+
+### 3. Check for File "Unblocking"
+
+Sometimes Windows tags files downloaded from the web or other network locations as "dangerous."
+
+1. Right-click your `.exe` file and select **Properties**.
+2. In the **General** tab, look at the bottom for a section called **Security**.
+3. If it says "This file came from another computer...", check the box for **Unblock** and click **Apply**.
+
+### 4. Registry Fix (If GPO is the culprit)
+
+On a domain machine, Group Policy often enforces **Admin Approval Mode**. If you have local admin rights, you can temporarily disable this to run your app.
+
+1. Press `Win + R`, type `regedit`, and hit Enter.
+2. Navigate to: `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+3. Find the value **`EnableLUA`**.
+4. Double-click it and change the value data from `1` to **`0`**.
+5. **Restart your VM.**
+* *Warning:* This disables UAC entirely. Run your app, then change it back to `1` and restart again once you're done to keep the VM secure.
+
+
+
+### 5. Check for AppLocker (The "Domain" reason)
+
+Since you are on a domain, your IT department might have **AppLocker** enabled.
+
+* Run `gpresult /h report.html` in CMD (Admin) and open that file.
+* Look for "AppLocker" or "Software Restriction Policies." If the app's hash or folder isn't white-listed, no amount of "Run as Admin" will fix it—you'll need to ask your Domain Admin to add an exception for that specific executable.
+
+**Which of these worked for you? If you're still blocked, let me know the name of the app—sometimes certain drivers or "unsigned" installers trigger extra security layers.**
+##How to diable matescrensaver for good and enable xscreensaver
+If `mate-screensaver` isn't showing up under that name but you're still getting the "Gnome screen saver daemon is running" error, it’s because MATE is a fork of GNOME 2, and many of its background processes still use the old `gnome-` names or are baked into the **MATE Settings Daemon**.
+
+Since the standard "masking" didn't work, we need to go "Nuclear" to prevent the MATE/Gnome binary from even being able to execute.
+
+### 1. Identify the "Ghost" Process
+
+Run this command to find exactly what process is claiming to be the screensaver:
+
+```bash
+pgrep -a -f "saver"
+
+```
+
+*Look for things like `mate-optimus`, `gsd-screensaver-proxy`, or `mate-settings-daemon`.*
+
+---
+
+### 2. The "Nuclear" Bypass (Moving the Binary)
+
+If MATE keeps restarting the daemon, we will move the physical file so the system can't find it. This is the most effective way to stop it permanently.
+
+```bash
+# Locate where the actual binary is
+which mate-screensaver
+# Usually /usr/bin/mate-screensaver
+
+# Rename it so the system can't launch it
+sudo mv /usr/bin/mate-screensaver /usr/bin/mate-screensaver.dead
+
+# Kill any currently running version
+killall -9 mate-screensaver
+
+```
+
+**Note:** If the error mentions `gnome-screensaver`, do the same for that:
+`sudo mv /usr/bin/gnome-screensaver /usr/bin/gnome-screensaver.dead`
+
+---
+
+### 3. Kill the "Proxy" and "Settings" hooks
+
+MATE often uses a "proxy" to manage the lock. We can disable the screensaver functionality within the `mate-settings-daemon` using `gsettings`:
+
+```bash
+gsettings set org.mate.screensaver lock-enabled false
+gsettings set org.mate.lockdown disable-lock-screen true
+
+```
+
+---
+
+### 4. Force XScreensaver to Start "Clean"
+
+Now that the other one is physically unable to run, restart XScreensaver:
+
+```bash
+killall xscreensaver
+xscreensaver -nosplash &
+
+```
+
+Now open the XScreensaver settings:
+`xscreensaver-demo`
+
+If you still see the "Gnome screen saver is running" warning, click **"OK"** or **"Ignore."** Often, XScreensaver sees a specific **DBus signal** and *thinks* another saver is running when it's actually just the MATE Power Manager waiting to dim the screen.
+
+### 5. Final Check: DBus
+
+If the error persists, it's because MATE is holding the `org.gnome.ScreenSaver` name on the system bus. Run this to "murder" that bus entry:
+
+```bash
+dbus-send --type=method_call --dest=org.gnome.SessionManager /org/gnome/SessionManager org.gnome.SessionManager.Logout uint32:1
+
+```
+
+*(Warning: This might log you out, but it will clear the bus.)*
+
+---
+
+**After moving the `/usr/bin/mate-screensaver` file to `.dead`, does the error finally go away when you open `xscreensaver-demo`?**
+
+
