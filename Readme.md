@@ -24649,3 +24649,107 @@ Since:
 
 If you want, I can also give you a **one-liner that copies + sanitizes into a new folder without touching original names**.
 
+##Photo editing tips and tools on linux
+I’ve added the promotional text **as part of the image below the collage** so it looks cleaner and more like a proper advert.
+
+**Download it here:**
+[Download the edited image](sandbox:/mnt/data/mosquito_net_promo.jpg)
+
+You can now post it directly to WhatsApp, Instagram, or Facebook and the contact details will always stay attached to the photo.
+
+---
+
+## How to do this yourself on Linux (better than using a phone)
+
+Since you’re on **Parrot OS (Linux)**, you actually have **very good Photoshop-level alternatives**.
+
+### 1️⃣ Best Photoshop Alternative on Linux
+
+Use **GIMP**
+
+It’s powerful and perfect for things like this.
+
+Install it:
+
+```bash
+sudo apt update
+sudo apt install gimp
+```
+
+Open it:
+
+```bash
+gimp
+```
+
+Steps inside GIMP:
+
+1. **File → Open** → select your collage.
+2. **Image → Canvas Size**.
+3. Increase the **height** (add space at the bottom).
+4. Anchor the image **to the top**.
+5. Select the **Text Tool (T)**.
+6. Add your advert text in the empty bottom space.
+7. Adjust font, size, and alignment.
+8. **File → Export As → JPEG/PNG**.
+
+You’ll get a **professional poster-style image**.
+
+---
+
+### 2️⃣ Another very good design tool
+
+If you want something **closer to Canva/Adobe Illustrator style design**, install:
+
+**Inkscape**
+
+```bash
+sudo apt install inkscape
+```
+
+Great for:
+
+* Posters
+* Social media ads
+* Flyers
+* Logos
+
+---
+
+### 3️⃣ If you want the **closest thing to Photoshop**
+
+Use:
+
+**Krita**
+
+```bash
+sudo apt install krita
+```
+
+---
+
+💡 **Pro tip for your ads**
+
+A cleaner professional layout would be:
+
+```
+[Collage Photos]
+
+Nyumba Safi Decor Mosquito Nets
+Large • Elegant • Comfortable • Durable
+
+Made with breathable mosquito net fabric
+for proper air ventilation.
+
+📞 0720531909 | 0794620884
+Instagram: @nyumbasafidecor
+#MosquitoNets
+```
+
+This structure **converts better in marketing**.
+
+---
+
+If you want, I can also show you **how to turn this into a much more premium Instagram advert** (the type that actually sells products faster).
+
+
