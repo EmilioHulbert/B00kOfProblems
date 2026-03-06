@@ -24753,3 +24753,124 @@ This structure **converts better in marketing**.
 If you want, I can also show you **how to turn this into a much more premium Instagram advert** (the type that actually sells products faster).
 
 
+Good, you’re already at the **Canvas Size** stage in **GIMP**. The “pixel boxes” you see are exactly what we need to create the space for the text panel.
+
+Here is the **exact workflow**.
+
+---
+
+# 1️⃣ Anchor the image to the top
+
+Inside the **Canvas Size** window:
+
+1. Increase **Height** (for example from `900` → `1200`).
+2. Click **Center** if it hasn't updated yet.
+3. In the **Offset section**, you’ll see a **small preview with arrows**.
+4. Click the **TOP arrow**.
+
+The image will move **upwards**, leaving **empty space at the bottom**.
+
+Then click:
+
+**Resize**
+
+Now your canvas has **white space under the image**.
+
+---
+
+# 2️⃣ Fill the new space with a background color (optional but professional)
+
+1. Select **Rectangle Select Tool** (`R`).
+2. Drag a box over the **empty bottom space**.
+3. Select **Bucket Fill Tool** (`Shift + B`).
+4. Pick a **color** (blue / grey / black).
+5. Click inside the selection to fill it.
+
+This creates the **advert panel**.
+
+---
+
+# 3️⃣ Add your advert text
+
+1. Select **Text Tool** (`T`).
+2. Click in the bottom panel.
+3. Paste your text:
+
+```
+Always sleep under a Mosquito net which covers your bed properly.
+
+Our nets are Large, Elegant, Comfortable and Durable.
+
+Made using recommended mosquito net fabrics for proper air ventilation.
+
+Call / WhatsApp:
+0720531909
+0794620884
+
+Instagram: @nyumbasafidecor
+#MosquitoNets
+```
+
+---
+
+# 4️⃣ Make it look professional
+
+Select the text layer and adjust:
+
+* **Font:** Sans / DejaVu Sans
+* **Size:** 28–40
+* **Alignment:** Center
+* **Color:** White if background is dark
+
+---
+
+# 5️⃣ Export the advert
+
+Do **not** press Save.
+
+Instead:
+
+**File → Export As**
+
+Choose:
+
+```
+mosquito_net_ad.jpg
+```
+
+Then click **Export**.
+
+---
+
+# Quick shortcut method (faster next time)
+
+Instead of Canvas Size, you can also use:
+
+**Image → Guides → New Guide (by percent)**
+
+Add guides at **70% height**, then design the lower section like a banner.
+
+---
+
+# One more thing (important for your marketing)
+
+Your advert text will look **more professional like real companies** if structured like this:
+
+```
+NYUMBA SAFI DECOR
+
+Premium Mosquito Nets
+Large • Elegant • Comfortable • Durable
+
+Breathable fabric for proper ventilation.
+
+Call / WhatsApp
+0720531909 | 0794620884
+
+Instagram: @nyumbasafidecor
+```
+
+---
+
+If you want, I can also show you **3 simple GIMP tricks that will instantly make your adverts look like they were designed by a professional graphic designer**. Those tricks make a *huge* difference.
+
