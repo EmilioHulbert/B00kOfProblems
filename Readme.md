@@ -24874,3 +24874,175 @@ Instagram: @nyumbasafidecor
 
 If you want, I can also show you **3 simple GIMP tricks that will instantly make your adverts look like they were designed by a professional graphic designer**. Those tricks make a *huge* difference.
 
+
+##To check if someone is currently connected to your Windows computer via TightVNC, you can use visual cues, built-in Windows commands
+Gemini said
+To check if someone is currently connected to your Windows computer via TightVNC, you can use visual cues, built-in Windows commands, or the TightVNC settings menu.
+
+1. The Visual "Smoking Gun": The Tray Icon
+The quickest way to tell is by looking at the TightVNC Server icon in your system tray (near the clock).
+
+White Background: No one is connected. The server is idle and waiting.
+
+Inverted Colors (Dark/Black Background): At least one person is currently connected and can see your screen.
+
+Red Border: The server is running but is configured to block any new incoming connections.
+
+2. Check via Command Prompt (Most Accurate)
+If you want to see the specific IP address of the person watching, you can use the netstat command. This looks for active "Established" connections on the default VNC port (5900).
+
+Open the Command Prompt (type cmd in the Start menu).
+
+Type the following command and press Enter:
+netstat -n | findstr ":5900" | findstr "ESTABLISHED"
+
+How to read the results:
+
+If the command returns nothing, no one is connected.
+
+If you see a line, look at the Foreign Address column. That is the IP address of the device currently watching your screen.
+
+3. Use the TightVNC Menu
+If you see the "inverted" icon and want to see details or kick them off:
+
+Right-click the TightVNC tray icon.
+
+Select "Information..." or "Active Connections" (the wording may vary slightly depending on your version).
+
+If you want to stop them immediately, select "Disconnect All Viewers" or "Kill All Clients" from that same right-click menu.
+
+4. Check the Logs (For Past Connections)
+If you suspect someone was watching but isn't anymore, you can check the log files. By default, TightVNC may not have logging enabled, but you can check:
+
+Location: C:\ProgramData\TightVNC\ or the installation folder (usually C:\Program Files\TightVNC).
+
+Look for .log files. These will list timestamps and IP addresses of every connection attempt.
+
+[!TIP]
+Privacy Tip: If you want to prevent people from "silently" connecting, open the TightVNC Server Configuration and enable "Query console user on incoming connections." This will force a pop-up on your screen asking for your permission before anyone can see your desktop.
+
+Would you like me to show you how to enable that "Ask for Permission" setting so you aren't surprised in the future?
+
+You said
+why do i get
+
+C:\Users\ICT-SEC>netstat -n | findstr ":5900" | findstr "ESTABLISHED"
+
+  TCP    10.80.3.102:5900       10.80.17.178:38646     ESTABLISHED
+
+
+
+C:\Users\ICT-SEC>netstat -n | findstr ":5900" | findstr "ESTABLISHED"
+
+
+
+C:\Users\ICT-SEC>netstat -n | findstr ":5900" | findstr "ESTABLISHED"
+
+
+
+C:\Users\ICT-SEC> then see on my machine authentication reason connection has been rejected.how can we fix this yet i did not see the pop up to reject or accept.
+
+Gemini said
+Based on the output you provided, someone from the IP address 10.80.17.178 successfully established a connection to your machine, but it was immediately terminated or rejected by the TightVNC service itself.
+
+The reason you didn't see a pop-up is likely because the "rejection" happened at the authentication level (password/security settings) before the "user query" (the pop-up) could even trigger.
+
+Here are the most common reasons this happens and how to fix it:
+
+1. The "Loopback" or IP Restriction Setting
+TightVNC has a security feature that can automatically reject connections from specific IP ranges or if someone is trying to connect from the same network in a way the software deems "unsafe."
+
+The Fix: 1.  Right-click the TightVNC tray icon and select Configuration.
+2.  Go to the Access Control tab.
+3.  Check if there are any rules under "IP Access Control List" that might be set to "Deny."
+4.  Ensure "Allow loopback connections" is checked if you are testing this from a very close or virtualized network.
+
+2. Password Mismatch (Administrative vs. View-Only)
+If the person connecting (10.80.17.178) is using a "View-Only" password but the server is configured to require "Full Control," or if they are typing the wrong password entirely, the server will drop the connection immediately to prevent a brute-force attack.
+
+The Fix: 1.  In the Server Configuration, go to the Authentication tab.
+2.  Re-set the Primary Password.
+3.  Ensure "Require VNC authentication" is checked. If it’s unchecked, some versions of VNC will reject connections for security reasons because no password is set.
+
+3. Timeout or "Ghost" Connections
+The fact that you saw ESTABLISHED once and then nothing in the next two commands means the connection was "reset." This often happens if the Windows Firewall or an Antivirus (like Symantec, McAfee, or Sophos) sees the VNC traffic as a threat and kills the socket immediately.
+
+The Fix: 1.  Check your Windows Firewall settings.
+2.  Ensure that tvnserver.exe is allowed through the firewall for both Private and Public networks.
+
+4. How to force the "Accept/Reject" Pop-up
+If you want to ensure you always see the prompt when someone tries to connect, you need to verify this specific setting:
+
+Open TightVNC Configuration.
+
+Go to the Administration tab.
+
+Look for the section labeled "Incoming Connections."
+
+Check the box: "Query console user on incoming connections."
+
+Set the "Seconds to wait" (e.g., 30 seconds) and set "Action on timeout" to Reject.
+
+[!IMPORTANT]
+If you have "Action on timeout" set to Reject and the pop-up is appearing "behind" another window or on a different monitor, the connection will be automatically rejected before you ever see it.
+
+Would you like me to walk you through checking your Windows Firewall logs to see if it's the one blocking that 10.80.17.178 address?
+
+You said
+i had 10.80.0.0 as first ip and 10.80.255.255 as lat ip and was set to query.i set it to allow. but why upon entering passowrd i land on press ctrl alt del to unlock instead of viewing the current screen and ctrl alt del does not even unlock
+
+Gemini said
+It sounds like you have successfully bypassed the "Query" hurdle, but you’ve hit a classic Windows security wall. When you connect via VNC and see the "Press Ctrl+Alt+Del to unlock" screen, you are looking at the Windows Secure Desktop.
+
+Here is why this is happening and how to fix the "Ctrl+Alt+Del" not working issue:
+
+1. The "Software SAS" Issue (Why Ctrl+Alt+Del fails)
+By default, Windows blocks applications (like TightVNC) from simulating the Ctrl+Alt+Del command for security reasons. This is called Secure Attention Sequence (SAS). If this isn't enabled in Windows, the "Send Ctrl+Alt+Del" button in your VNC viewer will do absolutely nothing.
+
+How to Fix:
+
+On the host machine (the one being watched), press Win + R, type gpedit.msc, and hit Enter.
+
+Navigate to: Computer Configuration > Administrative Templates > Windows Components > Windows Logon Options.
+
+Look for "Software SAS generation".
+
+Set it to Enabled, and in the dropdown menu below it, select "Services and Ease of Access applications".
+
+Click Apply and OK.
+
+2. TightVNC Service vs. Application Mode
+If you are seeing the lock screen but cannot interact with it, it's often because TightVNC is running as a User Application rather than a System Service.
+
+Application Mode: Can only see what the current user sees. If the screen locks, the application loses permission to "see" or "control" the desktop.
+
+Service Mode: Runs at the system level. It can see the login screen, the lock screen, and UAC prompts.
+
+How to Fix:
+
+Check your Services (services.msc). Ensure TightVNC Server is listed and the "Startup Type" is set to Automatic.
+
+If it’s not there, reinstall TightVNC and make sure the box "Install TightVNC as a system service" is checked during the setup.
+
+3. Sending the Command Correctly
+You cannot physically press Ctrl+Alt+Del on your own keyboard; your own Windows OS will intercept it.
+
+You must use the TightVNC Toolbar at the top of your viewer window. Look for the icon that looks like three small keys or a small computer screen with a "CAD" label.
+
+4. Why you "land" on the lock screen
+If the remote computer's monitor is physically turned off or the user has timed out, Windows locks the session. TightVNC simply shows you the current state of the monitor.
+
+If you want the machine to never lock (so you always land straight on the desktop):
+
+Go to Power & Sleep settings.
+
+Set "Screen" and "Sleep" to Never.
+
+Go to Sign-in options and set "Require sign-in" to Never (if your security policy allows it).
+
+Summary Table of Fixes
+
+Problem Solution
+Buttons don't work  Enable Software SAS in Group Policy.
+Stuck on Lock Screen    Ensure TightVNC is running as a Service, not an App.
+Keyboard shortcut fails Use the Toolbar button in the VNC Viewer.
