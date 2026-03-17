@@ -25008,7 +25008,6 @@ Navigate to: Computer Configuration > Administrative Templates > Windows Compone
 Look for "Software SAS generation".
 
 Set it to Enabled, and in the dropdown menu below it, select "Services and Ease of Access applications".
-
 Click Apply and OK.
 
 2. TightVNC Service vs. Application Mode
@@ -25046,3 +25045,448 @@ Problem Solution
 Buttons don't work  Enable Software SAS in Group Policy.
 Stuck on Lock Screen    Ensure TightVNC is running as a Service, not an App.
 Keyboard shortcut fails Use the Toolbar button in the VNC Viewer.
+
+##Resize filesystem on linux so as to create partition for windows
+Good—this output actually tells us exactly what’s wrong, and you were right: you’re on the right track. Now let’s fix it properly.
+
+🔥 What the error REALLY means
+
+ERROR: No space left on device
+
+This is not about disk space outside.
+It’s inside the btrfs filesystem.
+
+From your log:
+
+Used: ~47 GB
+
+Target size: 51 GB
+
+👉 That should fit… BUT:
+
+⚠️ btrfs detail (this is the catch)
+
+You also have:
+
+file data blocks allocated: 368 GB (!!)
+
+Metadata + chunk allocation overhead
+
+👉 btrfs pre-allocates chunks, so even if only 47GB is “used”, it may require more than 51GB to shrink safely.
+
+🧠 Translation in simple terms
+
+Think of btrfs like this:
+
+You have 47GB of files ✅
+
+But they are spread across “containers” (chunks) ❌
+
+Those containers currently occupy more space than 51GB
+
+👉 So shrinking to 51GB fails.
+
+✅ The REAL fix (this is the missing step)
+
+You need to rebalance btrfs before shrinking.
+
+🛠️ Step-by-step (DO THIS EXACTLY)
+
+Boot into Live USB (you already did that 👍)
+
+1. Mount your partition
+sudo mount /dev/nvme0n1p2 /mnt
+2. Rebalance (this is the key step)
+sudo btrfs balance start -dusage=50 -musage=50 /mnt
+
+👉 What this does:
+
+Compacts data chunks
+
+Frees unused allocated space
+
+Makes shrinking possible
+
+⚠️ This may take time depending on disk
+
+3. Check usage after rebalance
+sudo btrfs filesystem df /mnt
+
+You should see much lower allocated space
+
+4. Now shrink filesystem manually
+sudo btrfs filesystem resize 51G /mnt
+
+If it fails again, go slightly higher:
+
+sudo btrfs filesystem resize 55G /mnt
+5. Unmount
+sudo umount /mnt
+6. Open GParted
+
+Now:
+
+Resize partition to match (51–55GB)
+
+Apply
+
+👉 This time it will work.
+
+💡 Smart move (recommended)
+
+Don’t go too tight like 51GB.
+
+Give breathing room:
+
+👉 Shrink to ~55–60GB instead
+
+Why?
+
+btrfs likes space
+
+prevents future headaches
+
+system won’t choke later
+
+⚡ Even smarter (your current layout insight)
+
+You already have:
+
+👉 52GB unallocated
+
+So ask yourself:
+
+Do you REALLY need to shrink / further?
+
+If not:
+👉 just use that space for Windows and skip this whole fight
+
+🧭 Final clarity
+
+You were worried about:
+
+“tool cutting data blindly”
+
+❌ That’s not happening
+✅ What’s happening is btrfs refusing unsafe shrink
+
+Which is actually a good thing
+
+🚀 Your next move
+
+Choose one:
+
+Option A (FAST + SAFE)
+
+Use existing 52GB unallocated
+
+Create NTFS → install Windows
+
+Done
+
+Option B (CLEAN CONTROL)
+
+Rebalance → shrink → reorganize partitions
+
+If you want, I can go deeper and:
+
+Merge /mnt + / properly
+
+Set up shared partition for both OS
+
+Optimize layout for dual boot + performance
+
+Just say 👍
+┌─[root@parrot]─[/home/user]
+└──╼ #btrfs balance start -dusage=80 -musage=80 /mnt
+Done, had to relocate 7 out of 52 chunks
+┌─[root@parrot]─[/home/user]
+└──╼ #btrfs filesystem df /mnt
+Data, single: total=46.01GiB, used=42.91GiB
+System, DUP: total=32.00MiB, used=16.00KiB
+Metadata, DUP: total=2.00GiB, used=1.50GiB
+GlobalReserve, single: total=130.17MiB, used=0.00B
+┌─[root@parrot]─[/home/user]
+└──╼ #btrfs filesystem resize 65G /mnt
+Resize device id 1 (/dev/nvme0n1p2) from 101.00GiB to 65.00GiB
+┌─[root@parrot]─[/home/user]
+└──╼ #btrfs filesystem resize 55G /mnt
+Resize device id 1 (/dev/nvme0n1p2) from 65.00GiB to 55.00GiB
+┌─[root@parrot]─[/home/user]
+└──╼ #
+
+
+yoow man i have ┌─[root@parrot]─[/home/user] └──╼ #btrfs balance start -dusage=50 -musage=50 /mnt Done, had to relocate 5 out of 55 chunks ┌─[root@parrot]─[/home/user] └──╼ #sudo btrfs filesystem df /mnt Data, single: total=47.02GiB, used=42.91GiB System, DUP: total=32.00MiB, used=16.00KiB Metadata, DUP: total=2.00GiB, used=1.51GiB GlobalReserve, single: total=131.14MiB, used=0.00B ┌─[root@parrot]─[/home/user] └──╼ #btrfs filesystem resize 51G /mnt Resize device id 1 (/dev/nvme0n1p2) from 101.00GiB to 51.00GiB ERROR: unable to resize '/mnt': No space left on device ┌─[✗]─[root@parrot]─[/home/user] └──╼ #btrfs filesystem resize 55G /mnt Resize device id 1 (/dev/nvme0n1p2) from 101.00GiB to 55.00GiB ERROR: unable to resize '/mnt': No space left on device ┌─[✗]─[root@parrot]─[/home/user] └──╼ #btrfs filesystem resize 58G /mnt Resize device id 1 (/dev/nvme0n1p2) from 101.00GiB to 58.00GiB ERROR: unable to resize '/mnt': No space left on device ┌─[✗]─[root@parrot]─[/home/user] └──╼ #btrfs filesystem resize 60G /mnt Resize device id 1 (/dev/nvme0n1p2) from 101.00GiB to 60.00GiB ERROR: unable to resize '/mnt': No space left on device ┌─[✗]─[root@parrot]─[/home/user] └──╼ #   even after following this  Good—this output actually tells us exactly what’s wrong, and you were right: you’re on the right track. Now let’s fix it properly.
+
+🔥 What the error REALLY means
+
+ERROR: No space left on device
+
+This is not about disk space outside.
+It’s inside the btrfs filesystem.
+
+From your log:
+
+Used: ~47 GB
+
+Target size: 51 GB
+
+👉 That should fit… BUT:
+
+⚠️ btrfs detail (this is the catch)
+
+You also have:
+
+file data blocks allocated: 368 GB (!!)
+
+Metadata + chunk allocation overhead
+
+👉 btrfs pre-allocates chunks, so even if only 47GB is “used”, it may require more than 51GB to shrink safely.
+
+🧠 Translation in simple terms
+
+Think of btrfs like this:
+
+You have 47GB of files ✅
+
+But they are spread across “containers” (chunks) ❌
+
+Those containers currently occupy more space than 51GB
+
+👉 So shrinking to 51GB fails.
+
+✅ The REAL fix (this is the missing step)
+
+You need to rebalance btrfs before shrinking.
+
+🛠️ Step-by-step (DO THIS EXACTLY)
+
+Boot into Live USB (you already did that 👍)
+
+1. Mount your partition
+sudo mount /dev/nvme0n1p2 /mnt
+2. Rebalance (this is the key step)
+sudo btrfs balance start -dusage=50 -musage=50 /mnt
+
+👉 What this does:
+
+Compacts data chunks
+
+Frees unused allocated space
+
+Makes shrinking possible
+
+⚠️ This may take time depending on disk
+
+3. Check usage after rebalance
+sudo btrfs filesystem df /mnt
+
+You should see much lower allocated space
+
+4. Now shrink filesystem manually
+sudo btrfs filesystem resize 51G /mnt
+
+If it fails again, go slightly higher:
+
+sudo btrfs filesystem resize 55G /mnt
+5. Unmount
+sudo umount /mnt
+6. Open GParted
+
+Now:
+
+Resize partition to match (51–55GB)
+
+Apply
+
+👉 This time it will work.
+
+💡 Smart move (recommended)
+
+Don’t go too tight like 51GB.
+
+Give breathing room:
+
+👉 Shrink to ~55–60GB instead
+
+Why?
+
+btrfs likes space
+
+prevents future headaches
+
+system won’t choke later
+
+⚡ Even smarter (your current layout insight)
+
+You already have:
+
+👉 52GB unallocated
+
+So ask yourself:
+
+Do you REALLY need to shrink / further?
+
+If not:
+👉 just use that space for Windows and skip this whole fight
+
+🧭 Final clarity
+
+You were worried about:
+
+“tool cutting data blindly”
+
+❌ That’s not happening
+✅ What’s happening is btrfs refusing unsafe shrink
+
+Which is actually a good thing
+
+🚀 Your next move
+
+Choose one:
+
+Option A (FAST + SAFE)
+
+Use existing 52GB unallocated
+
+Create NTFS → install Windows
+
+Done
+
+Option B (CLEAN CONTROL)
+
+Rebalance → shrink → reorganize partitions
+
+If you want, I can go deeper and:
+
+Merge /mnt + / properly
+
+Set up shared partition for both OS
+
+Optimize layout for dual boot + performance
+
+Just say 👍
+
+You’re actually very close, but the explanation you followed missed one critical Btrfs detail 👇
+
+🔥 What’s really going on (based on YOUR numbers)
+
+From your output:
+
+Data used: ~42.9 GiB
+
+Metadata: ~1.5 GiB
+
+Total real usage ≈ ~45 GiB
+
+But shrinking to even 60 GB fails → that tells us:
+
+👉 Your chunks are still too fragmented / pinned
+
+Even though you ran:
+
+btrfs balance start -dusage=50 -musage=50
+
+That only partially compacted things:
+
+“relocate 5 out of 55 chunks” → that’s very little
+
+⚠️ The mistake
+
+-dusage=50 is too conservative for shrinking.
+
+It only touches chunks <50% full
+👉 Most of your chunks are probably >50% used → so they were skipped
+
+✅ The REAL fix (what will actually work)
+
+You need a more aggressive balance
+
+🔧 Run this:
+btrfs balance start -dusage=80 -musage=80 /mnt
+
+If that still barely moves chunks, go nuclear:
+
+btrfs balance start -dusage=100 -musage=100 /mnt
+
+👉 Yes, 100 means full rebalance
+
+⏱️ Important
+
+This can take a long time
+
+Especially on NVMe with lots of chunks
+
+But this is what actually frees contiguous space
+
+🔍 Then check again
+btrfs filesystem df /mnt
+
+You’re looking for:
+
+👉 lower “total” allocated space, not just “used”
+
+🚀 Then try shrinking again
+
+Start safe:
+
+btrfs filesystem resize 65G /mnt
+
+If that works → go lower step by step:
+
+60G → 58G → 55G
+💡 Pro tip (this is key)
+
+Don’t jump straight to 51G again.
+
+👉 Shrink gradually
+Btrfs behaves much better that way
+
+🧠 Why this works
+
+Btrfs shrink requires:
+
+✔ data must fit
+✔ chunks must be movable
+✔ enough contiguous free space must exist
+
+You fixed #1
+You partially fixed #2
+👉 Now we fix #3
+
+⚡ Honest advice (not sugarcoated)
+
+You’re fighting Btrfs the hard way here.
+
+Since you already said you have:
+
+~52GB unallocated space
+
+👉 The rational move is:
+
+Leave Btrfs alone
+
+Use that space for Windows
+
+Avoid unnecessary risk
+
+Shrinking Btrfs is always slightly risky + annoying
+
+🧭 If you still want to continue
+
+Tell me:
+
+Your full lsblk output
+
+Whether /mnt is your root (/) or separate
+
+I can:
+
+✅ Calculate exact safe shrink size
+✅ Give you a zero-risk sequence
+✅ Help you set up clean dual-boot layout
+
+You’re not stuck — just one step away 👍
+
+
+
