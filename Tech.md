@@ -27087,4 +27087,204 @@ If time *still* shifts occasionally:
 ---
 
 If you want, I can help you verify from Parrot OS side (`timedatectl status`) and make sure both are perfectly aligned — because sometimes NTP + RTC combo still causes subtle drift.
+#Fixing unmanagaed wifi device 
+What happened is almost certainly this:
+
+When you used `create_ap`, it likely **changed your NetworkManager control state** and/or put your Wi-Fi interface into a different mode (managed ↔ unmanaged). Now NetworkManager is ignoring the interface — that’s why:
+
+* The taskbar says **“device not managed”**
+* `ifconfig` doesn’t show the interface
+* `iwconfig` still shows it (because it talks directly to wireless extensions, not NetworkManager)
+
+This is fixable. Follow this clean recovery process.
+
+---
+
+## Step 1 — Check if NetworkManager is running
+
+```bash
+sudo systemctl status NetworkManager
+```
+
+If it’s not active:
+
+```bash
+sudo systemctl restart NetworkManager
+```
+
+---
+
+## Step 2 — Check if the device is marked unmanaged
+
+Run:
+
+```bash
+nmcli device
+```
+
+If you see something like:
+
+```
+wlan0  wifi  unmanaged
+```
+
+That confirms the issue.
+
+---
+
+## Step 3 — Fix NetworkManager configuration
+
+Open the NetworkManager config:
+
+```bash
+sudo nano /etc/NetworkManager/NetworkManager.conf
+```
+
+Look for this line:
+
+```
+managed=false
+```
+
+If you see it — change it to:
+
+```
+managed=true
+```
+
+Or remove the entire `[ifupdown]` block if present.
+
+It should ideally look like:
+
+```
+[main]
+plugins=ifupdown,keyfile
+
+[ifupdown]
+managed=true
+```
+
+Save and exit.
+
+---
+
+## Step 4 — Check for unmanaged-devices rule
+
+Sometimes `create_ap` adds a rule marking Wi-Fi unmanaged.
+
+Check:
+
+```bash
+sudo nano /etc/NetworkManager/conf.d/*
+```
+
+Look for something like:
+
+```
+unmanaged-devices=interface-name:wlan0
+```
+
+If you see it — delete that line.
+
+Save.
+
+---
+
+## Step 5 — Restart NetworkManager
+
+```bash
+sudo systemctl restart NetworkManager
+```
+
+Then check:
+
+```bash
+nmcli device
+```
+
+Your Wi-Fi should now say:
+
+```
+wlan0  wifi  connected/disconnected
+```
+
+NOT unmanaged.
+
+---
+
+## Step 6 — If interface still missing in ifconfig
+
+Bring it up manually:
+
+```bash
+sudo ip link set wlan0 up
+```
+
+Then check:
+
+```bash
+ip a
+```
+
+If it appears now, NetworkManager should detect it.
+
+---
+
+## Step 7 — If still broken (driver issue)
+
+Check:
+
+```bash
+rfkill list
+```
+
+If soft blocked:
+
+```bash
+sudo rfkill unblock wifi
+```
+
+---
+
+# Why this happened
+
+`create_ap` temporarily:
+
+* puts interface into AP mode
+* may stop NetworkManager
+* may mark interface unmanaged
+* sometimes modifies config files
+
+When it exits incorrectly or crashes, NetworkManager doesn’t regain control.
+
+---
+
+# Clean Reset (If You Want Full Reset)
+
+If things are messy:
+
+```bash
+sudo apt purge create-ap
+sudo rm -rf /etc/NetworkManager/conf.d/*
+sudo systemctl restart NetworkManager
+```
+
+Then reboot:
+
+```bash
+sudo reboot
+```
+
+---
+
+If after this it still says unmanaged, show me output of:
+
+```bash
+nmcli device
+ip a
+iwconfig
+rfkill list
+```
+
+We’ll debug it properly step by step.
 
