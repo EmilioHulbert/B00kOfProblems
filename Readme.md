@@ -26992,3 +26992,99 @@ Since you mentioned you're documenting this, I strongly recommend checking out *
 
 **Would you like the specific dgVoodoo2 config file settings so you can just push a "Fix Kit" to your GitHub?**
 
+##realtime is universal fix for windows registry
+Ahh yeah, that classic Windows ↔ Linux dual-boot clock drift problem — I know exactly what tweak you’re talking about.
+
+### 🔥 Why this happens (quick clarity)
+
+* **Linux (like Parrot OS)** uses **UTC (Universal Time)** for the hardware clock.
+* **Windows** assumes the hardware clock is **local time**.
+
+So every time you switch OS:
+
+* One OS “corrects” the clock → messes up the other.
+
+---
+
+## ✅ The Windows Registry Fix (what you’re remembering)
+
+You force Windows to behave like Linux (use UTC).
+
+### 🛠️ Steps
+
+1. Open **Registry Editor**:
+
+   ```
+   Win + R → regedit
+   ```
+
+2. Navigate to:
+
+   ```
+   HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation
+   ```
+
+3. Right-click → **New → DWORD (32-bit) Value**
+
+4. Name it exactly:
+
+   ```
+   RealTimeIsUniversal
+   ```
+
+5. Set its value to:
+
+   ```
+   1
+   ```
+
+---
+
+## ⚡ Equivalent command (faster way)
+
+Run this in **Command Prompt as Administrator**:
+
+```cmd
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" /v RealTimeIsUniversal /t REG_DWORD /d 1 /f
+```
+
+---
+
+## 🔄 After that
+
+* Reboot Windows
+* Boot back into Parrot OS once
+* Then Windows again
+
+Let both OSes sync properly once.
+
+---
+
+## 🧠 Alternative (not recommended but valid)
+
+Instead of fixing Windows, you could make Linux use local time:
+
+```bash
+timedatectl set-local-rtc 1
+```
+
+But:
+
+* This breaks best practices on Linux
+* Can cause weird DST issues later
+
+👉 So your registry tweak is the **correct, clean solution**.
+
+---
+
+## 💡 Pro tip (you’ll appreciate this)
+
+If time *still* shifts occasionally:
+
+* Disable “Set time automatically” in Windows temporarily
+* Then re-enable after sync
+
+---
+
+If you want, I can help you verify from Parrot OS side (`timedatectl status`) and make sure both are perfectly aligned — because sometimes NTP + RTC combo still causes subtle drift.
+
