@@ -26841,3 +26841,154 @@ Open PowerShell (Admin) and run:
 PowerShell
 compact.exe /CompactOS:always
 Would you like me to check if there are any other specific large logs or cache folders (like WinSxS) we can trim down to give you more breathing room
+
+#Tweaks for fullscreen gaming
+It sounds like you are looking for the classic "Scaling" registry tweak used to force older games—which often run at 4:3 resolutions—to stretch and fill a 16:9 or 16:10 widescreen monitor.
+
+Since you're updating your documentation, here is the specific path and the values you need to toggle.
+
+### The Registry Path
+The scaling settings for integrated and many discrete graphics drivers are handled in the following location:
+
+`HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\GraphicsDrivers\Configuration\`
+
+Inside this folder, you will see several subkeys starting with names like `SIMULATED_...` or `NOEDID_...`. You will need to check each one, specifically looking for a subfolder named **00** (and sometimes a **00** inside that one).
+
+### The "Scaling" Key
+1.  Navigate to the **00** subkey for your active display profile.
+2.  Look for a `DWORD` value named **Scaling**.
+3.  Modify the value data based on these standard behaviors:
+    * **3**: **Full Screen (Stretched)** — This is usually the one you want for *RoadRash* or *NFS: Most Wanted* to bypass black bars.
+    * **4**: **Centered** — No scaling; the game appears in a small box in the middle of the screen.
+    * **2**: **Fit to Aspect Ratio** — Scales the image up as much as possible while maintaining the original 4:3 shape (black bars on the sides).
+
+---
+
+### Alternative: Compatibility Settings
+If the registry tweak feels too global or doesn't stick, you can often achieve the same result for those specific executables:
+* Right-click the `.exe` > **Properties** > **Compatibility**.
+* Check **Run in 640 x 480 screen resolution** (for *RoadRash*).
+* Check **Disable full-screen optimizations**.
+
+### Pro-Tip for your GitHub Repo
+For *NFS: Most Wanted (2005)* specifically, most modern setups use the **ThirteenAG Widescreen Fix**. Instead of stretching the registry (which distorts the image), that plugin injects a true widescreen resolution into the engine, keeping the HUD and cars from looking "fat."
+
+Would you like me to find the specific PowerShell command to automate changing that registry key for your documentation?
+
+Since you're documenting this for your GitHub, a PowerShell script is much cleaner than manually digging through the Registry Editor. 
+
+The challenge with the `GraphicsDrivers` key is that the subfolder names (e.g., `SIMULATED_...` or `NOEDID_...`) are unique to every monitor and GPU combination. The script below uses a wildcard to find every instance of the **Scaling** key and force it to **3** (Full Screen/Stretched).
+
+### The PowerShell Script
+You can run this in an elevated PowerShell prompt (Run as Administrator) to apply the "Full Screen" fix across all detected display configurations:
+
+```powershell
+# Define the root path for Graphics Driver configurations
+$registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Configuration"
+
+# Get all subkeys recursively that contain a 'Scaling' value
+$subKeys = Get-ChildItem -Path $registryPath -Recurse | Where-Object { $_.GetValueNames() -contains "Scaling" }
+
+foreach ($key in $subKeys) {
+    Write-Host "Updating Scaling for: $($key.Name)" -ForegroundColor Cyan
+    # Set Value to 3 (Full Screen/Stretched)
+    Set-ItemProperty -Path "Registry::$($key.Name)" -Name "Scaling" -Value 3
+}
+
+Write-Host "Scaling Registry Tweak Applied. Restart your game to test." -ForegroundColor Green
+```
+
+---
+
+### Documentation Breakdown
+If you are adding this to a README or a `.ps1` file in your repo, here is the technical breakdown of the values you are manipulating:
+
+| Value | Mode | Result for *RoadRash* / *NFS* |
+| :--- | :--- | :--- |
+| **2** | **Centering** | Original resolution in the middle of the screen (Small Box). |
+| **3** | **Full Screen** | Stretches the 4:3 image to fill 16:9 (No black bars). |
+| **4** | **Aspect Ratio** | Scales up but keeps black bars on the left/right. |
+
+> [!NOTE]
+> In some newer Windows 11 builds, the driver may override the registry. If the game still shows black bars after running this, you might need to toggle the "Scaling" option in the **Intel Command Center** or **NVIDIA Control Panel** once to "unlock" the registry's ability to hold the setting.
+
+Would you like me to help you format a `README.md` snippet for your GitHub repo that explains how to use this script safely?
+
+It is incredibly frustrating when you do the legwork in the Registry and Windows just ignores it. Looking at those paths, you are targeting **MSBDD** (Microsoft Basic Display Driver) and **MSNIL** (Null Driver) entries.
+
+The reason it isn't working is likely because those are "fallback" or virtual drivers. Real hardware scaling for games like *RoadRash* is usually intercepted by the active GPU driver (Intel, NVIDIA, or AMD) before the Registry values can take effect.
+
+Here is why it’s failing and how to force it:
+
+### 1. The "Prerequisites" Check
+Windows often ignores the `Scaling` registry key if the **Intel Graphics Command Center** or **NVIDIA Control Panel** is set to "Maintain Aspect Ratio."
+* **The Fix:** Open your GPU control panel (e.g., Intel Graphics Command Center).
+* Go to **Display** > **General**.
+* Change "Scaling" to **Stretched** or **Scale Full Screen**.
+* Ensure **Override Application Settings** is checked.
+
+### 2. The Resolution "Handshake"
+*RoadRash* is a 16-bit era game that tries to force a $640 \times 480$ resolution. Modern Windows 10/11 handles this via "Display Scaling" (the % slider in your display settings). 
+* If your desktop is at 150% scaling, it can break the registry's ability to stretch the game. 
+* **Test:** Temporarily set your Windows Scaling to **100%** and try launching the game.
+
+### 3. The "Compatibility" Tab (Crucial for RoadRash)
+Since you've already tried the Registry, the game's own `.exe` properties might be overriding you. 
+1.  Right-click `RoadRash.exe`.
+2.  Go to **Compatibility**.
+3.  Click **Change high DPI settings**.
+4.  Check **Override high DPI scaling behavior**.
+5.  Set "Scaling performed by:" to **System (Enhanced)** or **Application**.
+
+---
+
+### A Better Tweak for your GitHub (dgVoodoo2)
+For games like *RoadRash*, the Registry tweak is often "brute force" and can fail because the game uses **DirectDraw**, which is legacy. 
+
+Most power users now document **dgVoodoo2** in their repos. It’s a wrapper that converts those old DirectX/DirectDraw calls to DirectX 11/12. 
+* It allows you to force "Stretched" scaling at the **API level** rather than the OS level.
+* It makes the game think it's running on a modern GPU, allowing for a perfect full-screen experience without touching the Registry at all.
+
+### One Last Registry Attempt
+If you want to stick to the Registry, try changing the value to **4** instead of **3**. On some driver versions (especially Intel 6th-9th Gen), the values for "Stretched" and "Aspect Ratio" are swapped internally.
+
+**Would you like me to find the specific dgVoodoo2 configuration steps to add to your documentation so you can skip the Registry headache entirely?**
+
+This is a known "feature" (or rather, a limitation) of the modern **Intel Graphics Command Center**. It hides the "Stretched" and "Centered" options when your display is running at its **Recommended (Native) Resolution**. 
+
+Intel’s logic is: "If you're already at max resolution, why would you need to stretch anything?" But for us running *RoadRash* at $640 \times 480$, we definitely need it.
+
+### How to "Unlock" the Stretched Option
+To see the missing options, you have to trick the software by temporarily lowering your resolution.
+
+1.  Go to **Windows Settings** > **System** > **Display**.
+2.  Change your **Display Resolution** to something lower than native (e.g., $1280 \times 720$ or $1024 \times 768$).
+3.  **Now** open the **Intel Graphics Command Center**.
+4.  Go to **Display** > **General** > **Scale**.
+5.  The **Stretched** option should now be visible. Select it.
+6.  (Optional) Once selected, you can change your Windows resolution back to native. The "Stretched" preference usually stays active for whenever a low-res game launches.
+
+---
+
+### Why your Registry edit didn't work
+The paths you found (`MSBDD` and `MSNIL`) are virtual/fallback drivers. Since you’re a cybersecurity pro, you’ll appreciate the technical "why": 
+* **MSBDD** = Microsoft Basic Display Driver (the "safe mode" driver).
+* **MSNIL** = A null/indirect display driver often used for remote desktop or virtual displays.
+
+Changing these won't affect your physical monitor. You need the key that corresponds to your actual Intel hardware ID (usually starts with something like `LGD...` or `AUO...`).
+
+### The "Pro" Way (Documentation for GitHub)
+If you want a truly permanent fix that doesn't rely on the UI, you can use the **Intel CustomModeApp**. This is a hidden utility that still exists in the driver folders for exactly this purpose.
+
+1.  Navigate to `C:\Windows\System32\`.
+2.  Find and run `CustomModeApp.exe`.
+3.  This opens the "Legacy" style interface where you can force resolutions and scaling modes without the modern UI's restrictions.
+
+### Final "Nuclear" Option: dgVoodoo2
+Since you mentioned you're documenting this, I strongly recommend checking out **dgVoodoo2**. It’s the industry standard for fixing *RoadRash* and *NFS: MW*. 
+* It wraps the game's old DirectDraw calls into **DirectX 11**.
+* It has a simple "Scaling Mode" dropdown that forces "Stretched" regardless of what Windows or Intel says.
+* It also fixes the "flickering" and "black screen" issues *RoadRash* has on Windows 11.
+
+**Would you like the specific dgVoodoo2 config file settings so you can just push a "Fix Kit" to your GitHub?**
+
