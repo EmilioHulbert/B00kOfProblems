@@ -27288,3 +27288,61 @@ rfkill list
 
 We’ll debug it properly step by step.
 
+
+##Fix msoffice offline installation issue
+The behavior you're seeing—where the installer starts downloading new files instead of just running from the local folder—is usually due to how the **Microsoft Office Click-to-Run (C2R)** system works. 
+
+Basically, the installer (often `setup.exe`) is designed to check Microsoft’s servers for the most recent security patches and updates before it finishes. Even if you have the 2019 files, it wants to grab the "2026 version" of those files to ensure you aren't installing a version with known bugs or vulnerabilities.
+
+Here is why this is happening and how you can try to force it to stay offline:
+
+### 1. Why it's downloading now
+* **Version Mismatch:** The files in your folder (version `16.0.10375`) are quite old. The installer sees that a newer build is available on the Microsoft CDN and tries to "help" by downloading the latest one.
+* **Missing Data:** If the folder you have doesn't contain the full ~3-4GB of "Cabinet" (`.cab`) files for your specific architecture (x64 or x86), the installer will automatically go online to fetch the missing pieces.
+
+### 2. How to force an Offline Install
+If you have a slow connection or just want to use the files you already have, you can try to "block" the installer from going online:
+
+* **The "Airplane Mode" Trick:** 1.  Disconnect your internet entirely (turn off Wi-Fi or unplug the Ethernet).
+    2.  Run the installer again. 
+    3.  If the folder has the *full* set of files, it will install without complaining. If it fails with an error, it means your local folder is incomplete and *requires* those downloads to function.
+* **Check the Configuration File:** Look inside that folder for a file ending in `.xml` (often `configuration.xml`). If you open it with Notepad, look for a line like this:
+    > `<Add OfficeClientEdition="64" ... >`
+    
+    If there is a `SourcePath` attribute, it might be pointing to a web address. You can try deleting the `SourcePath` part so it looks for files in the current folder.
+
+### 3. A Note on your Storage
+I noticed recently you were running very low on disk space (around **4.45GB** free). An Office 2019 Pro Plus installation typically requires about **4GB** of space just for the files, plus extra for the temporary "downloading" phase. 
+
+If the installer is "stuck" or taking forever, it might be because it's running out of room to extract the new data. You might want to clear some space on your `C:` drive before trying the install again.
+
+---
+**Would you like me to help you check if that folder has all the necessary files, or do you want to try clearing some space first?**
+
+
+That configuration file confirms exactly why it is trying to download new files. The key is the attribute **`AllowCdnFallback="True"`**.
+
+When that is set to `True`, the installer checks your local folder for the Office files. If it finds *any* mismatch—even a single missing or outdated security patch—it "falls back" to the Microsoft Content Delivery Network (CDN) to download the newest versions.
+
+Since your version (`16.0.10375`) is from a few years ago, the installer sees a mountain of updates available in 2026 and starts pulling them down.
+
+### How to Fix It
+
+To force the installer to use **only** the files you have on your desktop without going to the internet, you need to edit that XML file.
+
+1.  **Open the XML file** in Notepad.
+2.  **Add a `SourcePath`** and change the **`AllowCdnFallback`** to `False`.
+3.  **Update the line** to look like this (replacing `Emilio` with your actual username if different):
+
+```xml
+<Add SourcePath="C:\Users\Emilio\Desktop\_Getintopc.com_Microsoft_Office_2019_Pro_Plus_16.0.10375.20036" OfficeClientEdition="64" Channel="PerpetualVL2019" AllowCdnFallback="False">
+```
+
+### Important Prerequisites
+* **Disk Space:** As a reminder, you only had about **4.45GB** free recently. This installation will likely consume almost all of that. If the install fails halfway through, it’s almost certainly because the drive is 100% full.
+* **The Installation Command:** To make sure it actually uses your edited XML, don't just double-click `setup.exe`. Open a **Command Prompt** as Administrator, navigate to that folder, and run:
+    `setup.exe /configure yourfilename.xml`
+
+---
+
+**Would you like me to show you how to quickly free up a few extra gigabytes on your C: drive before you start the installation?**
