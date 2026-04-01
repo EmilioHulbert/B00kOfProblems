@@ -27509,3 +27509,4 @@ wifi.scan-rand-mac-address=no
 ```
 
 **Would you like me to show you how to verify the logs to make sure it's firing correctly during the next boot?**
+
