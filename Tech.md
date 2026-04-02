@@ -27518,3 +27518,20 @@ check hardware connections
 monitor internet usage
 identify secondary issues 
 
+##Insering and removing horizontal lines in word
+To insert and format a horizontal line in Word, use the Borders menu on the Home tab. Select the dropdown arrow next to the Borders button and choose Horizontal Line. To format, double-click the line to open the "Format Horizontal Line" dialog box to adjust width, height, color, and alignment. 
+YouTube
+YouTube
+ +4
+Quick Methods to Insert & Format:
+Fastest (AutoFormat): Type three hyphens (---) and press Enter for a plain line.
+Other Styles: Type three underscores (___) for a thicker line, or three equals signs (===) for a double line.
+Customize Color/Thickness: After inserting, double-click the line, or right-click it and select Format Horizontal Line.
+Using Shapes: Go to Insert > Shapes, select a line, and hold Shift while drawing to ensure it is perfectly horizontal. 
+Microsoft Support
+Microsoft Support
+ +5
+To remove a horizontal line:
+Select the line and click No Border in the Borders menu. 
+Pluralsight
+Pluralsight
