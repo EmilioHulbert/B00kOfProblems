@@ -27540,3 +27540,5 @@ Pluralsight
 https://ankergames.net/download/eyJkb3dubG9hZF9pZCI6Mjk0LCJ1c2VyX2lkIjpudWxsLCJpcCI6IjE5Ny4xMzYuMTU0LjIiLCJleHBpcmVzIjoxNzc1MjQ5MTkzLCJub25jZSI6ImE3NDIwZDRmOTc1OTUxYjI5NWQzNWExMzFmMzg4Y2RmIn0=/c3f4aae3fe5176a4c9f1869d209063d6cd1e7191db7a14c31fa480527f11c7ff
 
 https://archive.org/details/ppt-nshp
+##Reboot from windows directly into uefi mode
+shutdown /r /fw /t 0
