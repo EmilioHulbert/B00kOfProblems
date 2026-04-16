@@ -27542,3 +27542,7 @@ https://ankergames.net/download/eyJkb3dubG9hZF9pZCI6Mjk0LCJ1c2VyX2lkIjpudWxsLCJp
 https://archive.org/details/ppt-nshp
 ##Reboot from windows directly into uefi mode
 shutdown /r /fw /t 0
+
+
+Piratebay tutsnode user courses
+user:tuts756
