@@ -27546,3 +27546,126 @@ shutdown /r /fw /t 0
 
 Piratebay tutsnode user courses
 user:tuts756
+
+##Script to download videos from youtube
+The tool you are looking for is called **`yt-dlp`**.
+
+While there are many "YouTube downloader" scripts on GitHub, almost all of them are simply wrappers around `yt-dlp`. Rather than relying on someone else's unfinished script, you should use `yt-dlp` directly. It is the industry standard—actively maintained, updated almost daily to handle changes in YouTube's site structure, and incredibly feature-rich.
+
+### Why use `yt-dlp` directly?
+* **Reliability:** It is the core engine for nearly every major media downloader.
+* **Security:** Using a well-known, community-vetted tool is significantly safer than running arbitrary Python scripts found on GitHub.
+* **Advanced Features:** You get full control over quality, subtitles, playlists, metadata, and post-processing.
+
+---
+
+### Installation on Linux
+You can install `yt-dlp` via your package manager, but since YouTube changes often, the **standalone binary method** is recommended to ensure you always have the latest, working version.
+
+1.  **Download the latest version:**
+    ```bash
+    sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+    ```
+
+2.  **Make it executable:**
+    ```bash
+    sudo chmod a+rx /usr/local/bin/yt-dlp
+    ```
+
+3.  **Install FFmpeg:**
+    `yt-dlp` needs FFmpeg to merge high-quality video and audio streams (which YouTube stores separately).
+    * **Ubuntu/Debian:** `sudo apt install ffmpeg`
+    * **Fedora:** `sudo dnf install ffmpeg`
+    * **Arch:** `sudo pacman -S ffmpeg`
+
+---
+
+### Basic Usage
+
+You can run `yt-dlp` from your terminal simply by typing the command followed by the URL:
+
+* **Download the best quality available:**
+    ```bash
+    yt-dlp "URL"
+    ```
+
+* **Download as an MP3 (audio only):**
+    ```bash
+    yt-dlp -x --audio-format mp3 "URL"
+    ```
+
+* **Download a whole playlist:**
+    ```bash
+    yt-dlp -i "PLAYLIST_URL"
+    ```
+
+* **List available formats (to pick specific quality):**
+    ```bash
+    yt-dlp -F "URL"
+    ```
+
+### Keeping it Updated
+One of the best things about `yt-dlp` is that it can update itself. If you notice it failing to download videos, just run:
+
+```bash
+sudo yt-dlp -U
+```
+
+***
+
+**A Note on Ethics:** Please remember that downloading content from YouTube may violate the platform's Terms of Service. Ensure you have the right to download the content (e.g., it is your own video, you have permission, or it is in the public domain/Creative Commons) before saving it to your machine.
+
+yt-dlp --version
+if requires cookies
+yt-dlp --cookies-from-browser chrome "URL"
+##If you need a clean install
+You have run into a classic Linux "binary conflict." You have two different versions of `yt-dlp` installed in different directories (`/usr/local/bin/` and `/usr/bin/`).
+
+Your system is likely running the outdated version in `/usr/bin/` while you are trying to update the one in `/usr/local/bin/`. Furthermore, your shell has "hashed" the location of the old binary, so it keeps pointing to the old one even after you updated the other file.
+
+Here is how to clean this up and get a working version.
+
+### Step 1: Remove all existing versions
+We need to clear the slate to stop the confusion between the two locations. Run these commands:
+
+```bash
+# Remove the local bin version
+sudo rm /usr/local/bin/yt-dlp
+
+# Remove the usr bin version
+sudo rm /usr/bin/yt-dlp
+```
+
+### Step 2: Clear your shell's memory
+Linux shells (like Bash) cache the location of programs to make them run faster. Even after you delete the files, the shell might still be looking for them. Run this to force the shell to forget the old locations:
+
+```bash
+hash -r
+```
+
+### Step 3: Perform a clean install
+Now, download a fresh copy. We will put it in `/usr/local/bin/`, which is the standard place for user-installed binaries.
+
+```bash
+sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+sudo chmod a+rx /usr/local/bin/yt-dlp
+```
+
+### Step 4: Verify the installation
+Check to ensure the new version is the one being picked up by your system:
+
+1. **Verify path:** Run `which yt-dlp`. It should return `/usr/local/bin/yt-dlp`.
+2. **Verify version:** Run `yt-dlp --version`. 
+   * It should now show a version string from the current year (e.g., `2026.xx.xx`). If it shows `2024.10.07`, then something else is interfering.
+
+### Why this is happening (The "Precondition Failed" Error)
+YouTube's backend architecture changes almost daily. The `Precondition check failed` error happens because the old `yt-dlp` (from 2024) is sending "handshake" data to YouTube that YouTube no longer recognizes or accepts as valid. 
+
+**Once you see a 2026 version string, the download will work immediately.**
+
+If you *still* have issues after confirming the version is correct, it is possible your network is being throttled or blocked by YouTube for automated requests. In that case, you can try passing your browser's cookies to the request, which makes the traffic look like it is coming from a human using a web browser:
+
+```bash
+yt-dlp --cookies-from-browser firefox "https://www.youtube.com/watch?v=7JvIE4cnQ80"
+```
+*(Replace `firefox` with `chrome`, `chromium`, or `brave` depending on which browser you use.)*
