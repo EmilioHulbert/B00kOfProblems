@@ -27669,3 +27669,99 @@ If you *still* have issues after confirming the version is correct, it is possib
 yt-dlp --cookies-from-browser firefox "https://www.youtube.com/watch?v=7JvIE4cnQ80"
 ```
 *(Replace `firefox` with `chrome`, `chromium`, or `brave` depending on which browser you use.)*
+
+##Creating user level services and getting them to work
+To solve this on Parrot OS (which typically uses MATE or XFCE as its desktop environment), we will implement a "Smart Watchdog." This will use a `systemd` **user service** (which is cleaner than autostart folders) and the `wmctrl` utility to force the window onto Workspace 4.
+
+### Step 1: Install Required Tool
+We need `wmctrl` to manage window placement.
+```bash
+sudo apt update && sudo apt install wmctrl -y
+```
+
+---
+
+### Step 2: The "Smart" Script
+This script does three things: launches the session, keeps it alive, and actively moves it to Workspace 4 if it ever appears elsewhere.
+
+Create the file: `nano /home/hulbert/scripts/rdesktop_manager.sh`
+
+```bash
+#!/bin/bash
+
+# Configuration
+export DISPLAY=:0
+export XAUTHORITY=/home/hulbert/.Xauthority
+# Workspace 4 is index 3 (0, 1, 2, 3)
+WORKSPACE_ID=3 
+WINDOW_TITLE="10.80.3.102" # Adjust this if your rdesktop window title is different
+
+while true; do
+    # 1. Check if rdesktop is running
+    if ! pgrep -x "rdesktop" > /dev/null; then
+        rdesktop -u ICT-SEC -d KUTRRH -p '!Umoja19.KUTRRH#49' 10.80.3.102 &
+        # Give it a moment to initialize the window
+        sleep 5
+    fi
+
+    # 2. Force move to Workspace 4
+    # -r = search for window, -t = move to desktop number
+    wmctrl -r "$WINDOW_TITLE" -t $WORKSPACE_ID 2>/dev/null
+
+    sleep 5
+done
+```
+
+Make it executable:
+```bash
+chmod +x /home/hulbert/scripts/rdesktop_manager.sh
+```
+
+---
+
+### Step 3: Create the Systemd User Service
+Instead of relying on desktop autostart, we create a real service. This runs even if you aren't logged in, as long as your user session exists.
+
+Create the service file:
+```bash
+mkdir -p ~/.config/systemd/user/
+nano ~/.config/systemd/user/rdesktop-monitor.service
+```
+
+Paste this configuration:
+```ini
+[Unit]
+Description=RDesktop Monitor Service
+After=graphical-session.target
+
+[Service]
+ExecStart=/home/hulbert/scripts/rdesktop_manager.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
+```
+
+---
+
+### Step 4: Starting Without Logout
+You do not need to log out. Use these commands to load and start your service immediately:
+
+1.  **Reload systemd** to recognize your new file:
+    ```bash
+    systemctl --user daemon-reload
+    ```
+2.  **Enable and Start** the service:
+    ```bash
+    systemctl --user enable --now rdesktop-monitor.service
+    ```
+
+### How this solves your requirements:
+* **No Logout Required:** By running `systemctl --user start ...`, the process begins immediately in the background as your user.
+* **Session Persistence:** If someone kills your `rdesktop` process, the `Restart=always` in the systemd service will respawn the script, and the script will automatically relaunch the connection.
+* **Workspace Lock:** The `wmctrl` command inside the loop runs every 5 seconds. If you drag the window to Workspace 1, the script will silently detect it and snap it back to Workspace 4, and it will *not* steal your focus while you are working in other windows.
+
+**Verify it is running:**
+You can check the status at any time with:
+`systemctl --user status rdesktop-monitor.service`
