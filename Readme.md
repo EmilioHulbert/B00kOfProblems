@@ -27764,4 +27764,88 @@ You do not need to log out. Use these commands to load and start your service im
 
 **Verify it is running:**
 You can check the status at any time with:
+
 `systemctl --user status rdesktop-monitor.service`
+
+##Watchdog scripts and  autostart method
+To achieve persistent sessions for a graphical application, using a **"Watchdog" script** is the most reliable method.
+
+A standard `systemd` service runs in the background independent of your graphical session (X11 or Wayland), which is why it often fails to display windows or connect to your user environment. A script running in your user space, however, has direct access to your `DISPLAY` variable and `Xauthority` permissions, allowing `rdesktop` to function correctly.
+
+### ⚠️ Security Important Note
+You have a password hardcoded in your command. **This is a significant security risk.** Anyone with access to your user account (or the script file) can see your credentials in plain text.
+
+If possible, look into `rdesktop` alternatives like `xfreerdp`, which supports reading credentials from a separate, restricted file (e.g., `--cred /path/to/creds.txt`), or utilize an SSH tunnel for the connection to secure the traffic.
+
+---
+
+### Step 1: Create the Watchdog Script
+We will create a simple loop that checks for the process every 10 seconds. If the process is not found, it will restart it.
+
+1.  Open your terminal and create a directory for your scripts (if you haven't already):
+    ```bash
+    mkdir -p ~/scripts
+    nano ~/scripts/rdesktop_watchdog.sh
+    ```
+
+2.  Paste the following code into the editor:
+
+    ```bash
+    #!/bin/bash
+
+    # Ensure the script uses your graphical display
+    export DISPLAY=:0
+
+    while true; do
+        # Check if rdesktop is running
+        if ! pgrep -x "rdesktop" > /dev/null; then
+            echo "rdesktop not found. Starting session..."
+            rdesktop -u ICT-SEC -d KUTRRH -p '!Umoja19.KUTRRH#49' 10.80.52.102 &
+        fi
+        
+        # Wait 10 seconds before checking again
+        sleep 10
+    done
+    ```
+
+    *Note: If `DISPLAY=:0` does not work, run `echo $DISPLAY` in your current terminal to find your correct display number and replace `:0` with that value.*
+
+3.  Save and exit (Ctrl+O, Enter, Ctrl+X).
+
+4.  Make the script executable:
+    ```bash
+    chmod +x ~/scripts/rdesktop_watchdog.sh
+    ```
+
+---
+
+### Step 2: Set to Run Automatically
+To ensure this "service" starts automatically when you log in as `hulbert`, add it to your Desktop Environment's autostart configuration.
+
+1.  Create a `.desktop` file in your autostart folder:
+    ```bash
+    nano ~/.config/autostart/rdesktop_monitor.desktop
+    ```
+
+2.  Add the following content:
+
+    ```ini
+    [Desktop Entry]
+    Type=Application
+    Exec=/home/hulbert/scripts/rdesktop_watchdog.sh
+    Hidden=false
+    NoDisplay=false
+    X-GNOME-Autostart-enabled=true
+    Name=RDesktop Monitor
+    Comment=Ensures rdesktop session is always running
+    ```
+
+3.  Save and exit.
+
+---
+
+### Why this is the best approach
+* **User Context:** By adding it to the Autostart folder, the script runs with your user permissions (`hulbert`). This avoids the headache of `Xauthority` errors and file permission issues that occur when you try to force-run graphical apps as root.
+* **Resiliency:** The `while true` loop is the standard "daemon" behavior for simple tasks. It ensures that if the server kicks you off or the application crashes, it will recover automatically without manual intervention.
+* **CPU Efficiency:** The `sleep 10` command ensures the script consumes virtually zero CPU while it is just "watching."
+
