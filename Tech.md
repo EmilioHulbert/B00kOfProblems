@@ -27898,3 +27898,56 @@ Parrot OS (usually using MATE or KDE) has network settings.
 4. Setting this to "Yes" tells many system services (like updates) to wait until you're on a "real" Wi-Fi.
 
 **Quick Question:** Are you running any specific Parrot tools like Anonsurf or a VPN right now, or just standard browsing?
+
+##Porting and installing pandoc though it does not convert docx to pdf
+Smart move using `dpkg-repack` to grab the binary, but as you’ve discovered, `dpkg-repack` only bundles the specific package you name—it doesn't follow the "family tree" of dependencies. In this case, `pandoc` is useless without `pandoc-data`.
+
+Since you are trying to move this to another machine (`Intel5`) while saving data, you have two solid options to get those missing dependencies.
+
+### Option 1: Repack the missing data package
+Since you already have the main `pandoc` deb, just go back to the machine where you installed it (`Z3r0S3C`) and repack the data package specifically.
+
+Run this on the original machine:
+```bash
+dpkg-repack pandoc-data
+```
+Then move that `pandoc-data_..._all.deb` to your `Intel5` machine and install them together:
+```bash
+# On Intel5, run them both at once so dpkg sees the dependency fulfilled
+dpkg -i pandoc-data_*.deb pandoc_*.deb
+```
+
+---
+
+### Option 2: The "Cached" Method (Easiest & Cleanest)
+When you ran `apt install pandoc`, the system actually downloaded the original, clean `.deb` files from the repository and stored them in a cache folder. You don't even need to "repack" them if you haven't cleared your cache yet.
+
+On the machine where you did the install (`Z3r0S3C`):
+1. Go to the cache folder: 
+   `cd /var/cache/apt/archives/`
+2. Look for the files:
+   `ls | grep pandoc`
+3. You should see both `pandoc_..._amd64.deb` and `pandoc-data_..._all.deb`.
+4. Copy **both** of those to your `/media/sf_vm/` folder.
+
+---
+
+### Option 3: Automating "Repack All Dependencies"
+If you find yourself doing this often for complex programs with dozens of dependencies, `dpkg-repack` is too manual. You can use a small loop to repack everything a package depends on.
+
+**Warning:** This can be overkill because it might try to repack core system libraries (like `libc6`), which you don't want. 
+
+To just get the "immediate" dependencies:
+```bash
+# Get the list of immediate dependencies and repack them
+apt-cache depends pandoc | grep "Depends:" | awk '{print $2}' | xargs dpkg-repack
+```
+
+### Pro-Tip for your Hotspot Situation:
+Since you are currently "broken" on the `Intel5` machine (the `[✗]` in your prompt shows the last command failed), `apt` might complain next time you use it. If you want to clear that error without downloading anything:
+```bash
+sudo dpkg --remove pandoc
+```
+This uninstalls the "half-configured" version so your package manager is clean again until you bring over the `pandoc-data` file.
+
+How many other machines are you planning to move this to? If it's a lot, I can show you how to create a local "mini-repo" on your USB/Shared folder.
