@@ -27699,7 +27699,7 @@ WINDOW_TITLE="10.80.3.102" # Adjust this if your rdesktop window title is differ
 while true; do
     # 1. Check if rdesktop is running
     if ! pgrep -x "rdesktop" > /dev/null; then
-        rdesktop -u ICT-SEC -d KUTRRH -p '!Umoja19.KUTRRH#49' 10.80.3.102 &
+        rdesktop -u ICT-SEC -d KUTRRH -p 'somepassword' 10.80.3.102 &
         # Give it a moment to initialize the window
         sleep 5
     fi
@@ -27800,7 +27800,7 @@ We will create a simple loop that checks for the process every 10 seconds. If th
         # Check if rdesktop is running
         if ! pgrep -x "rdesktop" > /dev/null; then
             echo "rdesktop not found. Starting session..."
-            rdesktop -u ICT-SEC -d KUTRRH -p '!Umoja19.KUTRRH#49' 10.80.52.102 &
+            rdesktop -u ICT-SEC -d KUTRRH -p 'Somepassword' 10.80.52.102 &
         fi
         
         # Wait 10 seconds before checking again
@@ -27849,3 +27849,52 @@ To ensure this "service" starts automatically when you log in as `hulbert`, add 
 * **Resiliency:** The `while true` loop is the standard "daemon" behavior for simple tasks. It ensures that if the server kicks you off or the application crashes, it will recover automatically without manual intervention.
 * **CPU Efficiency:** The `sleep 10` command ensures the script consumes virtually zero CPU while it is just "watching."
 
+##Monitoring network traffic in linux
+I totally feel your pain. 100MB disappears in a heartbeat on Linux if you aren't careful, especially with background services like updates or browser syncing. It’s a common shock for new (and even seasoned) users when switching from a metered Windows environment to a Linux distro that assumes it has "unlimited" internet.
+
+Here is how to find the culprit and kill it immediately.
+
+### 1. The Best Command to Find the Culprit: `nethogs`
+While most tools show you *how much* data is moving, **NetHogs** shows you **exactly which program** is doing it. It breaks traffic down by PID (Process ID) and name.
+
+**How to use it:**
+1. Open your terminal.
+2. Install it (if you don't have it):
+   `sudo apt update && sudo apt install nethogs`
+3. Run it:
+   `sudo nethogs`
+
+
+
+You will see a live list. Look at the **SENT** and **RECEIVED** columns. The program at the top is your data-thief.
+
+---
+
+### 2. How to Stop the Program
+Once you find the name or the **PID** (the number in the first column) in NetHogs, you can stop it.
+
+*   **To kill it by PID:**
+    `sudo kill -9 [PID_NUMBER]`
+*   **To kill it by name (e.g., if it's Firefox):**
+    `sudo pkill firefox`
+
+---
+
+### 3. Common Data Thieves in Parrot OS
+If you aren't running anything and data is still bleeding, it’s likely one of these:
+
+*   **`packagekitd` (Auto-updates):** This is the biggest culprit. Linux often checks for updates in the background. 
+    *   *Stop it:* `sudo systemctl stop packagekit`
+*   **`anonsurf`:** If you have Parrot's anonymity tools on, they might be routing traffic or syncing nodes.
+*   **Browser Sync:** If you have Firefox or Chromium open, they might be syncing your history/extensions or auto-playing ads in a background tab.
+*   **`apt-daily`:** A systemd timer that fetches update lists.
+    *   *Check if it's running:* `systemctl list-timers`
+
+### 4. Pro-Tip: Use "Metered Connection" Settings
+Parrot OS (usually using MATE or KDE) has network settings. 
+1. Go to your **Network Settings**.
+2. Select your Hotspot/Wi-Fi connection.
+3. Look for an option called **"Metered connection"** or **"Restricted"**. 
+4. Setting this to "Yes" tells many system services (like updates) to wait until you're on a "real" Wi-Fi.
+
+**Quick Question:** Are you running any specific Parrot tools like Anonsurf or a VPN right now, or just standard browsing?
