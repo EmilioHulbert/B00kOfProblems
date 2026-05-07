@@ -28008,3 +28008,6 @@ If this is for a **study visa**, formatting matters. If the commands above mess 
 
 ##Converting pdf to docx
 libreoffice --headless --convert-to pdf ../Documents/Apple-market-Cover-letter.docx 
+
+##Uninstall using dpkg
+dpkg --remove --force-remove-reinstreq abiword
