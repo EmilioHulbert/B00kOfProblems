@@ -28011,3 +28011,10 @@ libreoffice --headless --convert-to pdf ../Documents/Apple-market-Cover-letter.d
 
 ##Uninstall using dpkg
 dpkg --remove --force-remove-reinstreq abiword
+
+##Enhanced rsync command
+rsync -avPh --info=progress2 --delete \
+--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/media/*","/lost+found"} \
+--exclude="/mnt/The_Blacklist_S04" \
+--exclude="/mnt/Blur-PC.rar" \
+/ /media/hulbert/LINUX_DATA/
