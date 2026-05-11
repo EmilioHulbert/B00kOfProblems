@@ -28031,3 +28031,66 @@ Attempt a Repair:
 Bash
 sudo fsck.ext4 -y /dev/sda2
 Note: This might find thousands of errors. Let it finish. It might give the drive enough "life" to let you copy your important data off of it.
+
+##Autorefresh net in windows10 vm
+It looks like you’ve created the PowerShell script and a shortcut, but the shortcut is currently trying to run a generic command rather than pointing directly to your specific `refresh_net.ps1` file. Also, your shortcut is looking for "Ethernet," while your script specifies "Ethernet 3."
+
+To make Option 1 work seamlessly, you want the shortcut to execute your script with administrative privileges automatically.
+
+### The Correct Way to Connect Them
+
+Instead of a complex `Start-Process` string inside the shortcut, the cleanest way is to point the shortcut directly to your script file.
+
+1. **Right-click** on your desktop and select **New > Shortcut**.
+2. In the location box, paste the following (adjusting for your specific user path):
+```text
+powershell.exe -ExecutionPolicy Bypass -File "C:\Users\Emilio\Desktop\refresh_net.ps1"
+
+```
+
+
+3. Click **Next**, name it "Fix Network," and click **Finish**.
+
+### The "Secret Sauce": Auto-Run as Admin
+
+Since `Restart-NetAdapter` requires administrator rights, the shortcut will fail unless we tell it to elevate:
+
+1. **Right-click** your new "Fix Network" shortcut and select **Properties**.
+2. On the **Shortcut** tab, click the **Advanced...** button.
+3. Check the box for **Run as administrator**.
+4. Click **OK**, then **OK** again.
+
+---
+
+### Syncing the Adapter Name
+
+I noticed your `type refresh_net.ps1` shows `$adapter = "Ethernet 3"`. Ensure that matches exactly what you see in `ncpa.cpl`. If Windows renamed it, your script must match:
+
+* **In your script:** Ensure it says `$adapter = "Ethernet 3"` (with the space and number).
+* **In the shortcut:** You don't need to mention the adapter name in the shortcut anymore because the shortcut is now just calling the script that contains the name.
+
+### Why this is better
+
+By using the `-File` flag and the "Run as administrator" property, you avoid the messy "double-launch" logic. When you connect to a new Wi-Fi on Parrot, you just double-click that icon on your Windows desktop, hit "Yes" on the UAC prompt, and it will bounce the interface for you.
+
+---
+
+### A Quick Check (Parrot Side)
+
+Since you are a cybersecurity guy, you might prefer the **Option 4** I mentioned previously. If you run this from your Parrot terminal, you don't even have to click anything inside the VM:
+
+```bash
+vboxmanage controlvm "Your_VM_Name" setlinkstate1 off && sleep 2 && vboxmanage controlvm "Your_VM_Name" setlinkstate1 on
+
+```
+
+This physically "unplugs" the virtual cable and plugs it back in, which usually triggers Windows to realize the gateway has changed without needing any scripts inside the guest OS.
+
+Which method feels faster for your workflow—running a command in your Parrot terminal or clicking an icon inside the Windows VM?
+
+```
+
+```
+script 
+$adapter = "Ethernet 3"
+Restart-NetAdapter -Name $adapter
