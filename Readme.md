@@ -28018,3 +28018,16 @@ rsync -avPh --info=progress2 --delete \
 --exclude="/mnt/The_Blacklist_S04" \
 --exclude="/mnt/Blur-PC.rar" \
 / /media/hulbert/LINUX_DATA/
+##Filesystem check on a drive partition
+2. Dealing with the Dying Drive (sda2)
+The error EXT4-fs (sda2): Remounting filesystem read-only means you cannot write any more data to that drive right now. Do not try to rsync to it again.
+
+To try and save the drive (temporarily):
+
+Unmount it: umount /dev/sda2
+
+Attempt a Repair:
+
+Bash
+sudo fsck.ext4 -y /dev/sda2
+Note: This might find thousands of errors. Let it finish. It might give the drive enough "life" to let you copy your important data off of it.
