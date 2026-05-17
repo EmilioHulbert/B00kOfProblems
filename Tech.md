@@ -28098,3 +28098,65 @@ Restart-NetAdapter -Name $adapter
 ##Shortkey to run windows comand r apps with admin rights
 press ctrl shift enter instead of pressing enter alone
 
+##Excluding files not from local origin when using rsync
+There is a lot of good, practical technical logic to unpack here. Let’s break down exactly how `rsync` behaves behind the scenes, why your deleted TV show stayed safe, and how to structure your new command today to protect your Amazon Linux backups.
+
+---
+
+## 1. How `rsync` Handles Excludes and `--delete`
+
+To answer your question about how it preserved `/mnt/The_Blacklist_S04`: **`rsync` doesn't keep a historical database or log files** to remember what used to exist. Instead, every time you run the command, it does a live, real-time comparison between the source (`/`) and the destination (`/media/hulbert/LINUX_DATA/`).
+
+When you pass the `--delete` flag, you are telling `rsync`: *"If a file exists on the destination, but is missing from the source, wipe it out."*
+
+However, **the `--exclude` flag completely blinds `rsync` to that path on both sides.**
+
+Here is exactly what happened during your last sync:
+
+1. `rsync` looked at your laptop's source and saw `/mnt/The_Blacklist_S04` didn't exist anymore.
+2. It looked at the destination backup drive and saw `/media/hulbert/LINUX_DATA/mnt/The_Blacklist_S04`.
+3. Normally, `--delete` would have wiped it out from the backup drive.
+4. But because you had `--exclude="/mnt/The_Blacklist_S04"`, `rsync` was forced to pretend that path didn't exist *at all*. It skipped checking it on the source, skipped looking at it on the destination, and left it completely untouched.
+
+---
+
+## 2. Handling Your Amazon Linux Situation
+
+You have `amazon_linux.tar` and the `amazon_linux` directory on your external drive, but they didn't originate from your laptop. If you run your root backup with `--delete`, `rsync` will see these files on the backup drive, realize they aren't on your laptop's root filesystem, and try to delete them.
+
+To protect them, you need to add them to your exclude rules. Because you are backing up the root directory (`/`), `rsync` maps the destination structure relative to that root.
+
+Assuming your external drive is mounted at `/media/hulbert/LINUX_DATA/`, those files likely sit right at the root of that backup drive:
+
+* `/media/hulbert/LINUX_DATA/amazon_linux.tar`
+* `/media/hulbert/LINUX_DATA/amazon_linux/`
+
+To make `rsync` ignore them entirely (saving them from deletion), your exclude paths must match how they look relative to the source root—meaning you treat them as if they were directly under `/`.
+
+### Your Updated Command
+
+Here is how your command should look today to keep everything safe:
+
+```bash
+sudo rsync -avPh --info=progress2 --delete \
+--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/media/*","/lost+found"} \
+--exclude="/mnt/The_Blacklist_S04" \
+--exclude="/amazon_linux.tar" \
+--exclude="/amazon_linux" \
+/ /media/hulbert/LINUX_DATA/
+
+```
+
+> ⚠️ **Important Path Check:** If your `amazon_linux` files are actually sitting inside a subfolder on your backup drive (for example, inside `/media/hulbert/LINUX_DATA/mnt/`), you must update the exclude paths to match that exact structure, like `--exclude="/mnt/amazon_linux"`.
+
+---
+
+## 3. How Does `rsync` Work Under the Hood?
+
+Instead of relying on central logs, `rsync` uses a brilliant **Delta-Transfer Algorithm** during its live check:
+
+* **The File List:** First, it scans the source and destination to build an in-memory list of files, sizes, and modification timestamps.
+* **The Quick Check:** It instantly skips transferring any file where the size and modified time match perfectly on both sides.
+* **The Block Rolling Checksum:** If a file *has* changed (like a database or log file), it doesn't resend the whole thing. It breaks the file into small chunks, calculates math signatures (checksums) for them, and only sends the raw pieces of data that actually changed over the wire or to the disk.
+
+This is why your subsequent backups are incredibly fast compared to the first initial copy.
