@@ -28094,3 +28094,7 @@ Which method feels faster for your workflow—running a command in your Parrot t
 script 
 $adapter = "Ethernet 3"
 Restart-NetAdapter -Name $adapter
+
+##Shortkey to run windows comand r apps with admin rights
+press ctrl shift enter instead of pressing enter alone
+
