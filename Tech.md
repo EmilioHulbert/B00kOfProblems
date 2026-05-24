@@ -28162,3 +28162,32 @@ Instead of relying on central logs, `rsync` uses a brilliant **Delta-Transfer Al
 * **The Block Rolling Checksum:** If a file *has* changed (like a database or log file), it doesn't resend the whole thing. It breaks the file into small chunks, calculates math signatures (checksums) for them, and only sends the raw pieces of data that actually changed over the wire or to the disk.
 
 This is why your subsequent backups are incredibly fast compared to the first initial copy.
+
+##Git autocommit minor issue
+┌─[root@Intel5]─[/etc/nginx/sites-available]
+└──╼ #autocommit 
+fatal: detected dubious ownership in repository at '/home/hulbert/Desktop/B00kOfProblems'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /home/hulbert/Desktop/B00kOfProblems
+fatal: detected dubious ownership in repository at '/home/hulbert/Desktop/B00kOfProblems'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /home/hulbert/Desktop/B00kOfProblems
+fatal: detected dubious ownership in repository at '/home/hulbert/Desktop/B00kOfProblems'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /home/hulbert/Desktop/B00kOfProblems
+fatal: detected dubious ownership in repository at '/home/hulbert/Desktop/B00kOfProblems'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /home/hulbert/Desktop/B00kOfProblems
+fatal: detected dubious ownership in repository at '/home/hulbert/Desktop/B00kOfProblems'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /home/hulbert/Desktop/B00kOfProblems
+fatal: detected dubious ownership in repository at '/home/hulbert/Desktop/B00kOfProblems'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /home/hulbert/Desktop/B00kOfProblems
+
