@@ -28081,6 +28081,8 @@ Since you are a cybersecurity guy, you might prefer the **Option 4** I mentioned
 
 ```bash
 vboxmanage controlvm "Your_VM_Name" setlinkstate1 off && sleep 2 && vboxmanage controlvm "Your_VM_Name" setlinkstate1 on
+vboxmanage controlvm "WINDOWS 10 - ENTERPRISE" setlinkstate1 off && sleep 2 && vboxmanage controlvm "WINDOWS 10 - ENTERPRISE" setlinkstate1 on
+
 
 ```
 
