@@ -28191,3 +28191,283 @@ To add an exception for this directory, call:
 
 	git config --global --add safe.directory /home/hulbert/Desktop/B00kOfProblems
 
+
+##Public exposing of a local project solutions
+You’re very close—the issue isn’t Django or the tunnel itself, it’s **hostname routing + how localhost.run forwards traffic**.
+
+Right now:
+
+* NGINX is routing based on `server_name remacode.local`
+* But your tunnel URL (from `localhost.run`) will hit your server with a **different Host header** (e.g. `xyz.lhr.life`)
+* So NGINX does **NOT match your remacode block**, and traffic likely falls to your default server (WordPress)
+
+---
+
+## 🔴 Root Problem
+
+Your config:
+
+```nginx
+server {
+    listen 80;
+    server_name remacode.local;
+
+    location / {
+        proxy_pass http://localhost:8002;
+```
+
+But external requests look like:
+
+```
+Host: something.localhost.run
+```
+
+➡️ NGINX ignores this block.
+
+---
+
+# ✅ SOLUTION PATHS (Pick one cleanly)
+
+## ✅ Option 1 — Make this server the default (FASTEST)
+
+Modify your NGINX config:
+
+```nginx
+server {
+    listen 80 default_server;
+    server_name _;
+
+    client_max_body_size 128M;
+
+    location / {
+        proxy_pass http://127.0.0.1:8002;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /static/ {
+        alias /root/remacode/staticfiles/;
+    }
+}
+```
+
+Then:
+
+```bash
+nginx -t
+systemctl reload nginx
+```
+
+👉 Now ANY incoming tunnel request hits Django.
+
+---
+
+## ✅ Option 2 — Force Host header via SSH tunnel (cleaner)
+
+`localhost.run` supports this trick:
+
+```bash
+ssh -R 80:localhost:80 localhost.run
+```
+
+But still won’t match `remacode.local`.
+
+So you override Host header using `--http-host-header` (if using alternatives like cloudflared or ngrok):
+
+### With **cloudflared (BEST OPTION)**
+
+```bash
+cloudflared tunnel --url http://localhost:80 --http-host-header remacode.local
+```
+
+👉 This makes NGINX think request is for `remacode.local`
+
+---
+
+## ✅ Option 3 — Add tunnel domain to NGINX
+
+After you get your tunnel URL (e.g. `abcd.lhr.life`), update:
+
+```nginx
+server_name remacode.local abcd.lhr.life;
+```
+
+Reload:
+
+```bash
+systemctl reload nginx
+```
+
+✔️ Works
+❌ But breaks when URL changes
+
+---
+
+## ✅ Option 4 — Wildcard catch (BEST BALANCE)
+
+```nginx
+server {
+    listen 80;
+    server_name remacode.local *.localhost.run *.lhr.life;
+
+    location / {
+        proxy_pass http://127.0.0.1:8002;
+    }
+}
+```
+
+👉 This handles dynamic tunnel domains.
+
+---
+
+# ⚠️ IMPORTANT FIXES (You already saw hints)
+
+### 1. Missing static file
+
+```
+GET /static/webfonts/fa-solid-900.ttf → 404
+```
+
+Run:
+
+```bash
+python manage.py collectstatic
+```
+
+And confirm:
+
+```bash
+ls /root/remacode/staticfiles/webfonts/
+```
+
+---
+
+### 2. Django settings (CRITICAL)
+
+Add tunnel domain:
+
+```python
+ALLOWED_HOSTS = [
+    "remacode.local",
+    ".localhost.run",
+    ".lhr.life",
+    "*",  # temporary for testing only
+]
+```
+
+---
+
+### 3. Don’t use Django dev server in production
+
+You are running:
+
+```
+manage.py runserver
+```
+
+That’s okay for testing, but for clean tunneling:
+
+👉 Use **gunicorn**
+
+```bash
+pip install gunicorn
+
+gunicorn remacode.wsgi:application --bind 127.0.0.1:8002
+```
+
+Update your systemd service accordingly.
+
+---
+
+# 🔥 Clean Working Setup (Recommended)
+
+### 1. NGINX
+
+```nginx
+server {
+    listen 80 default_server;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:8002;
+    }
+
+    location /static/ {
+        alias /root/remacode/staticfiles/;
+    }
+}
+```
+
+---
+
+### 2. Run tunnel
+
+```bash
+ssh -R 80:localhost:80 localhost.run
+```
+
+---
+
+### 3. Django
+
+```python
+ALLOWED_HOSTS = ["*"]
+```
+
+(only while testing)
+
+---
+
+# 🧠 Key Insight
+
+You were trying to expose:
+
+```
+remacode.local → nginx → django
+```
+
+But the internet sees:
+
+```
+random-domain → nginx → (wrong server block)
+```
+
+👉 Fix is always about **aligning the Host header with NGINX routing**
+
+---
+
+# 🚀 If you want the BEST setup
+
+Tell me and I’ll guide you through:
+
+* persistent public URL (no changing domains)
+* HTTPS
+* no Host header hacks
+* works like production
+
+(using Cloudflare Tunnel properly or VPS reverse proxy)
+
+---
+
+## 💻 Quick test checklist
+
+Run in order:
+
+```bash
+curl -H "Host: remacode.local" http://127.0.0.1
+```
+
+✔️ Should return Django HTML
+
+Then:
+
+```bash
+ssh -R 80:localhost:80 localhost.run
+```
+
+Open link → should now load fully (CSS, JS, everything)
+
+---
+
+If anything still partially loads (like CSS missing), that’s a **STATIC_URL / STATIC_ROOT mismatch**, and I’ll fix that with you next.
+
