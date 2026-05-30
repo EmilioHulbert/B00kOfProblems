@@ -28806,3 +28806,9 @@ chattr +i /etc/apt/sources.list.d/google-chrome.sources
 *(If you ever actually want to delete or change it yourself later, you'd just run `chattr -i` first).*
 
 Give `apt update` one final spin—you should have completely clean output now!
+
+#Partially fix virtualbox terminal warnings
+ # export GTK_MODULES=""
+        # export NO_AT_BRIDGE=1
+        export GTK_MODULES=""
+        export NO_AT_BRIDGE=1
