@@ -28471,3 +28471,35 @@ Open link → should now load fully (CSS, JS, everything)
 
 If anything still partially loads (like CSS missing), that’s a **STATIC_URL / STATIC_ROOT mismatch**, and I’ll fix that with you next.
 
+##Fixing mobilehacking lab certification and links after mobile hacking lab was transformed
+That 404 is a classic headache, but don't worry—your hard work hasn't vanished into the void.
+
+The short answer is that **Mobile Hacking Lab changed how their platform handles courses and certifications.**
+
+They migrated their infrastructure from their main site over to a dedicated sub-domain or separate learning portal (**`academy.mobilehackinglab.com`**). Because they updated the backend platform, the old URL path structure (`/certificate_v2/...`) broke, causing the 404 error you're seeing on your old link.
+
+Here is exactly how to recover your Android Application Security badge and certificate:
+
+### 1. Log In to the New Academy Portal
+
+Your account data should have carried over during their platform updates.
+
+* Head over to **`[https://academy.mobilehackinglab.com](https://academy.mobilehackinglab.com)`** (or click the "Sign In" / "Academy" link on their main homepage).
+* Log in using the exact same credentials you used a year ago when you won the free course.
+
+### 2. Check Your Profile / Completed Courses
+
+* Once logged in, click on your profile icon in the top right corner or navigate to **"My Courses"** / **"Dashboard"**.
+* Look for the **Android Application Security - Free Course** or **Tryout Labs** section.
+* There should be a "Download Certificate" or "View Badge" option directly attached to your completed course progress within the new portal layout.
+
+### 3. Check Your Original Email
+
+If you can't find it on the dashboard, look back at the original congratulatory email from a year ago. Sometimes, platforms issue a backup verification PDF or a **credential ID** directly in the text of the message. If it includes a unique serial number or ID, that can be used to manually look it up.
+
+### 4. What to do if it's completely missing
+
+If your login doesn't work or the dashboard shows empty, it means your specific certificate record didn't automatically migrate to the new database.
+
+* Do not panic. Because you have the exact text snippet of the congratulations email, you have proof of completion.
+* Reach out to their support team directly or drop a message in the official **Mobile Hacking Lab Discord channel** (which they use actively for student support). Give them your registration email and the old broken URL—they can manually pull the record from their legacy database and re-issue your badge on the new system.
