@@ -28503,3 +28503,306 @@ If your login doesn't work or the dashboard shows empty, it means your specific 
 
 * Do not panic. Because you have the exact text snippet of the congratulations email, you have proof of completion.
 * Reach out to their support team directly or drop a message in the official **Mobile Hacking Lab Discord channel** (which they use actively for student support). Give them your registration email and the old broken URL—they can manually pull the record from their legacy database and re-issue your badge on the new system.
+
+##Using df to show files and directory sizes in reverse order
+To sort the output of `du -shc` from largest to smallest, you have to pipe the results into the `sort` command.
+
+However, there is a classic catch: the `-h` (human-readable) flag makes `du` print sizes in different units (K, M, G). If you use a standard alphabetical or numerical sort, a **2M** file might mistakenly be placed above a **500G** file.
+
+To fix this, you need to use the matching `-h` flag on the `sort` command so it understands human-readable sizes.
+
+Here is the ultimate command to do exactly what you want:
+
+```bash
+du -sh * | sort -rh
+
+```
+
+### How it breaks down:
+
+* `du -sh *`: Calculates the total **s**ummary size of each item in the current directory using **h**uman-readable format (like 4.2G, 120M). *Note: We drop the `-c` flag here because the grand total would always be the biggest number and sit right at the top, which messes up the actual ranking of your largest folders.*
+* `|` (pipe): Sends that list directly to the sorting tool.
+* `sort -rh`: Tells sort to rank the list **r**eversely (largest to smallest) while natively understanding **h**uman-readable size suffixes.
+
+---
+
+### Pro-Tips for better results
+
+#### 1. Tracking Down Hidden Files
+
+The standard `*` glob ignores hidden files and folders (those starting with a dot, like `.git` or `.config`). To include absolutely everything in your current directory, use this variant:
+
+```bash
+du -sh .[^.]* * | sort -rh
+
+```
+
+#### 2. Slicing the Top 10 Largest Items
+
+If you run this in a massive directory, the list will scroll way past your screen. Append `head` to only look at the top offenders:
+
+```bash
+du -sh * | sort -rh | head -n 10
+
+```
+
+#### 3. What if your version of `sort` doesn't have the `-h` flag?
+
+If you are ever working on an older legacy system or a stripped-down environment where `sort -h` throws an error, you have to let `du` output everything in raw Megabytes (`-m`) or Kilobytes (`-k`) so a standard numeric sort (`-n`) can understand it:
+
+```bash
+# Output in Megabytes, sort numerically, reverse order
+du -sm * | sort -rn
+
+```
+
+To do this entirely inside the `-exec` flag without piping to `sort` on the outside, you run into a structural hurdle: **`sort` requires a full list of files to compare them.** When you use `-exec du -shc {} \;`, `find` spawns a brand new, isolated instance of `du` for *every single file* it finds, one by one. Because `du` only sees one file at a time, it can't sort anything, and `sort` can't help from inside that loop.
+
+To fix this and keep your command self-contained, you have two native options depending on how you want to handle the sorting.
+
+### Method 1: The `+` Terminator (Fastest & Simplest)
+
+Instead of ending your find command with `\;`, end it with `+`. This tells `find` to bunch *all* discovered files together into a single, massive argument list and pass them to `du` at the exact same time.
+
+Once `du` has the whole list, you can append a sub-shell to sort it right there:
+
+```bash
+find . -type f -iname '*mix*' -exec sh -c 'du -sh "$@" | sort -rh' _ {} +
+
+```
+
+**How it works:**
+
+* `-exec sh -c '...' _ {} +`: Spawns a single shell instance, feeding all found files into `$@` (the argument array).
+* `du -sh "$@"`: Drops the `-c` flag (grand total) because a total at the bottom breaks the largest-to-smallest sorting flow. It measures all files simultaneously.
+* `| sort -rh`: Sorts the collective batch before returning the output to your screen.
+
+---
+
+### Method 2: Let `find` Handle the Sorting (Modern GNU Find)
+
+If you are running a modern Linux system (like Parrot OS or Debian), GNU `find` actually has a built-in formatting engine (`-printf`) that can pull the exact file size in bytes directly from the file's metadata.
+
+This completely bypasses the need to launch `du` entirely, making it incredibly fast. You can use an internal shell invocation to format the final output:
+
+```bash
+find . -type f -iname '*mix*' -printf '%s\t%p\n' | sort -rn | numfmt --to=iec
+
+```
+
+**How it works:**
+
+* `-printf '%s\t%p\n'`: Prints the raw file size in **bytes** (`%s`), followed by a tab, followed by the file path (`%p`).
+* `sort -rn`: Sorts purely by the raw byte numbers (reverse numeric), which is perfectly accurate.
+* `numfmt --to=iec`: Humanizes the raw bytes at the very end of the pipe, turning numbers like `1048576` into `1.0M`.
+
+---
+
+### Which one should you use?
+
+* Use **Method 1** if you prefer the familiar format of `du` and want to keep everything strictly contained within the `-exec` architecture.
+* Use **Method 2** if you are scanning a massive directory with thousands of files, as skipping the `du` process execution loop will give you a massive speed boost.
+
+##Apt update error fix
+└──╼ #apt update
+Get:1 http://deb.debian.org/debian bookworm-backports InRelease [59.4 kB]                                                                                                                                                                                                                       
+Hit:2 https://pkgs.netbird.io/debian stable InRelease                                                                                                                                                                                                                                                      
+Get:3 https://dl.google.com/linux/chrome/deb stable InRelease [1,825 B]                                                                               
+Get:4 http://deb.debian.org/debian bookworm-backports/main amd64 Packages.diff/Index [63.3 kB]                                                  
+Get:5 https://repo.teamsforlinux.de/debian stable InRelease [10.8 kB]                                                                           
+Get:6 https://deb.parrot.sh/parrot echo InRelease [31.5 kB]                                                                                             
+Hit:7 https://deb.nodesource.com/node_18.x nodistro InRelease                                         
+Get:8 https://dl.google.com/linux/chrome-stable/deb stable InRelease [1,825 B]                        
+Get:9 https://mega.nz/linux/repo/Debian_12 ./ InRelease [2,959 B]                                   
+Get:10 http://deb.debian.org/debian bookworm-backports/main i386 Packages.diff/Index [63.3 kB]         
+Get:11 https://deb.parrot.sh/parrot echo-security InRelease [25.8 kB]        
+Get:12 https://dl.google.com/linux/chrome/deb stable/main amd64 Packages [1,213 B]        
+Hit:13 https://deb.parrot.sh/parrot echo-backports InRelease                                
+Get:14 http://deb.debian.org/debian bookworm-backports/main Translation-en.diff/Index [63.3 kB]
+Get:15 https://deb.parrot.sh/parrot echo/main i386 Packages [10.3 MB]                 
+Get:16 http://deb.debian.org/debian bookworm-backports/main amd64 Packages T-2026-05-30-0201.08-F-2026-05-29-2005.34.pdiff [4,239 B]
+Get:17 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1,213 B]    
+Get:16 http://deb.debian.org/debian bookworm-backports/main amd64 Packages T-2026-05-30-0201.08-F-2026-05-29-2005.34.pdiff [4,239 B]
+Get:18 http://deb.debian.org/debian bookworm-backports/main i386 Packages T-2026-05-30-0201.08-F-2026-05-29-2005.34.pdiff [2,555 B]
+Get:18 http://deb.debian.org/debian bookworm-backports/main i386 Packages T-2026-05-30-0201.08-F-2026-05-29-2005.34.pdiff [2,555 B]
+Get:19 http://deb.debian.org/debian bookworm-backports/main Translation-en T-2026-05-30-0201.08-F-2026-05-30-0201.08.pdiff [2,804 B]
+Get:19 http://deb.debian.org/debian bookworm-backports/main Translation-en T-2026-05-30-0201.08-F-2026-05-30-0201.08.pdiff [2,804 B]
+Get:20 https://deb.parrot.sh/parrot echo/main amd64 Packages [21.0 MB]                                                                                                                                                                                                                                                      
+Fetched 31.7 MB in 20s (1,559 kB/s)                                                                                                                                                                                                                                                                                         
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+2193 packages can be upgraded. Run 'apt list --upgradable' to see them.
+N: Skipping acquire of configured file 'main/binary-i386/Packages' as repository 'https://dl.google.com/linux/chrome-stable/deb stable InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'main/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-security InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'contrib/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-security InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'non-free/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-security InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'non-free-firmware/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-security InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'main/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-backports InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'contrib/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-backports InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'non-free/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-backports InRelease' doesn't support architecture 'i386'
+N: Skipping acquire of configured file 'non-free-firmware/binary-i386/Packages' as repository 'https://deb.parrot.sh/parrot echo-backports InRelease' doesn't support architecture 'i386'
+
+solution
+Those `N: Skipping acquire...` messages are definitely annoying clutter. They happen because your system has 32-bit architecture (`i386`) enabled as a foreign architecture (likely for Wine, Steam, or older apps), so `apt` is trying to look for 32-bit packages in *all* of your repositories. However, those specific third-party repositories only offer 64-bit (`amd64`) packages.
+
+Since they aren't actual errors, nothing is broken, but we can easily clean up your terminal output by telling `apt` to only look for 64-bit packages from those specific sources.
+
+Here is how we fix it.
+
+---
+
+### Step 1: Fix the Google Chrome repositories
+
+Google Chrome dropped 32-bit Linux support years ago. You have two Google Chrome repository configurations throwing flags here.
+
+Run the following commands to explicitly limit them to `amd64`:
+
+```bash
+# Fix the chrome-stable list
+sudo sed -i 's/deb http/deb [arch=amd64] http/' /etc/apt/sources.list.d/google-chrome-stable.list 2>/dev/null || sudo sed -i 's/deb https/deb [arch=amd64] https/' /etc/apt/sources.list.d/google-chrome-stable.list
+
+# Fix the generic chrome list (if it exists separately)
+sudo sed -i 's/deb http/deb [arch=amd64] http/' /etc/apt/sources.list.d/google-chrome.list 2>/dev/null || sudo sed -i 's/deb https/deb [arch=amd64] https/' /etc/apt/sources.list.d/google-chrome.list
+
+```
+
+---
+
+### Step 2: Fix the Parrot OS repositories
+
+You are running Parrot OS (or using its repositories), and its security and backports repos are complaining about the lack of `i386` binaries.
+
+Open your main Parrot sources file:
+
+```bash
+sudo nano /etc/apt/sources.list.d/parrot.list
+
+```
+
+*(Note: If it's not there, check your main `/etc/apt/sources.list` file instead).*
+
+Look for lines that resemble the `echo-security` and `echo-backports` configurations. They will look something like this:
+
+```text
+deb https://deb.parrot.sh/parrot echo-security main contrib non-free non-free-firmware
+deb https://deb.parrot.sh/parrot echo-backports main contrib non-free non-free-firmware
+
+```
+
+Modify them by inserting `[arch=amd64]` right after `deb`. They should look like this:
+
+```text
+deb [arch=amd64] https://deb.parrot.sh/parrot echo-security main contrib non-free non-free-firmware
+deb [arch=amd64] https://deb.parrot.sh/parrot echo-backports main contrib non-free non-free-firmware
+
+```
+
+Save and exit (`Ctrl+O`, `Enter`, then `Ctrl+X`).
+
+---
+
+### Step 3: Test the Fix
+
+Run your update command again to verify that the clutter is gone:
+
+```bash
+sudo apt update
+
+```
+
+Your output should now clean-load without a wall of skipping notifications! Let me know if any stray lines persist.
+
+##For google chrome repos
+Ah, that sneaky one survived. `google-chrome-stable.list` can be stubborn because Google sometimes auto-generates or overwrites that file with standard updates, or it might be configured via a different `.list` file or a newer `.sources` DEB822 format file.
+
+Let's wipe it out for good. Since you are already `root`, you don't need `sudo`.
+
+---
+
+### Method 1: The Quick Overwrite
+
+The absolute cleanest way to handle Google Chrome's repository is to just overwrite the file entirely with the explicit `amd64` architecture flag. Run this:
+
+```bash
+echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome-stable.list
+
+```
+
+---
+
+### Method 2: Check for Alternative Configs (If Method 1 fails)
+
+If you run `apt update` after Method 1 and still see the message, the entry is hiding somewhere else. Let's hunt it down using `grep`:
+
+```bash
+grep -r "chrome-stable" /etc/apt/sources.list*
+
+```
+
+* **If it returns a line from a file ending in `.list`:** Open that file and manually add `[arch=amd64]` right after `deb`.
+* **If it returns a line from a file ending in `.sources` (DEB822 format):** Open that file and change `Architectures: amd64 i386` (or whatever it lists) to strictly:
+```text
+Architectures: amd64
+
+```
+
+
+
+---
+
+### Verify the Fix
+
+Run it one more time:
+
+```bash
+apt update
+
+```
+
+That should completely clean up the last remaining warning!
+Ah, there it is! Google has switched to the newer **DEB822** format (`.sources`) for its repository configurations.
+
+Since it's a structured format rather than a one-line string, we just need to add an explicit `Architectures` line to that file.
+
+Open it back up:
+
+```bash
+nano /etc/apt/sources.list.d/google-chrome.sources
+
+```
+
+Add `Architectures: amd64` right under the `Components: main` line. It should look exactly like this:
+
+```text
+### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# Changes to this file will not be preserved.
+# This file will not be recreated if removed.
+X-Repolib-Name: Google Chrome
+Types: deb
+URIs: https://dl.google.com/linux/chrome-stable/deb/
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/google-chrome.gpg
+
+```
+
+Save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+---
+
+### A Quick Warning About Google's Cron Job
+
+Because of that comment at the top (`# Changes to this file will not be preserved.`), Google Chrome has a daily cron job that might overwrite this file when the browser updates.
+
+If the warning ever comes back in the future, you can make the file immutable so Google can't touch it:
+
+```bash
+chattr +i /etc/apt/sources.list.d/google-chrome.sources
+
+```
+
+*(If you ever actually want to delete or change it yourself later, you'd just run `chattr -i` first).*
+
+Give `apt update` one final spin—you should have completely clean output now!
