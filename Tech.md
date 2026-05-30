@@ -28019,6 +28019,7 @@ rsync -avPh --info=progress2 --delete \
 --exclude="/mnt/Blur-PC.rar" \
 / /media/hulbert/LINUX_DATA/
 rsync -avPh --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/media/*","/lost+found"} --exclude="/mnt/The_Blacklist_S04" --exclude="/amazon_linux.tar" --exclude="/amazon_linux" / /media/hulbert/LINUX_DATA/ &&systemctl suspend
+rsync -avPh --inplace --info=progress2 --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/media/*","/lost+found"} --exclude="/mnt/The_Blacklist_S04" --exclude="/amazon_linux.tar" --exclude="/amazon_linux" / /media/hulbert/LINUX_DATA/ && systemctl suspend
 ##Filesystem check on a drive partition
 2. Dealing with the Dying Drive (sda2)
 The error EXT4-fs (sda2): Remounting filesystem read-only means you cannot write any more data to that drive right now. Do not try to rsync to it again.
