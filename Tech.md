@@ -28961,3 +28961,84 @@ If you want a cryptographic receipt showing they match without checking paths, y
 
 Bash
 diff <(cd study-visa-documents/ && sha256sum * | awk '{print $1}') <(cd "study-visa-documents - check/" && sha256sum * | awk '{print $1}')
+
+#Show custom screen time using tmux
+Let's build a dedicated, real-time status bar using **Tmux** (Terminal Multiplexer). It gives you a persistent, ticking clock at the bottom of your screen that never interferes with your `PS1` prompt math or overlapping long commands.
+
+Since you are running Parrot Sec, Tmux should be readily available or easily installed. Here is how to set it up perfectly.
+
+---
+
+### Step 1: Install Tmux
+
+If it isn't already installed on your VM, install it via `apt`:
+
+```bash
+sudo apt update && sudo apt install -y tmux
+
+```
+
+---
+
+### Step 2: Create a Custom Theme Configuration
+
+We want to style the Tmux status bar so it matches the slick, dark red and neon profile of your Parrot Sec terminal.
+
+Create a configuration file in your home directory:
+
+```bash
+nano ~/.tmux.conf
+
+```
+
+Paste the following configuration inside it:
+
+```tmux
+# Refresh the status bar every 1 second (default is 15s)
+set -g status-interval 1
+
+# Status bar styling to match Parrot Sec colors
+set -g status-style bg=black,fg=white
+
+# Customize the left side of the status bar (Session name/User)
+set -g status-left "#[fg=red]──╼ #[fg=cyan][#S] "
+set -g status-left-length 20
+
+# Customize the right side to hold our LIVE, TICKING CLOCK
+# %a = Day, %b = Month, %d = Date, %r = 12-hour live clock with AM/PM
+set -g status-right "#[fg=red]─[#[fg=yellow]%a %b %d %r#[fg=red]]─"
+set -g status-right-length 50
+
+# Active/Inactive window tab styling
+set -g window-status-current-style fg=black,bg=cyan,bold
+set -g window-status-style fg=gray,bg=black
+
+```
+
+*Save and close the file (`Ctrl+O`, `Enter`, then `Ctrl+X`).*
+
+---
+
+### Step 3: Launch Your New Environment
+
+Now, simply start a new Tmux session by typing:
+
+```bash
+tmux
+
+```
+
+Look at the bottom of your screen. You will see a clean status line featuring a live clock ticking away the seconds in real-time. Because it operates completely outside of Bash's input loop, you can copy, paste, or type that massive LibreOffice conversion command on your main prompt line, and it will wrap flawlessly without a single layout glitch!
+
+---
+
+### Useful Tmux Shortcuts to Know
+
+When you are inside Tmux, commands are triggered by a "prefix key combination," which defaults to `Ctrl+b`.
+
+* **To exit Tmux cleanly:** Just type `exit` in your terminal line.
+* **Split screen vertically:** Press `Ctrl+b`, then release and press `%`.
+* **Split screen horizontally:** Press `Ctrl+b`, then release and press `"`.
+* **Switch between split panes:** Press `Ctrl+b`, then use your keyboard arrow keys.
+
+Give `tmux` a run and let me know if the styling fits your workspace perfectly!
