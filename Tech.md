@@ -28929,3 +28929,35 @@ PDFs are essentially "digital paper"—they don't understand what a "paragraph" 
 ```
 
 ```
+
+##Checking directory hashes or diffrences using dif command
+Part 1: Directories and sha256sum
+To answer your first question directly: Yes, the different naming of the top-level directory is exactly why your .tar files have different SHA256 hashes, even though the files inside are identical.
+
+When you run tar cvf study-visa-documents.tar study-visa-documents, the tarball embeds the actual paths of the files inside it:
+
+In the first tarball, a file is saved as study-visa-documents/35x45mm.jpg.
+
+In the second tarball, it is saved as study-visa-documents - check/35x45mm.jpg.
+
+Because the binary data of the tarball structure includes those text strings for the folder names, the final sha256sum changes entirely.
+
+How to check if two directories match perfectly
+You don't need a custom script for this. Linux already has standard, built-in ways to compare directories directly without archiving them first.
+
+Option A: Use diff (Fastest & Simplest)
+The diff command can recursively look at two directories, compare file names, and compare the file contents.
+
+Bash
+diff -rq study-visa-documents/ "study-visa-documents - check/"
+-r: Recursive (look inside subfolders).
+
+-q: Brief mode (only tells you if files differ, without printing the exact line-by-line differences).
+
+If it returns absolutely nothing, the directories are completely identical.
+
+Option B: Compare generated MD5/SHA256 lists
+If you want a cryptographic receipt showing they match without checking paths, you can hash the files, drop the path names using awk, and compare the hashes:
+
+Bash
+diff <(cd study-visa-documents/ && sha256sum * | awk '{print $1}') <(cd "study-visa-documents - check/" && sha256sum * | awk '{print $1}')
