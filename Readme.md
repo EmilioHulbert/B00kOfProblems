@@ -29042,3 +29042,431 @@ When you are inside Tmux, commands are triggered by a "prefix key combination," 
 * **Switch between split panes:** Press `Ctrl+b`, then use your keyboard arrow keys.
 
 Give `tmux` a run and let me know if the styling fits your workspace perfectly!
+
+##Manual install zsh
+Fair enough, I hear you completely. You want `apt` to act like a surgical tool, not a sledgehammer. No massive updates, no ripping out your existing desktop apps, and no forced migrations to newer toolchains just to get a terminal shell.
+
+Looking closely at your `uname -a` and your `apt update` output, the mystery of this "upgrading madness" is completely laid bare.
+
+---
+
+## The Root Cause: Hybrid Repository Conflict
+
+Your kernel is `6.10.11-1parrot1` (from the Parrot OS project), but your package manager is pulling directly from **Debian Bookworm Backports** alongside the standard Parrot `echo` repos.
+
+Parrot OS is *based* on Debian, but it uses highly specific pins, modified libraries, and its own package versions. When you mixed standard Debian Backports directly into your sources list, `apt` got confused. Because the Debian repository lists significantly newer core library versions (like `libc6`, `libcrypt`, and `python3.13`), `apt` thinks: *"Oh, to install Zsh, I should use the path that updates all these core dependencies to match the newest repo I have access to."* That is why it's trying to force a massive cascade of upgrades and removals—it is trying to partially convert your Parrot system into a vanilla Debian hybrid.
+
+---
+
+## The Surgical Fixes
+
+If you do not want to upgrade your system and just want `zsh` configured right now, you have three clean ways to bypass the `apt` loop.
+
+### Option 1: Pin the Target and Bypass Upgrades (The APT Way)
+
+You can tell `apt` explicitly to install `zsh` while strictly forbidding it from touching or upgrading other packages. Run this:
+
+```bash
+apt install zsh --no-upgrade
+
+```
+
+If the dependencies for `zsh` specifically require a newer library that isn't on your local disk, `apt` might still throw a "held packages" error. If it does, move to Option 2.
+
+### Option 2: Pull the Direct Binary Package (The Zero-Risk Way)
+
+`zsh` has incredibly few hard dependencies; it mostly just needs standard library functions. You can bypass the entire repo dependency engine by downloading the `.deb` file directly and installing it natively with `dpkg`.
+
+1. Go to your Parrot repository pool using `curl` to grab the standalone package (or download it from a browser):
+```bash
+curl -LO https://deb.parrot.sh/parrot/pool/main/z/zsh/zsh_5.9-4+b2_amd64.deb
+curl -LO https://deb.parrot.sh/parrot/pool/main/z/zsh/zsh-common_5.9-4_all.deb
+
+```
+
+
+2. Install them directly using `dpkg`. This completely ignores the 1,700+ pending updates in your repo database:
+```bash
+dpkg -i zsh-common_5.9-4_all.deb zsh_5.9-4+b2_amd64.deb
+
+```
+
+
+
+*(Note: If it complains about a missing lightweight dependency like `libcap2`, you can easily fetch just that specific `.deb` or let `apt install -f` patch only that single tool).*
+
+### Option 3: Fix the Sources List permanently
+
+To stop this from happening to *every other package* you try to install in the future, you need to clean up the external repositories causing the loop.
+
+1. Open your sources configuration:
+```bash
+nano /etc/apt/sources.list
+# Also check inside this directory:
+# ls /etc/apt/sources.list.d/
+
+```
+
+
+2. Look for the line referencing `debian bookworm-backports` and comment it out by adding a `#` at the start of the line.
+3. Save, exit, and update your system layout database:
+```bash
+apt update
+
+```
+
+
+
+Once that rogue Debian repo is out of the mix, `apt` will stop trying to calculate massive upgrade paths every time you ask for a simple utility. Which route do you want to tackle first?
+
+##Converting parrot to stable frozen version
+To convert your current machine into a frozen setup that **stops misbehaving, stops threatening to delete your desktop files, and stays perfectly stable**, we need to decouple it from Parrot's active, rolling development line.
+
+Instead of pointing your system to the internet where everything is moving forward, we can lock your configuration file (`sources.list`) directly to a specific static release of the underlying **Debian** base, or tell your package manager to absolutely freeze your packages in place.
+
+Depending on what you want out of this machine long-term, there are two distinct ways to handle this.
+
+---
+
+### Option 1: Freeze Your Current System Exact Configuration (Recommended)
+
+If you like how your machine is behaving right now and you simply want `apt` to leave everything alone—meaning no more huge walls of text and no risk of broken packages—you can tell `apt` to **hold** your critical system components.
+
+When a package is placed on "hold", `apt` will physically skip it during any future `apt install` calculations, preventing that domino effect.
+
+Run this quick script block in your terminal to instantly freeze your entire desktop layout and core operating system libraries:
+
+```bash
+# Freeze your core system libraries
+sudo apt-mark hold libc6 systemd systemd-sysv init-system-helpers
+
+# Freeze your current desktop environment pieces so they can never be uninstalled
+sudo apt-mark hold mate-desktop-environment parrot-interface parrot-core
+
+```
+
+> **What this changes:** From now on, if you try to `apt install` a tool that demands massive core upgrades, `apt` will simply refuse and give you a clean error message saying *"The package could not be installed because X is held"*, rather than threatening to wipe your environment.
+
+---
+
+### Option 2: The "Air-Gap" Method (Completely Stop Internet Syncing)
+
+If you truly want a frozen, offline-style snapshot where `apt` *only* reads your local system database and never checks the modern internet repos, you can comment out your active Parrot streams.
+
+Open your repository configuration file:
+
+```bash
+sudo nano /etc/apt/sources.list.d/parrot.list
+
+```
+
+You will see a line that looks like this:
+`deb [https://deb.parrot.sh/parrot](https://deb.parrot.sh/parrot) echo main contrib non-free non-free-firmware`
+
+Add a `#` at the very beginning of that line to comment it out, exactly like this:
+
+```text
+# deb https://deb.parrot.sh/parrot echo main contrib non-free non-free-firmware
+
+```
+
+Save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+Now, when you run `apt update`, your machine will stop pulling the 2026 rolling development tree completely. If you ever need to install a minor application, you can do it safely via the `curl + dpkg` method we did for Zsh, or simply uncomment the line temporary whenever you intentionally want to check the web.
+
+---
+
+### Option 3: The True "Debian Stable" Conversion
+
+If your goal is to have a machine that still updates, but *only* receives small, safe security patches without major structural overhauls, you can replace the Parrot repository entirely with the **Debian 12 (Bookworm)** stable repository.
+
+To map your configuration to a fixed-in-time snapshot, replace the content of `/etc/apt/sources.list.d/parrot.list` with these official Debian stable lines:
+
+```text
+deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
+deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
+
+```
+
+Once you save that file and run `apt update`, your system will treat Debian 12 Stable as its target anchor. It will stop looking at Parrot's cutting-edge `echo` branch, giving you the exact calm, predictable environment you had on the older version.
+
+
+#Fastfetch direct download
+https://launchpadlibrarian.net/802832791/fastfetch_2.47.0_amd64.deb
+
+#fastfetch fast tricks
+Look at that! **"0 upgraded, 2 newly installed, 0 to remove and 2 not upgraded."** That is exactly what a clean, well-behaved package manager installation looks like. You successfully anchored your system to Debian Bookworm Stable, the 2,175-package "upgrading madness" is completely gone, and your system won't try to pull your desktop apart anymore.
+
+Since you mentioned loading time, it sounds like you might be thinking of dropping a system information fetch directly into your shell startup script (like your `.bashrc` or `.zshrc`).
+
+Standard `neofetch` can actually be surprisingly sluggish on startup because it actively shells out to query disk usage, complex package counts (`dpkg --get-selections`), and hardware status every single time you open a terminal wrapper.
+
+If you want an **incredibly fast** system printout that won't affect terminal rendering times, here are the best switches and configurations to speed it up, along with a blistering-fast alternative tool.
+
+---
+
+## 1. Streamlining Neofetch for Pure Speed
+
+By default, `neofetch` spends a lot of time running background checks. We can disable the heavy lifting (like counting thousands of `.deb` packages or scanning disk blocks) using specific flags.
+
+Run this terminal command for a stripped-down, optimized execution:
+
+```bash
+neofetch --disable packages disk shell resolution de wm layout underlying
+
+```
+
+### Making it permanent and clean
+
+Instead of long command flags, you can modify your config file to hide the slow elements while keeping the aesthetics fast.
+
+1. Open the config: `nano ~/.config/neofetch/config.conf`
+2. Comment out (`#`) the slow lines inside the `print_info()` block, specifically:
+* `info "Packages" packages` *(The absolute biggest time-killer)*
+* `info "Disk" disk`
+* `info "GPU" gpu`
+
+
+
+---
+
+## 2. The Elite Alternative: `fastfetch` (Written in C)
+
+If you truly want a lightning-fast terminal setup without even a microsecond of lag, **`fastfetch`** is the modern replacement.
+
+While `neofetch` is written entirely in Bash scripts (which fork processes slowly), `fastfetch` is compiled directly in **C**. It is optimized to pull hardware architecture parameters near-instantaneously.
+
+Since you are safely on the Debian Stable repos now, you can install it cleanly without any system issues:
+
+```bash
+apt install fastfetch
+
+```
+
+### The Ultimate Fast Setup
+
+Once installed, you can append `fastfetch` to the very bottom of your `~/.zshrc` file.
+
+If you want a highly compact, minimal presentation that looks incredibly sharp and prints almost instantly, use this:
+
+```bash
+fastfetch --structure OS:Kernel:Uptime:CPU:Memory
+
+```
+
+This bypasses all complex disk/package evaluations entirely, hitting the kernel APIs directly for an immediate shell load.
+
+##Installing sl game
+Ah, I see exactly what is causing the confusion here. Your `dpkg` output proves that the `sl` package **is** technically installed (`ii` status means installed), but the binary is missing from your active shell paths.
+
+The mystery comes down to two specific things: running as **root** and how **Zsh** caches its commands.
+
+Here is how to get the train on the tracks right now.
+
+---
+
+### Reason 1: The Binary is in `/usr/games` (Root Path Issue)
+
+By default, Debian installs recreational tools like `sl` into `/usr/games/`.
+
+When you switch to the root user (`root@Intel5`), the system strips down your `$PATH` variable for security, often dropping `/usr/games` entirely. Since your root user doesn't look there, Zsh says "command not found".
+
+Test if it works by targeting the path explicitly:
+
+```bash
+/usr/games/sl
+
+```
+
+### Reason 2: Zsh Needs to Rehash Its Cache
+
+Unlike Bash, which checks paths dynamically, Zsh builds an internal lookup table of where commands live. If you install something new, Zsh won't see it until you tell it to re-index the file system.
+
+Run this to force Zsh to update its command paths:
+
+```bash
+rehash
+
+```
+
+---
+
+## The Permanent Fix
+
+To make sure you can just type `sl` as root anytime without thinking about it, we should add `/usr/games` to your root path and create a clean shortcut. Run these two commands:
+
+```bash
+# Add the games directory to your current session path
+export PATH=$PATH:/usr/games
+
+# Make a symlink directly into standard binary path so it always works
+ln -s /usr/games/sl /usr/usr/bin/sl 2>/dev/null || ln -s /usr/games/sl /usr/bin/sl
+
+```
+
+Now, simply type `sl` and you should be good to go!
+
+##sl switches
+Ah, the classic **`sl` (Steam Locomotive)**! It is the ultimate punishment for fat-fingering `ls`.
+
+Looking at your terminal logs, you can see exactly why it is broken. When you typed `ii sl`, your system read the raw package description database (*"Correct you if you type 'sl' by mistake"*), but the last line tells the real story:
+`zsh: command not found: sl`
+
+The package data is cached in your repository list from your Debian conversion, but the actual binary tool isn't physically installed on your machine yet.
+
+Because you are safely hooked up to the Debian Stable repos now, you can install the real engine cleanly right now without breaking anything.
+
+---
+
+## 1. The Real Installation
+
+Run this to pull the authentic steam locomotive package from your new stable repositories:
+
+```bash
+apt install sl
+
+```
+
+Once the installation finishes, clear your terminal or just type it out intentionally:
+
+```bash
+sl
+
+```
+
+You should see the ASCII steam engine chug across your screen from right to left.
+
+---
+
+## 2. Advanced Train Switches (The Fun Part)
+
+The `sl` package actually has a few hidden parameters built into it to change how the train behaves. Give these a try once it is installed:
+
+* **The Accident Train:** ```bash
+sl -a
+```
+*(This makes people inside the train cry out for help as an accident appears to happen).*
+
+
+```
+
+
+* **The Flyover:**
+```bash
+sl -F
+
+```
+
+
+*(This hooks the engine up to anti-gravity and sends the locomotive flying diagonally up and off your terminal window).*
+* **The Mini-Train:**
+```bash
+sl -l
+
+```
+
+
+*(This renders a much smaller, compact version of the steam engine).*
+
+---
+
+## 3. Creating the Ultimate Trap (Optional)
+
+If you *really* want it to serve its original purpose—catching you when you accidentally misspell the list command—you can bind it to a shell alias.
+
+Since you just installed Zsh, open your Zsh configuration file:
+
+```bash
+nano ~/.zshrc
+
+```
+
+Go down to your alias sections and drop this line in:
+
+```bash
+alias sl="sl"
+
+```
+
+*(Though usually, it works automatically out of the box once installed, adding it ensures your system processes the environment layout precisely without checking for sub-paths).* Let me know if the train successfully chugs across your command line!
+
+##Make zsh behave like bash using ctrl and alt combos
+This happens because you just switched to **Zsh**.
+
+Unlike Bash, which lets your underlying terminal emulator dictate how key combinations like `Ctrl` or `Alt` behave, Zsh intercepts keys directly through its own line editor called **ZLE (Zsh Line Editor)**.
+
+Out of the box, Zsh doesn't pre-bind the specific escape sequences your terminal sends when you press `Ctrl + Arrow`. Instead of interpreting the shortcut, it just dumps the raw terminal code (like that `;5C` or `;5D` you are seeing) straight into your prompt. It also treats word boundaries much more aggressively than Bash does.
+
+Here is how to fix both issues permanently in your configuration.
+
+---
+
+## 1. Fix `Ctrl + Left/Right` Word Skipping
+
+To fix the `;5C` character dump and make your cursor jump word-by-word, you need to map your terminal's specific escape codes directly to Zsh's internal line-editing widgets.
+
+Open your Zsh configuration file:
+
+```bash
+nano ~/.zshrc
+
+```
+
+Scroll down to the bottom of the file and paste this block exactly:
+
+```bash
+# Bind Ctrl + Left Arrow to move back one word
+bindkey "^[[1;5D" backward-word
+
+# Bind Ctrl + Right Arrow to move forward one word
+bindkey "^[[1;5E" forward-word
+bindkey "^[[1;5C" forward-word
+
+```
+
+> **Note:** If you are using a specific terminal wrapper (like Terminator or XFCE Terminal), the code might slightly differ. If the lines above don't register instantly after restarting, try adding these alternative standard mappings to the file as well:
+> ```bash
+> bindkey ';5D' backward-word
+> bindkey ';5C' forward-word
+> 
+> ```
+> 
+> 
+
+---
+
+## 2. Fix `Alt + Backspace` Killing the Whole Path
+
+By default, Zsh considers characters like `/`, `.`, and `-` to be part of a single, continuous word string. This is why hitting `Alt + Backspace` nukes `/usr/games/ninvaders` all at once instead of stopping at the slash like Bash does.
+
+To make Zsh respect path separators (`/`) as distinct boundaries, tell Zsh to use the standard backward-kill-word behavior by adding this line to your `~/.zshrc`:
+
+```bash
+# Make Alt+Backspace respect slashes and punctuation boundaries
+autoload -U select-word-style
+select-word-style bash
+
+```
+
+Alternatively, if you prefer explicit control over exactly which characters break a word, you can define the `$WORDCHARS` string variable instead. Adding this line will strip out the slash, hyphen, and dot from being considered part of a word:
+
+```bash
+WORDCHARS='*?_[]~=&;!#$%^(){}<>'
+
+```
+
+---
+
+## 3. Apply the Changes
+
+Once you have added those lines to your `~/.zshrc` file, save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+To activate the fixes immediately in your current terminal session without logging out, reload your configuration shell environment:
+
+```bash
+source ~/.zshrc
+
+```
+
+Test your shortcuts now—your cursor should smoothly skip words, and deleting backward on paths will halt safely at every forward slash!
