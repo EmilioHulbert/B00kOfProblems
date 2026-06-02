@@ -29848,3 +29848,223 @@ Vim looks for `/etc/vim/vimrc` because it is a "system-first" editor. Neovim is 
 Run the command `:version` inside Neovim. Look for the lines that say `system vimrc file: "/etc/vimrc"` or `user vimrc file: "$HOME/.config/nvim/init.vim"`. It will explicitly tell you which file it is checking.
 
 If `:scriptnames` doesn't show any user-created files, then your Neovim is indeed using its internal defaults. Are you able to see any file paths when you run `:scriptnames`?
+
+##Showing installed packages using aptitude
+Skip to main contentAccessibility help
+showing packages installed using aptitude
+
+
+All
+Videos
+Images
+Forums
+Short videos
+News
+More
+Tools
+AI Overview
+To show installed packages using the aptitude package manager on Debian or Ubuntu systems, you can use the command-line search patterns or the interactive text user interface (TUI). 
+
+Ask Ubuntu
+ +1
+The Command Line (Quickest)
+To output a simple list of all currently installed packages directly to your terminal, run: 
+
+Unix & Linux Stack Exchange
+ +1
+bash
+aptitude search '~i'
+The ~i (or ?installed) pattern tells aptitude to filter for packages that have an "installed" status.
+The first column of the output will show an i flag, indicating the package is installed. 
+
+Server Fault
+ +4
+Advanced Formatting & Filtering
+If you need to narrow down the list, format the output, or check specific flags, use these variations:
+List only package names: To strip out the flags and package descriptions for clean scripting, use the custom formatting flag:
+bash
+aptitude search -F "%p" '~i'
+Show explicitly (manually) installed packages: To ignore dependencies and see only the packages you or the system specifically requested to install:
+bash
+aptitude search '~i !~M'
+(Where !~M filters out packages marked as automatically installed).
+Find a specific installed package: Search for a specific software name within your installed repository:
+bash
+aptitude search '~i package_name'
+ 
+
+Server Fault
+ +4
+The Interactive GUI / TUI (Visual Mode) 
+If you prefer to browse your packages visually, you can use aptitude's interactive terminal interface: 
+
+Ask Ubuntu
+ +2
+Launch the interface by typing aptitude into your terminal without any arguments:
+bash
+sudo aptitude
+Use the Arrow keys to navigate to the Installed Packages top-level section.
+Press the [ key to expand the entire subgroup tree. This lists all your installed packages neatly categorized by category (e.g., Administration, Editors, Libraries).
+Highlight any package and press Enter to view its complete version, origin, and
+
+
+#Maintaining persistence of docker containers
+To ensure your container starts automatically after a host reboot, you need to set a **restart policy**. This tells the Docker daemon how to handle the container when the Docker service starts or the host reboots.
+
+### 1. The Easiest Way: Update the Existing Container
+
+You do not need to recreate your container to change its restart policy. You can update the running container directly using the `docker update` command.
+
+Run this on your host machine:
+
+```bash
+docker update --restart unless-stopped 09b1d341d5d3
+
+```
+
+* **`unless-stopped`**: This is the recommended setting. It ensures the container starts automatically when the Docker daemon starts (i.e., after a reboot), **unless** you explicitly stop it yourself before a shutdown. This gives you manual control while providing automation for unexpected power cycles.
+
+### 2. Why use `--restart unless-stopped`?
+
+There are a few options for restart policies; choosing the right one depends on your lab workflow:
+
+| Policy | Behavior |
+| --- | --- |
+| **`no`** | Default. Does not restart automatically. |
+| **`always`** | Always restarts the container regardless of whether you stopped it manually or the system rebooted. |
+| **`unless-stopped`** | Restarts only if it was running when the daemon stopped. **Best for persistence.** |
+| **`on-failure`** | Restarts only if the container exits with an error code. |
+
+### 3. Making it Permanent for Future Containers
+
+If you decide to launch a new, fresh container (as discussed previously to fix the lag), you simply add the flag to your `docker run` command:
+
+```bash
+docker run -d --restart unless-stopped --network host -v $(pwd):/root/Eternalblue-Doublepulsar-Metasploit eternalblue-custom-saved /bin/bash
+
+```
+
+*Note: I added the `-d` (detached) flag. Since you are using `exec -it` to enter the container, you usually want the container process to run in the background as a daemon so it persists independently of your terminal session.*
+
+### Understanding Container Lifecycle Management
+
+By configuring these policies, you are essentially delegating the "process management" of your exploit environment to the Docker daemon (`dockerd`).
+
+**Since you now have a plan to handle persistence and performance, are you ready to finalize this setup, or are there other specific environment variables or network configurations you need to bake into this container before moving to the next phase?**
+
+##checking current docker container status
+To manage your container's restart policy, you can use the `docker update` command to both check and set (or remove) these configurations.
+
+### 1. How to check the current policy
+
+You don't need to manually hunt through configuration files. You can use the `docker inspect` command to query the specific value for your container.
+
+Run this on your host:
+
+```bash
+docker inspect --format='{{.HostConfig.RestartPolicy.Name}}' 09b1d341d5d3
+
+```
+
+* This will return `no`, `always`, `unless-stopped`, or `on-failure`.
+
+---
+
+### 2. How to revert to defaults (Remove the policy)
+
+If you decide you no longer want the container to restart automatically, you can "remove" the policy by setting it back to `no` (which is the Docker default).
+
+Run this on your host:
+
+```bash
+docker update --restart=no 09b1d341d5d3
+
+```
+
+* Once this is set, if you run `docker stop 09b1d341d5d3`, the container will remain stopped even if you reboot the host.
+
+---
+
+### Summary of Commands
+
+| Action | Command |
+| --- | --- |
+| **Check current policy** | `docker inspect --format='{{.HostConfig.RestartPolicy.Name}}' <id>` |
+| **Set to auto-restart** | `docker update --restart=unless-stopped <id>` |
+| **Revert to default (No restart)** | `docker update --restart=no <id>` |
+
+### Pro-Tip: Managing multiple containers
+
+If you ever end up with multiple lab containers and want to check or reset them all at once, you can use these "one-liners":
+
+* **List all containers and their policies:**
+```bash
+docker ps -a --format "table {{.ID}}\t{{.Names}}\t{{.Status}}" | while read line; do echo "$line $(docker inspect --format='{{.HostConfig.RestartPolicy.Name}}' $(echo $line | awk '{print $1}'))"; done
+
+```
+
+
+* **Disable auto-restart for ALL containers:**
+```bash
+docker update --restart=no $(docker ps -a -q)
+
+```
+
+
+
+**Since you are setting up this lab for long-term persistence, do you need help setting up a script that automatically triggers your `msfconsole` listener on container startup, or are you comfortable manually firing it up each time?**
+
+##Fixing ssh key authentication for ssh
+To fix this, we need to address the most common reasons why SSH key authentication fails even after `ssh-copy-id` has successfully placed the key on the server.
+
+The issue is almost certainly due to **directory/file permissions** on the remote machine (`192.168.56.4`), which SSH enforces strictly for security reasons.
+
+### The Immediate Fix (Run on the remote server)
+
+Log into the server (192.168.56.4) and run these commands to ensure permissions are correct. If the permissions are too "open" (e.g., world-writable), SSH will ignore the keys and fall back to password authentication.
+
+```bash
+# Set home directory to not be group/world writable
+chmod 755 /home/user
+
+# Set .ssh directory to 700 (only owner can read/write/execute)
+chmod 700 /home/user/.ssh
+
+# Set authorized_keys file to 600 (only owner can read/write)
+chmod 600 /home/user/.ssh/authorized_keys
+
+# Ensure the correct user owns these files
+chown -R user:user /home/user/.ssh
+
+```
+
+---
+
+### Why this happens (Conceptual Understanding)
+
+SSH is extremely paranoid about security. If anyone other than the owner of the account has "write" permissions on the `.ssh` folder or the `authorized_keys` file, SSH assumes the system might be compromised and refuses to use the key, forcing you to type your password instead.
+
+---
+
+### Troubleshooting Checklist
+
+If the permissions above were already correct, check these three things in order:
+
+1. **Check for SELinux/AppArmor:** If you are on a hardened system, SELinux might be blocking the SSH daemon from reading the key file. Check the logs:
+* `tail -f /var/log/auth.log` (on Debian/Ubuntu) or `journalctl -u sshd -f` (on systemd systems) while attempting the login. Look for "Authentication refused" or "Permission denied" errors.
+
+
+2. **Verify the `authorized_keys` content:** Sometimes `ssh-copy-id` appends a key, but the file might contain garbage or incorrect formatting. Check the file manually:
+* `cat /home/user/.ssh/authorized_keys`
+* Ensure the line starts with `ssh-rsa` or `ssh-ed25519` and there are no extra newlines or corrupted characters.
+
+
+3. **Debug Mode:** Use the `-v` (verbose) flag on your client to see exactly why it is skipping the key:
+* `ssh -v user@192.168.56.4`
+* Look for lines like `debug1: Authentications that can continue: publickey,password` and specifically look for messages about why a specific identity file was skipped.
+
+
+
+**Quick Tip:** If you are still struggling, ensure that the user you are logging into is actually `user` and not `root`. Your `sshd_config` has `PermitRootLogin yes`, but if you are attempting to login as `user`, verify that the home directory path in the commands above matches the target user's home directory.
+
+Are you seeing any specific error messages in the output when you run `ssh -v user@192.168.56.4`?
