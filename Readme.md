@@ -29739,3 +29739,112 @@ Since `sync` is hanging, the kernel is stuck waiting for a hardware acknowledgme
 
 If you need something highly reliable for your setup—especially if you are running portable Linux environments, flashing firmware, or doing heavy testing—it is highly recommended to stick to **SanDisk Ultra/Extreme** or **Samsung EVO** cards. They use tier-1 silicon and have much smarter FTL controllers designed to handle aggressive write cycles without panicking.
 
+
+##Vim and nvim diffrences
+Neovim and standard Vim are two different programs that follow completely different directory structures. That is exactly why your `/etc/vim/vimrc` changes aren't affecting your `nvim` instance.
+
+### 1. Where Neovim (nvim) Hides Its Config
+
+Unlike Vim, which looks at `/etc/vim/vimrc` or `~/.vimrc`, **Neovim** adheres to the XDG Base Directory specification. It does not use the `/etc/vim` directory at all.
+
+Your Neovim configuration is located here:
+
+* **Primary Config:** `~/.config/nvim/init.lua` (if using Lua) or `~/.config/nvim/init.vim` (if using Vimscript).
+* **Alternative:** Sometimes it may look at `~/.config/nvim/init.vim`.
+
+If the `~/.config/nvim` directory does not exist, Neovim runs with default settings. To make it behave like your host, you need to create that directory and file.
+
+### 2. How to Sync Your Neovim Config
+
+Since your host is already using Neovim, you need to grab the config from your host's Neovim path:
+
+1. **On your Host:** Find the config file by running:
+```bash
+ls -d ~/.config/nvim/
+
+```
+
+
+2. **Copy the directory:** Copy that entire folder to your VM's home directory.
+3. **On your VM:** Ensure the directory exists:
+```bash
+mkdir -p ~/.config/nvim
+
+```
+
+
+4. **Place your config:** Copy your host's `init.vim` or `init.lua` into `~/.config/nvim/` on the VM.
+
+### 3. Why `set nu` (Line Numbers) isn't working
+
+You noticed `set nu` is commented out in your `vimrc`. Even if it wasn't, Neovim would ignore it because it's looking at `~/.config/nvim/init.vim`, not `/etc/vim/vimrc`.
+
+**To fix line numbers in Neovim:**
+
+1. Open your Neovim config file: `nano ~/.config/nvim/init.vim`
+2. Add this line:
+```vim
+set number
+
+```
+
+
+3. Save and restart Neovim.
+
+### Summary Table: Configuration Paths
+
+| Application | System-wide Config | User-level Config |
+| --- | --- | --- |
+| **Vim** | `/etc/vim/vimrc` | `~/.vimrc` |
+| **Neovim** | N/A (Project-based) | `~/.config/nvim/init.vim` |
+
+**Quick Diagnostic:** Inside your `nvim` on the VM, run the command `:echo stdpath('config')`. This will print the exact path where Neovim is looking for its configuration files on that specific machine.
+
+Does `~/.config/nvim/` exist on your host, and what does `:echo stdpath('config')` return when you run it inside your Nvim?
+
+If those directories don't exist, **Neovim is running with built-in hardcoded defaults.** It is **not** getting those settings from the executable binary itself, but rather from its internal compiled-in configuration logic.
+
+When no configuration files are found, Neovim defaults to a "clean slate." If you are seeing line numbers, it is likely because:
+
+1. **System-wide defaults:** Some Linux distributions (like Parrot or Kali) ship with a "default" Neovim config file placed in `/usr/share/nvim/runtime/` or `/etc/xdg/nvim/`.
+2. **Environment Variables:** You might have an environment variable like `NVIM_APPNAME` or a shell alias that is forcing it to load a specific file.
+
+### How to Find Where Those "Default" Settings are Coming From
+
+Neovim is excellent at self-reporting. Inside your `nvim` instance, run this exact command:
+
+`:scriptnames`
+
+This will output a list of **every file** that was sourced during startup. Look at that list—one of those files is where your line numbers and other settings are defined. It will point you to the exact file path.
+
+### How to force your own config (The "Clean Slate" method)
+
+If you want to move away from these "mystery" defaults and ensure you are in control, you should always create your own configuration. Neovim will look for it if you create the directory manually:
+
+```bash
+# Create the directory
+mkdir -p ~/.config/nvim
+
+# Create your own file
+touch ~/.config/nvim/init.vim
+
+```
+
+Once that file exists, **Neovim will prioritize it over any other default settings.** You can then add exactly what you want:
+
+```vim
+" Inside ~/.config/nvim/init.vim
+set number          " Enable line numbers
+set tabstop=4       " Set tab width
+syntax on           " Enable syntax highlighting
+
+```
+
+### Why Neovim acts "different" than Vim
+
+Vim looks for `/etc/vim/vimrc` because it is a "system-first" editor. Neovim is designed to be a "user-first" editor, which is why it ignores `/etc/vim/` entirely.
+
+**To verify what is happening right now:**
+Run the command `:version` inside Neovim. Look for the lines that say `system vimrc file: "/etc/vimrc"` or `user vimrc file: "$HOME/.config/nvim/init.vim"`. It will explicitly tell you which file it is checking.
+
+If `:scriptnames` doesn't show any user-created files, then your Neovim is indeed using its internal defaults. Are you able to see any file paths when you run `:scriptnames`?
