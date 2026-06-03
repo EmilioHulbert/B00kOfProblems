@@ -29955,6 +29955,70 @@ By configuring these policies, you are essentially delegating the "process manag
 ##checking current docker container status
 To manage your container's restart policy, you can use the `docker update` command to both check and set (or remove) these configurations.
 
+
+You were close — the issue is you passed a container ID that doesn’t exist anymore. You don’t need to hardcode IDs anyway.
+
+### ✅ One-liner to set restart policy on **all containers**
+
+```bash
+docker update --restart unless-stopped $(docker ps -aq)
+```
+
+### 🔍 What it does
+
+* `docker ps -aq` → lists **all container IDs** (running + stopped)
+* `docker update --restart unless-stopped` → applies restart policy to each
+
+### 💡 Safer version (handles empty list)
+
+If there’s a chance no containers exist:
+
+```bash
+docker ps -aq | xargs -r docker update --restart unless-stopped
+```
+
+### 🚀 Verify
+
+```bash
+docker inspect -f '{{ .Name }} -> {{ .HostConfig.RestartPolicy.Name }}' $(docker ps -aq)
+```
+
+---
+
+### ⚠️ Extra tip (important for your stack)
+
+Since you're running:
+
+* nginx
+* php
+* node
+* mysql
+
+If this is a **docker-compose setup**, better persist it in config:
+
+```yaml
+restart: unless-stopped
+```
+
+Then:
+
+```bash
+docker-compose up -d
+```
+
+This avoids reapplying manually every time.
+
+---
+
+If you want, I can also give you a clean script to:
+
+* pull latest images
+* recreate containers
+* zero downtime approach (for nginx/php)
+
+Just say 👍
+
+
 ### 1. How to check the current policy
 
 You don't need to manually hunt through configuration files. You can use the `docker inspect` command to query the specific value for your container.
@@ -30068,3 +30132,196 @@ If the permissions above were already correct, check these three things in order
 **Quick Tip:** If you are still struggling, ensure that the user you are logging into is actually `user` and not `root`. Your `sshd_config` has `PermitRootLogin yes`, but if you are attempting to login as `user`, verify that the home directory path in the commands above matches the target user's home directory.
 
 Are you seeing any specific error messages in the output when you run `ssh -v user@192.168.56.4`?
+
+##terminator customization
+To set up **Terminator** to launch with specific layouts, you need to define them in your configuration file (`~/.config/terminator/config`). You can then create custom command shortcuts to trigger specific layouts or just a default terminal.
+
+Here is how to achieve your multi-split layout and custom keyboard mapping.
+
+---
+
+### 1. Create the Layout Configuration
+
+First, open your current configuration file:
+`nano ~/.config/terminator/config`
+
+You need to define a layout. Terminator allows you to define custom layouts in the `[layouts]` section. Paste a structure similar to this, modifying it to your needs:
+
+```ini
+[layouts]
+  [[default]]
+    [[[child1]]]
+      type = Window
+      parent = ""
+    [[[child2]]]
+      type = Terminal
+      parent = child1
+    # You would expand this tree to create your 4-way split
+  [[parrot_layout]]
+    # Add your 4-split configuration here
+    # You can define "command" = "neofetch" or similar under each terminal
+    # to make it load the ParrotSec logo/info automatically.
+
+```
+
+**Tip:** The easiest way to get the exact syntax for your 4-way split is to open Terminator, manually arrange your windows exactly how you want them, right-click anywhere, select **Preferences** > **Layouts**, and click **Add**. Save it as `parrot_layout`.
+
+---
+
+### 2. Configure Command Execution on Startup
+
+To ensure the bottom terminals automatically run the "ParrotSec" command (or show the splash screen), find the specific terminal entry in your `~/.config/terminator/config` file under your new layout and add the `command` line:
+
+```ini
+[[[terminal1]]]
+  type = Terminal
+  parent = child2
+  command = neofetch  # Replace with the actual command you use to show the logo
+
+```
+
+---
+
+### 3. Setup Keyboard Shortcuts
+
+Since you want `Ctrl+Alt+T` to stay as it is (a single window) and perhaps use another shortcut (like `Alt+T`) for your custom layout, you need to define two different launch commands in your Desktop Environment's shortcut settings (e.g., GNOME/MATE Settings > Keyboard > Shortcuts).
+
+#### Command A (Default - Single Window):
+
+```bash
+terminator
+
+```
+
+#### Command B (Your Custom 4-Way Layout):
+
+```bash
+terminator -l parrot_layout
+
+```
+
+* **`terminator -l <layout_name>`**: This flag tells Terminator to ignore the default layout and load the specific one you saved in step 1.
+
+---
+
+### Summary Checklist
+
+1. **Arrange** your 4 terminals manually in Terminator.
+2. **Save** that arrangement as a layout named `parrot_layout` via Preferences.
+3. **Edit** the config file to add `command = <your_command>` to the specific terminal child nodes you want to auto-populate.
+4. **Assign** `terminator -l parrot_layout` to a new keyboard shortcut (like `Alt+T`) in your system's Keyboard Shortcut settings.
+
+By mapping the standard `Ctrl+Alt+T` to just `terminator` and your new shortcut to the layout flag, you will have exactly the behavior you described.
+
+Since you enjoy customizing your setup, are you interested in learning how to use **Terminator Profiles** to change the background colors or transparency for those specific terminal splits as well?
+
+
+To prevent a terminal from closing immediately after running a command, you need to tell the shell to stay open and keep the interactive session running after your script/command executes.
+
+### 1. Fixing the Auto-Closing Terminals
+
+When you use `command = neofetch` or `command = ls`, Terminator runs that specific command and then terminates the process, which closes the window.
+
+To keep the terminal open, you need to chain the command with an interactive shell. Modify your configuration under the `[layouts]` section for those specific terminals:
+
+Instead of just:
+`command = neofetch`
+
+Use:
+`command = neofetch; zsh`
+*(Or `bash` if you prefer that over `zsh`)*.
+
+**How it works:** The semicolon `;` tells the terminal to run your command, and once it finishes, immediately spawn the `zsh` shell. Since the shell is an interactive process, the terminal will stay open.
+
+---
+
+### 2. Creating the Custom Launcher
+
+To ensure you can launch the default single window versus your 4-way split, you should create a desktop shortcut or a simple alias.
+
+#### Option A: The "Alias" approach (Easiest)
+
+Add these to your `~/.zshrc` file:
+
+```bash
+# Default launch
+alias term='terminator'
+
+# Parrot Layout launch
+alias termp='terminator -l parrot-layout'
+
+```
+
+Now, simply typing `termp` in your terminal will open the specific layout you configured.
+
+#### Option B: Keyboard Shortcut
+
+Since you want `Ctrl+Alt+T` to stay standard, go to your **System Settings > Keyboard > Shortcuts** and create a new custom shortcut:
+
+1. **Name:** `Terminator Layout`
+2. **Command:** `terminator -l parrot-layout`
+3. **Shortcut:** Set this to something else, like `Super+T` or `Alt+T`.
+
+---
+
+### Pro-Tip: "Run on Startup" in Profile
+
+If you find the `command` field in the layout file is finicky, there is another way to achieve this:
+
+1. Open **Terminator Preferences**.
+2. Go to the **Profiles** tab.
+3. Create a new profile called `ParrotProfile`.
+4. In the **Command** tab within that profile, check **"Run command as a login shell"** or put your script/command in the **"Custom command"** box.
+5. In your `layout` config file, just change `profile = default` to `profile = ParrotProfile` for the terminals you want to customize. This is often cleaner than hard-coding commands in the layout file.
+
+Does this solve the closing window issue, or would you like to refine the startup commands further?
+
+To ensure your commands (like `ls` or `pwd`) run *and then* leave you at an active command prompt where your shell environment (and thus your `alias` definitions) is loaded, you need to use a specific syntax in your Terminator configuration.
+
+### The Solution: Using `bash -c` or `zsh -i -c`
+
+Terminator’s `command` field executes a process and exits. To keep the shell alive and interactive, you need to invoke the shell as an interactive login shell after your command finishes.
+
+Modify your `~/.config/terminator/config` file under the `[layouts]` section for your specific terminals:
+
+```ini
+    [[[terminal6]]]
+      type = Terminal
+      parent = child5
+      order = 0
+      profile = default
+      # This runs neofetch, then hands over to an interactive zsh
+      command = "neofetch; zsh" 
+
+    [[[terminal7]]]
+      type = Terminal
+      parent = child5
+      order = 1
+      profile = default
+      # This runs ls and pwd, then hands over to an interactive zsh
+      command = "ls; pwd; zsh"
+
+```
+
+### Why this works
+
+* **The Command Chain:** By using the semicolon `;`, you tell the terminal to execute the first part (`ls`) and, regardless of its success, move to the next part (`zsh`).
+* **The Interactive Shell:** By calling `zsh` (or `bash`) at the end, you force the terminal to spawn a **new interactive subshell**. Because it is interactive, it will automatically source your `.zshrc` (or `.bashrc`) file, which is where your Parrot Security SSH aliases are defined.
+
+---
+
+### Alternative: The "Profiles" Method (Cleaner)
+
+If you find that the command string in the layout file is acting up with your specific shell environment, the most robust way to do this is to move the logic to a **Profile**:
+
+1. Open **Terminator Preferences**.
+2. Go to the **Profiles** tab and create a new profile named `ParrotEnv`.
+3. Click the **Command** tab within that profile.
+4. Check the box: **"Run command as a login shell"**.
+5. In the "Custom command" box, enter: `neofetch && zsh` (or your preferred command).
+6. In your `~/.config/terminator/config` file, simply change the `profile` line for terminal 6 and 7 to:
+`profile = ParrotEnv`
+
+Using the Profile approach is generally better because it keeps your layout file clean and separates the *appearance* (which layout) from the *behavior* (what happens when it opens).
+
+Does the session stay open now when you use the `; zsh` syntax, or are you still seeing it drop back to the main prompt?
