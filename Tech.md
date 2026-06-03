@@ -30325,3 +30325,221 @@ If you find that the command string in the layout file is acting up with your sp
 Using the Profile approach is generally better because it keeps your layout file clean and separates the *appearance* (which layout) from the *behavior* (what happens when it opens).
 
 Does the session stay open now when you use the `; zsh` syntax, or are you still seeing it drop back to the main prompt?
+
+##Checking file size using ls
+ls -lh "/media/hulbert/LINUX_DATA/mnt/VirtualBox VMs/WINDOWS 10 - ENTERPRISE/Windows10-Enterprise.vdi"
+
+##Removing snap leftovers
+When trying to free up space from `snap`, the most effective strategy isn't necessarily removing individual apps (like you did with `leafpad`), but **removing the hidden, older versions of snaps that the system keeps for rollbacks.**
+
+By default, `snap` keeps at least two versions of every package, which accumulates significant disk usage over time.
+
+### The Immediate Solution: Clean Up Old Revisions
+
+You do not need to uninstall apps to save space. You can safely remove the "disabled" revisions of your installed snaps.
+
+To reclaim that space, run this command in your terminal:
+
+```bash
+# This script identifies disabled snaps and removes their old revisions
+set -eu
+snap list --all | awk '/disabled/{print $1, $3}' |
+    while read snapname revision; do
+        sudo snap remove "$snapname" --revision="$revision"
+    done
+
+```
+
+---
+
+### Important Considerations
+
+* **`core` / `coreXX` packages:** You have several versions of `core` (core, core18, core20, core22, core24). These are base runtimes required by different applications. **Do not remove these manually.** They are essential for your system and the applications that depend on them.
+* **Snap Snapshots:** When you ran `snap remove leafpad`, your terminal noted `(snap data snapshot saved)`. Snap saves a snapshot of your user data in `/var/lib/snapd/snapshots/` in case you decide to reinstall. To reclaim space from these leftovers, run:
+* `sudo snap forget <snapshot-id>` (to remove a specific one)
+* `sudo rm -rf /var/lib/snapd/snapshots/*` (to clear all saved snapshots)
+
+
+
+### How to Monitor Disk Usage
+
+If you are still low on space, it is helpful to visualize where the bulk of your storage is actually going, rather than guessing.
+
+1. **Check Snap directory size:** `du -sh /var/lib/snapd/snaps/`
+2. **Check overall directory usage:**
+`ncdu /` (If not installed, use `sudo apt install ncdu`. It provides an interactive interface to navigate and delete large files).
+
+**Recommendation:** After running the "Clean Up" script above, you will likely see a significant improvement. If you continue to struggle with space, please run `df -h` and provide the output so I can see if the issue is with your root partition or a specific mount point.
+
+It looks like you are attempting to use `ddrescue` on individual files (by using `*`), which is why you received the "Too many files" error.
+
+**`ddrescue` is not designed to copy individual files.** It operates at the "block level," meaning it clones an entire drive or partition, bit-by-bit, to create an image file. This is the correct way to handle failing hardware because it ignores the filesystem's structure to bypass errors.
+
+### The Correct Way to Use `ddrescue`
+
+To extract data from a dead memory card, you need to target the **device path** (e.g., `/dev/sdb`), not the files visible when it is mounted.
+
+#### 1. Identify the Device
+
+First, find out exactly which device your memory card is. Run:
+
+```bash
+lsblk
+
+```
+
+Look for the size of your memory card (e.g., 16G, 32G). It will be something like `/dev/sdb` or `/dev/sdc`. **Be extremely careful:** If you pick the wrong one, you could wipe your own hard drive.
+
+#### 2. Perform the Rescue
+
+Assuming your memory card is `/dev/sdb`, run the command like this:
+
+```bash
+# Syntax: sudo ddrescue -d -r3 <source_device> <destination_image_file> <mapfile>
+sudo ddrescue -d -r3 /dev/sdb /media/hulbert/WINDOWS_DATA/dead-memcard/recovery.img /media/hulbert/WINDOWS_DATA/dead-memcard/recovery.map
+
+```
+
+* **`/dev/sdb`**: Your failing memory card (use the whole device, not a partition like `/dev/sdb1`).
+* **`recovery.img`**: The file where your data will be saved.
+* **`recovery.map`**: A critical file that tracks progress. If the power fails or the card disconnects, you can run the exact same command again, and `ddrescue` will pick up exactly where it left off.
+
+---
+
+### What to do after the image is created
+
+Once `ddrescue` finishes, you will have a `.img` file. This is a perfect clone of the card. You do **not** work on the physical card anymore. Instead, you use recovery tools on the image file itself:
+
+1. **Mounting the image**: You can often mount the image directly to see if the filesystem is still readable:
+`sudo mount -o loop /media/hulbert/WINDOWS_DATA/dead-memcard/recovery.img /mnt`
+2. **Using `TestDisk` or `PhotoRec**`: If the image doesn't mount (meaning the filesystem is too corrupt), use `testdisk` or `photorec` on the image file:
+`testdisk /media/hulbert/WINDOWS_DATA/dead-memcard/recovery.img`
+
+**Warning:** Since the card is "dead," it may disconnect during the process. If it does, just plug it back in and run the exact same `ddrescue` command again. It will use the mapfile to resume reading from the last successful point.
+
+Would you like me to walk you through how to use `testdisk` on the resulting image file once the cloning is complete?
+
+The error "wrong fs type, bad option, bad superblock" is very common when working with failing hardware. It means `ddrescue` successfully created an image, but the **filesystem structure** on the card is too damaged to be "mounted" normally.
+
+Since you cannot mount it, you must move to the next layer: **Data Carving**. Instead of trying to read the filesystem, you need to scan the raw data for file headers (like JPEGs, PDFs, or Docs).
+
+### 1. Use TestDisk to Recover Partition Structure
+
+Before going to deep carving, check if the partition table itself can be repaired.
+
+1. Run: `testdisk /media/hulbert/WINDOWS_DATA/dead-memcard/recovery.img`
+2. Select **Create** (to create a log file).
+3. Select the disk (the image file).
+4. Select the partition table type (usually **Intel/PC** for SD cards).
+5. Select **Analyse** -> **Quick Search**.
+
+If `testdisk` finds your files, it can list them and copy them out to a healthy location.
+
+### 2. Use PhotoRec for Raw File Recovery
+
+If `testdisk` fails, use **PhotoRec**. It ignores the filesystem entirely and looks for raw data signatures. This is the "gold standard" for dead media.
+
+Run this command:
+
+```bash
+photorec /media/hulbert/WINDOWS_DATA/dead-memcard/recovery.img
+
+```
+
+* **Follow the prompts:** Choose the image file, select a destination folder (make sure it's on a *different* disk, not the one containing `recovery.img`), and let it run.
+* **Expect many files:** PhotoRec will rename everything (e.g., `f12345.jpg`). You will have to sort through them later, but your data will be extracted.
+
+### 3. Check for Hardware Errors (Important)
+
+If you want to know *why* it failed, check the kernel log as the error message suggested. Run:
+
+```bash
+dmesg | tail -n 20
+
+```
+
+Look for lines containing `I/O error` or `Buffer I/O error`. If you see these, it confirms that your `recovery.img` may have "holes" (areas of zeros) where `ddrescue` couldn't read the physical card. If the data you need was in those specific sectors, it may be permanently lost, but PhotoRec will retrieve everything else that was successfully cloned.
+
+**A quick tip for the future:** If `testdisk` and `photorec` both fail, the data may be trapped in those unreadable sectors. Since you have a `recovery.map` file from your `ddrescue` run, you can try to run `ddrescue` one more time with a slower, more aggressive retry pass to see if it can grab those last bits of data, though this can sometimes stress a failing card further.
+
+Are you getting any specific errors inside the `testdisk` or `photorec` interfaces, or are they unable to find any partitions at all?
+##Deleting docker volumes manually
+└──╼[ZERODIUM]# docker volume ls -q
+9968d0213439073e0c455c08c101e25aae4b7bcd4121fe6c816e77dbf07a1348
+9205623b34e64f3a7a294dea872c29e7e87b5ac4f6349fae44f39f1f3da7e8b3
+vii-web-main_postgres_data
+vii-web_postgres_data
+vii_jasmin_data
+vii_letsencrypt_data
+vii_mariadb_data
+vii_monitoring_data
+vii_nginx_data
+vii_postgres_data
+┌──[Thu Jun 04 12:03:13 AM][root@Z3r0S3C]─[~/Eternalblue-Doublepulsar-Metasploit]
+└──╼[ZERODIUM]# docker volume rm `docker volume ls -q`
+9968d0213439073e0c455c08c101e25aae4b7bcd4121fe6c816e77dbf07a1348
+9205623b34e64f3a7a294dea872c29e7e87b5ac4f6349fae44f39f1f3da7e8b3
+vii-web-main_postgres_data
+vii-web_postgres_data
+vii_jasmin_data
+vii_letsencrypt_data
+vii_mariadb_data
+vii_monitoring_data
+vii_nginx_data
+vii_postgres_data
+┌──[Thu Jun 04 12:03:21 AM][root@Z3r0S3C]─[~/Eternalblue-Doublepulsar-Metasploit]
+└──╼[ZERODIUM]# 
+
+
+#more docker cleanups
+The reason `docker system prune` is not removing those volumes is that **Docker only prunes volumes that are not currently being used by any container.**
+
+If you have containers that were created using these volumes—even if those containers are currently stopped—the volumes will remain on your system to prevent data loss.
+
+### How to Clean Them
+
+#### 1. Identify and Remove Unused Containers
+
+First, ensure all stopped containers are removed, as they might be locking those volumes:
+
+```bash
+docker container prune -f
+
+```
+
+#### 2. Remove Specific Unused Volumes
+
+If you know for certain that you no longer need the data in those volumes, you must remove them explicitly by name. Since `docker system prune` did not catch them, they are likely still associated with containers (even if those containers are stopped).
+
+To list all volumes and see which ones are "dangling" (not used by any container):
+
+```bash
+docker volume ls -f dangling=true
+
+```
+
+To remove **all** volumes that are not currently used by a running container:
+
+```bash
+docker volume prune
+
+```
+
+#### 3. The "Nuclear" Option (Force Remove)
+
+If you want to remove a specific volume that is still being held by a container, you must first remove the container using that volume. If you want to clear **everything** and start fresh, run these commands in order:
+
+1. **Stop all containers:** `docker stop $(docker ps -aq)`
+2. **Remove all containers:** `docker rm $(docker ps -aq)`
+3. **Remove all volumes:** `docker volume prune -f`
+4. **Remove all networks:** `docker network prune -f`
+
+---
+
+### Important Note on Your Environment
+
+Looking at your output, you have many volumes labeled `vii_...` (e.g., `vii_postgres_data`, `vii_redis_data`). These appear to be persistent data stores for a specific application or stack (likely a `docker-compose` project).
+
+* **Warning:** If you remove these volumes, **you will lose all data stored in those databases.** * If this is a development environment, you can safely remove them. If this is a production or testing environment where you need that data, **do not remove them.**
+
+Are you trying to perform a clean reinstall of your environment, or are you just trying to free up disk space?
