@@ -30543,3 +30543,10 @@ Looking at your output, you have many volumes labeled `vii_...` (e.g., `vii_post
 * **Warning:** If you remove these volumes, **you will lose all data stored in those databases.** * If this is a development environment, you can safely remove them. If this is a production or testing environment where you need that data, **do not remove them.**
 
 Are you trying to perform a clean reinstall of your environment, or are you just trying to free up disk space?
+
+##Managing user services 
+To view all systemd user services, you cannot use the old SysVinit --status-all syntax. Instead, you must use systemctl --user list-units --type=service to see all currently loaded and active user services.View Active User ServicesTo display a list of user services that are currently loaded and running, active, or failed:bashsystemctl --user list-units --type=service
+View All User Services (Including Inactive)To view every loaded user service unit regardless of its active state:bashsystemctl --user list-units --type=service --all
+View Installed User Service FilesTo see the full configuration state (enabled, disabled, or masked) of all user service files stored on disk:bashsystemctl --user list-unit-files --type=service
+Key Differences from System CommandsNo sudo needed: Managing your own user-level services requires no root privileges.Do not use sudo with --user: Running sudo systemctl --user will attempt to check the root user's user-space services, which usually errors out or shows unexpected results.
+
