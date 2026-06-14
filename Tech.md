@@ -30685,3 +30685,5 @@ How to auto-start this when I boot my PC
 
 Automate opening terminals for these projects
 
+##Proper keyboard shortcut for opening mozilla firefox and mobing window
+sh -c 'firefox http://b2b.django/en/ http://remacode.local/ http://laravel.local/ http://shopping.local/ http://wallet.local/ http://callcompany.local/ & sleep 3 && wmctrl -r "Mozilla Firefox" -t 2'
