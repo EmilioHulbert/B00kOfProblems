@@ -30757,3 +30757,24 @@ sudo iptables -t nat -L POSTROUTING --line-numbers
 iptables -A FORWARD -i wg0 -o ens5 -j ACCEPT
 iptables -A FORWARD -i ens5 -o wg0 -j ACCEPT
 iptables -L
+
+##Fast multiple mount and unmount on linux filesystem and using --bind and chroot
+# 1. Mount the target Linux root
+sudo mount /dev/sda5 /mount
+
+# 2. Mount the Windows partition so it is visible inside the chroot
+sudo mkdir -p /mount/media/win
+sudo mount /dev/sda2 /mount/media/win
+
+# 3. Bind the system directories
+for dir in /dev /dev/pts /proc /sys /run; do sudo mount --bind $dir /mount$dir; done
+
+# 4. Enter the chroot
+sudo chroot /mount
+
+
+exit
+# Now unmount everything cleanly
+sudo umount /mount/media/win
+for dir in /run /sys /proc /dev/pts /dev; do sudo umount /mount$dir; done
+sudo umount /mount
