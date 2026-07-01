@@ -30721,3 +30721,9 @@ require_once('/var/www/html/wordpress/wp-load.php');
 echo wp_hash_password('yourpasswordhere');
 
 
+##Multi activating wordpress plugins
+for plugin in $(sudo -u www-data wp plugin list --status=inactive --format=csv --path=/var/www/html/wordpress |tail -n +2 |cut -d',' -f1); do
+    echo "Activating $plugin..."
+    sudo -u www-data wp plugin activate $plugin --path=/var/www/html/wordpress
+done
+
