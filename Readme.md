@@ -30705,3 +30705,19 @@ users:
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCom08ftZy9v/4b0OeIrLTDyAkAnaSPACnvkhLgZqEpMfB8w8yEyDOewDLLGpTsoBk9gPkLxQzJgxUE646HVN5fVT4jJgHEmonQ5mnEggDq3fLMjMZXm/VmktUC/AMK4+yy1GLASg1WHWsnloPo/qXUKCJ2G+/CLTJvZ294rQdkKzQUB2LlrLKBfLrTH0DieviMlB1kSVAbrhzsB1sWC7tc5pl09vyNCK2Q5QtxVhoQjAeDcqSoETBaQxiIOo/jlSoBauGtDE7c4w4fVG0JTPMPEQXFYLDk4jutwV8NiXHmnmaDyee54zyOsRMIlFyMUd7E/FKkuGwEHUgzrituWfeF
 
 Save the user data and Start your instance.Log in using your new private key. Once connected, stop the instance again, clear the User Data box for security, and restart it.
+
+#deactivating wordpress plugins using wp
+sudo -u www-data wp plugin deactivate --all
+
+##More on firefox and keyboard shortcuts
+sh -c 'firefox http://b2b.django/en/ http://remacode.local/ http://laravel.local/ http://shopping.local/ http://wallet.local/ http://callcompany.local/ http://kefstan-associates.local/ http://nashtechke-website.local/ http://nashtechke-design-brief.local/ http://nashtechke-campaign.local/ http://techlane-landing-page.local http://wordpress.local & sleep 3 && wmctrl -r "Mozilla Firefox" -t 2'
+
+##Uisng your own wordpress passgen in php
+http://localhost/wp-passgen.php
+contents of file would be
+<?php
+//require_once('/var/www/html/wordpress/wp-includes/pluggable.php');
+require_once('/var/www/html/wordpress/wp-load.php');
+echo wp_hash_password('yourpasswordhere');
+
+
