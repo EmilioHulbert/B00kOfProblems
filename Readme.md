@@ -30727,3 +30727,6 @@ for plugin in $(sudo -u www-data wp plugin list --status=inactive --format=csv -
     sudo -u www-data wp plugin activate $plugin --path=/var/www/html/wordpress
 done
 
+
+#Firefox multi tab opener
+sh -c 'firefox http://b2b.django/en/ http://remacode.local/ http://laravel.local/ http://shopping.local/ http://wallet.local/ http://callcompany.local/ http://kefstan-associates.local/ http://nashtechke-website.local/ http://nashtechke-design-brief.local/ http://nashtechke-campaign.local/ http://techlane-landing-page.local http://wordpress.local & sleep 3 && wmctrl -r "Mozilla Firefox" -t 2'
