@@ -30730,3 +30730,30 @@ done
 
 #Firefox multi tab opener
 sh -c 'firefox http://b2b.django/en/ http://remacode.local/ http://laravel.local/ http://shopping.local/ http://wallet.local/ http://callcompany.local/ http://kefstan-associates.local/ http://nashtechke-website.local/ http://nashtechke-design-brief.local/ http://nashtechke-campaign.local/ http://techlane-landing-page.local http://wordpress.local & sleep 3 && wmctrl -r "Mozilla Firefox" -t 2'
+
+##Iptables commands for traffic flow on remote server when setting up wireguard
+iptables -A FORWARD -i wg0 -o ens5 -j ACCEPT
+iptables -A FORWARD -i ens5 -o wg0 -j ACCEPT
+
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+  iptables -t nat -A POSTROUTING -o ens5 -j MASQUERADE
+  iptables -A FORWARD -i wg0 -o ens5 -j ACCEPT
+
+  sudo iptables -t nat -L POSTROUTING --line-numbers
+
+
+
+ iptables -L
+ history |grep iptables
+iptables -L
+sudo iptables -t nat -A POSTROUTING -o ens5 -j MASQUERADE
+apt install iptables-persistent
+sudo iptables -t nat -A POSTROUTING -o ens5 -j MASQUERADEip ens5
+iptables -L
+iptables -L -A
+iptables -A
+iptables -L -t nat
+sudo iptables -t nat -L POSTROUTING --line-numbers
+iptables -A FORWARD -i wg0 -o ens5 -j ACCEPT
+iptables -A FORWARD -i ens5 -o wg0 -j ACCEPT
+iptables -L
