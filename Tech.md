@@ -30778,3 +30778,6 @@ exit
 sudo umount /mount/media/win
 for dir in /run /sys /proc /dev/pts /dev; do sudo umount /mount$dir; done
 sudo umount /mount
+
+##prefix that prevents user root from login in eve with right key
+no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"admin\" rather than the user \"root\".';echo;sleep 10;exit 142" ssh-rsa AAAAB3Nzkey.....
