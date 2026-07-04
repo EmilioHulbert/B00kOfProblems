@@ -16561,6 +16561,7 @@ echo $USER
 codium --user-data-dir=/home/hulbert/.config/VSCodium
 checking for settings file within !/.config
 find ~ -type f -name "settings.json" 2>/dev/null | grep VSCodium
+#usually path is /home/remac/.config/Visual\ Studio\ Code
 
 settings.json should have 
 {
@@ -30781,3 +30782,90 @@ sudo umount /mount
 
 ##prefix that prevents user root from login in eve with right key
 no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"admin\" rather than the user \"root\".';echo;sleep 10;exit 142" ssh-rsa AAAAB3Nzkey.....
+
+##Renaming Virtualbox paths to match username after altering home users name
+──╼[REMAC]# find . -type f -exec sed -i 's/hulbert/remac/g;' {} +
+┌──[Thu Jul 02 12:18:32 PM][root@Intel5]─[/home/remac/.config/VirtualBox]
+└──╼[REMAC]
+
+
+##caa style mounting
+When you use a file manager like **Caja** (the default in MATE), it uses a service called `udisks2` to handle mounting. This service automatically creates a mount point directory for you—usually based on the drive's label—so you don't have to create it manually.
+
+When you run the `mount` command manually, you are bypassing this automation. You are required to provide an **existing** directory as the mount point; the command will fail or behave unexpectedly if that folder does not already exist.
+
+To achieve the behavior you see in Caja (where the system creates the directory for you) from the command line, you should use `udisksctl`.
+
+### The "Caja-style" Command
+
+Instead of the standard `mount` command, use the `udisksctl` utility. It interfaces with the same system services that Caja uses:
+
+```bash
+udisksctl mount --block-device /dev/disk/by-uuid/b6975a27-d201-4cc1-8f96-e5668e5c5a3e
+
+```
+
+**Why this is better for your use case:**
+
+* **Automatic Directory Creation:** It will automatically create the necessary directory (e.g., `/media/username/LINUX_DATA`) just like clicking the drive in Caja does.
+* **No `sudo` needed:** Because `udisksctl` works at the user session level, you generally do not need to be root to run it.
+* **Permissions:** It handles user-space permissions automatically, meaning your current user will have the necessary read/write access to the files.
+
+---
+
+### If you prefer to keep using `mount` manually
+
+If you still want to use the `mount` command, you **must** create the directory first, or the kernel will have nowhere to attach the filesystem. You can automate this in a single line:
+
+```bash
+sudo mkdir -p /media/remac/LINUX_DATA && sudo mount /dev/disk/by-uuid/b6975a27-d201-4cc1-8f96-e5668e5c5a3e /media/remac/LINUX_DATA
+
+```
+
+### Summary of Differences
+
+| Method | Creates Folder? | Requires `sudo`? | Best for... |
+| --- | --- | --- | --- |
+| **Caja/GUI** | Yes | No | Casual daily use |
+| **`udisksctl`** | **Yes** | **No** | **Scripting "Caja-like" behavior** |
+| **`mount`** | No | Yes | Static, permanent system mounts |
+
+**Recommendation:** Use `udisksctl mount --block-device ...` to replicate the exact behavior you are seeing in your file manager.
+
+Are you looking to use this in a script for backups, or are you just trying to get quick access to the drive via terminal?
+
+To run a command as a different user (like `remac`) while you are currently logged in as `root`, you should use the **`su -c`** syntax.
+
+The error you received occurred because `su` interprets everything after the username as a command to be executed by the new shell, and it treats `--block-device` as an argument for the `su` command itself, which doesn't recognize it.
+
+### The Correct Command
+
+Run this from your root terminal:
+
+```bash
+su - remac -c "udisksctl mount --block-device /dev/disk/by-uuid/b6975a27-d201-4cc1-8f96-e5668e5c5a3e"
+
+```
+
+### Breakdown of the command:
+
+* **`su - remac`**: Switches to the user `remac` and starts a login shell (which loads their environment variables).
+* **`-c`**: Tells `su` that the next part is the command to run.
+* **`"..."`**: The command (including all its arguments) must be wrapped in quotes so that `su` passes the entire string to the shell of the user `remac`.
+
+---
+
+### Important Notes:
+
+1. **Mount Location:** When using `udisksctl`, it will **not** mount to `/media/remac/`. Instead, it will follow the system convention and mount the drive to a directory inside `/run/media/remac/` (the exact name will be based on the drive's label or UUID).
+2. **Permissions:** Because you are executing this as the user `remac`, the mount will be owned by that user, which is exactly what you want for daily tasks.
+3. **Why `sudo` is usually preferred:** If you are in a script, you might find it cleaner to use `sudo` if your user has permission:
+```bash
+sudo -u remac udisksctl mount --block-device /dev/disk/by-uuid/b6975a27-d201-4cc1-8f96-e5668e5c5a3e
+
+```
+
+
+This avoids the extra complexity of `su` and generally works more reliably within scripts.
+
+Are you planning to run this inside your `backupsys.sh` script, or do you just need to trigger this mount manually from the CLI?
