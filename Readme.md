@@ -30869,3 +30869,100 @@ sudo -u remac udisksctl mount --block-device /dev/disk/by-uuid/b6975a27-d201-4cc
 This avoids the extra complexity of `su` and generally works more reliably within scripts.
 
 Are you planning to run this inside your `backupsys.sh` script, or do you just need to trigger this mount manually from the CLI?
+
+##Reprobe to poweron a poweroff drive
+When you reboot, the BIOS/UEFI initializes the USB controllers from scratch. It physically sends a power signal to all ports and waits for the hardware to announce its presence. When you use `udisksctl power-off`, you bypass the software layer and send a command to the hardware controller to **cut power to that specific port**—the firmware essentially ignores that port until it is power-cycled.
+
+If you are a "power user" and want to force a re-initialization without a full system reboot, you have to target the **PCI subsystem** that controls your USB controllers.
+
+### The "Power User" Method: PCI Rescan
+
+Your USB hubs are PCI devices. Instead of looking for `scsi_host` (which is gone), you need to tell the kernel to reset the **USB Host Controller (xHCI)**.
+
+1. **Find the PCI address of your USB controller:**
+```bash
+lspci | grep USB
+
+```
+
+
+You will see something like `00:14.0 USB controller: Intel Corporation ... (rev xx)`.
+2. **Unbind and Rebind the Controller (The "Hard Reset"):**
+*Warning: This will disconnect ALL USB devices on that controller (mouse, keyboard, etc.) for a few seconds.*
+```bash
+# Unbind the controller
+echo "0000:00:14.0" | sudo tee /sys/bus/pci/drivers/xhci_hcd/unbind
+
+# Wait a moment for the hardware to settle
+sleep 3
+
+# Bind the controller back
+echo "0000:00:14.0" | sudo tee /sys/bus/pci/drivers/xhci_hcd/bind
+
+```
+
+
+*(Note: Replace `0000:00:14.0` with the actual ID you found in the `lspci` command.)*
+
+### Why this works where `scsi_host` failed
+
+* **`scsi_host/scan`** only works if the hardware is powered and talking to the kernel.
+* **`unbind/bind`** tells the Linux kernel driver to dump the existing state of the USB controller, clear its memory, and force it to re-run the hardware discovery routine. This is the closest you can get to a "reboot" of a single hardware component.
+
+### Important Caveats for Power Users:
+
+* **The "Power Off" state:** Some laptops have hardware-level power-management circuitry (PMIC). If the `power-off` command triggered a low-level firmware sleep state, even the `bind` command might fail because the electrical power to the port is physically cut at the circuit level. If this happens, only a physical re-plug or a full ACPI reset (Reboot) can restore power.
+* **Safety:** Do not do this while the system is writing to other disks or performing sensitive I/O. Forcing a rebind of the xHCI controller is aggressive.
+
+If this `unbind/bind` procedure does not cause your `lsusb` to show the drive again, it confirms that your laptop's firmware has entered a "deep power-off" state that ignores software commands, and you will have to physically unplug/replug the drive to reset the circuit.
+
+Did the `unbind/bind` command show any signs of life in your `dmesg` output (check it with `dmesg | tail -n 20`) after you ran it?
+
+Based on your `lspci` output, your USB controller address is **`0000:00:14.0`**.
+
+Since you are a power user, here is the exact sequence to try to wake the port.
+
+### The "Force Rebind" Sequence
+
+Run these commands in order. **Important:** If your keyboard or mouse is also on the USB controller, they will stop responding for a few seconds during this process.
+
+```bash
+# 1. Unbind the controller to force a state dump
+echo "0000:00:14.0" | sudo tee /sys/bus/pci/drivers/xhci_hcd/unbind
+
+# 2. Wait for the hardware to power cycle
+sleep 5
+
+# 3. Bind the controller back to trigger hardware discovery
+echo "0000:00:14.0" | sudo tee /sys/bus/pci/drivers/xhci_hcd/bind
+
+```
+
+### How to verify if it worked
+
+Immediately after running the `bind` command, check for two things:
+
+1. **Check for device arrival:**
+```bash
+dmesg | grep -i usb | tail -n 20
+
+```
+
+
+Look for lines mentioning `new SuperSpeed USB device` or `Mass Storage`. If you see these, the hardware has successfully re-initialized.
+2. **Verify with `lsusb`:**
+```bash
+lsusb
+
+```
+
+
+
+### Why this might still fail
+
+Even with this low-level command, if `udisksctl power-off` sent an **ACPI Power State (D3cold)** command to the USB controller, the firmware may have completely cut the 5V power line to that specific port.
+
+* **If it works:** The controller re-initializes, and the OS "sees" the drive as if you just plugged it in.
+* **If it fails:** The controller comes back, but the *drive itself* remains in a "dead" power state because the port is not providing power. If this happens, it is definitively a physical power-state lock, and you will have to unplug the drive to physically break the circuit and restore power.
+
+Does running the unbind/bind sequence bring the drive back, or does the system stay silent even after the controller restarts?
