@@ -31025,3 +31025,6 @@ Did the `find` command help you locate the file, or are you still seeing the err
 
 #Downloaading mp3 from unusual sites using yt-dlp
 yt-dlp -x --audio-format mp3 "https://mofity.com/track/hqPcFk2wrOD9uvw?lang=dutch"
+
+#Checking git remote settings
+git remote -v
