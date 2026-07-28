@@ -31022,3 +31022,6 @@ I noticed in your prompt that you are currently acting as **`root`** inside your
 Running development tools (like `vi`, `npm`, or `composer`) as `root` is generally discouraged because it can lead to file permission issues, where files created by `root` become unreadable or unwritable by your normal user account (`remac`). It is best practice to run these commands as your standard user and use `sudo` only when strictly necessary for system-wide installations.
 
 Did the `find` command help you locate the file, or are you still seeing the error message when you try to open a file?
+
+#Downloaading mp3 from unusual sites using yt-dlp
+yt-dlp -x --audio-format mp3 "https://mofity.com/track/hqPcFk2wrOD9uvw?lang=dutch"
