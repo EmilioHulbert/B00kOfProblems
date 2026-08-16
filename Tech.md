@@ -31028,3 +31028,24 @@ yt-dlp -x --audio-format mp3 "https://mofity.com/track/hqPcFk2wrOD9uvw?lang=dutc
 
 #Checking git remote settings
 git remote -v
+
+##Oppo
+uninstalling system package athena removes close all functionality, so to restore it,do:
+─[root@Intel5]─[/home/remac]
+└──╼ #adb shell cmd package install-existing com.oplus.athena
+Package com.oplus.athena installed for user: 0
+┌─[root@Intel5]─[/home/remac]
+└──╼ #adb shell cmd appops set com.oplus.athena WRITE_SETTINGS ignore
+┌─[root@Intel5]─[/home/remac]
+└──╼ #adb shell settings put global transition_animation_scale 0.0
+┌─[root@Intel5]─[/home/remac]
+└──╼ #adb shell settings put global window_animation_scale 0.0
+┌─[root@Intel5]─[/home/remac]
+└──╼ #adb shell settings put global window_animation_scale 0.0^C
+┌─[✗]─[root@Intel5]─[/home/remac]
+└──╼ #adb shell settings put global animator_duration_scale 0.0
+┌─[root@Intel5]─[/home/remac]
+└──╼ #
+##samml quotes
+unapologetically black
+i am my ancestors wildest dreams
