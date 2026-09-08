@@ -31049,3 +31049,6 @@ Package com.oplus.athena installed for user: 0
 ##samml quotes
 unapologetically black
 i am my ancestors wildest dreams
+
+##Full bluetooth parrot issue fix
+https://chatgpt.com/c/6aa02c48-c958-83e9-bad2-3b950fe7b1e0
