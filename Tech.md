@@ -31051,4 +31051,5 @@ unapologetically black
 i am my ancestors wildest dreams
 
 ##Full bluetooth parrot issue fix
+#Always remember it is archived
 https://chatgpt.com/c/6aa02c48-c958-83e9-bad2-3b950fe7b1e0
