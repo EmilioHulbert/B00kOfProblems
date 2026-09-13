@@ -31056,3 +31056,5 @@ https://chatgpt.com/c/6aa02c48-c958-83e9-bad2-3b950fe7b1e0
 
 #(Direct Command Execution) using aircrack-ng to crack passwords from lan machine wordlist
 ssh user@192.168.56.4 "cat /usr/share/wordlists/rockyou.txt" | aircrack-ng -w - misscado-01.cap -b 50:0F:F5:99:7A:50
+#oraclebox guest additions
+https://download.virtualbox.org/virtualbox/7.1.6/
