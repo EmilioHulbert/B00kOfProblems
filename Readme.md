@@ -31061,3 +31061,91 @@ https://download.virtualbox.org/virtualbox/7.1.6/
 
 ##keyboard shortcut to put quotation mark at start and end of a line in codium instead of copy pasting
 There is no single native keyboard shortcut to wrap an entire line in quotes in VSCodium, but you can do it quickly using multiple cursors. [1] (https://www.reddit.com/r/vscode/comments/fep0mo/is_there_a_way_to_add_quotes_to_the_start_and_end/)How to Add Quotes to Lines FastSelect the lines you want to change.Press Shift + Alt + I (Shift + Option + I on Mac) to place a cursor at the end of every selected line.Type your closing quotation mark (" or ').Press Home (Cmd + Left Arrow on Mac) to move all cursors to the start of the lines.Type your opening quotation mark (" or '). [1] (https://stackoverflow.com/questions/44793523/how-to-edit-all-lines-in-visual-studio-code), [2] (https://code.visualstudio.com/docs/reference/default-keybindings), [3] (https://www.linkedin.com/pulse/keyboard-shortcuts-windows-visual-studio-code-beniamin-martis)If you want an even faster one-key solution, I can show you how to install a VSCodium extension or write a custom macro for this exact action. Let me know if you are on Windows/Linux or Mac.
+
+
+#xscreensaver issues fix
+To keep the `mate-screensaver` package installed for dependencies (such as notification services) while ensuring `xscreensaver` runs reliably as the default screensaver daemon, you need to disable `mate-screensaver`'s execution and configure `xscreensaver` to start automatically.
+
+---
+
+### Step 1: Disable the `mate-screensaver` Daemon
+
+Even though the package is installed, you can prevent its background process from running or grabbing DBus interfaces.
+
+1. **Disable autostart via desktop settings (Current User):**
+Run the following `gsettings` commands in a terminal to turn off MATE's idle screen blanking and lock screen daemon:
+```bash
+gsettings set org.mate.screensaver idle-activation-enabled false
+gsettings set org.mate.screensaver lock-enabled false
+
+```
+
+
+2. **Disable `mate-screensaver` System-Wide Autostart:**
+Copy the default autostart desktop entry into your local config (or edit the system-wide file) and set it to `NoDisplay=true` and `AutostartCondition`:
+```bash
+mkdir -p ~/.config/autostart
+cp /etc/xdg/autostart/mate-screensaver.desktop ~/.config/autostart/
+echo "X-MATE-Autostart-enabled=false" >> ~/.config/autostart/mate-screensaver.desktop
+echo "Hidden=true" >> ~/.config/autostart/mate-screensaver.desktop
+
+```
+
+
+3. *(Optional / System-Wide)* **Prevent the binary from running entirely:**
+If MATE desktop components attempt to restart `mate-screensaver`, replace or override the binary:
+```bash
+sudo dpkg-divert --local --rename --add /usr/bin/mate-screensaver
+sudo ln -s /bin/true /usr/bin/mate-screensaver
+
+```
+
+
+> **How to verify:** Run `pgrep -fa mate-screensaver`. It should return no active processes.
+
+
+
+---
+
+### Step 2: Configure `xscreensaver` to Autostart at Boot
+
+To make sure `xscreensaver` starts every time your session begins, create an XDG autostart file for it.
+
+1. Create a desktop entry in your autostart directory:
+```bash
+cat <<EOF > ~/.config/autostart/xscreensaver.desktop
+[Desktop Entry]
+Type=Application
+Name=XScreenSaver
+Comment=Start XScreenSaver daemon
+Exec=xscreensaver --no-splash
+Hidden=false
+NoDisplay=false
+X-MATE-Autostart-enabled=true
+EOF
+
+```
+
+
+2. If your distribution uses `systemd` user services (Debian/Ubuntu/Arch derivatives), you can also enable it via `systemctl` so it stays alive:
+```bash
+systemctl --user enable --now xscreensaver
+
+```
+
+
+> **How to verify:** Run `xscreensaver-command -ping` in the terminal. It should report that the daemon is running.
+
+
+
+---
+
+### Step 3: (Optional) Map MATE Lock Shortcuts to `xscreensaver`
+
+If you use keyboard shortcuts or menu icons to lock your screen, redirect them to trigger `xscreensaver`:
+
+```bash
+gsettings set org.mate.Marco.global-keybindings run-command-screensaver '<Control><Alt>l'
+gsettings set org.mate.Marco.keybinding-commands command-screensaver 'xscreensaver-command -lock'
+
+```
