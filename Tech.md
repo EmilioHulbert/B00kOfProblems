@@ -31136,8 +31136,6 @@ systemctl --user enable --now xscreensaver
 
 > **How to verify:** Run `xscreensaver-command -ping` in the terminal. It should report that the daemon is running.
 
-
-
 ---
 
 ### Step 3: (Optional) Map MATE Lock Shortcuts to `xscreensaver`
@@ -31149,3 +31147,4 @@ gsettings set org.mate.Marco.global-keybindings run-command-screensaver '<Contro
 gsettings set org.mate.Marco.keybinding-commands command-screensaver 'xscreensaver-command -lock'
 
 ```
+#sep 15 2026 started learning how to touch type
