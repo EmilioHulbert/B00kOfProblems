@@ -31148,3 +31148,214 @@ gsettings set org.mate.Marco.keybinding-commands command-screensaver 'xscreensav
 
 ```
 #sep 15 2026 started learning how to touch type
+
+#codium shortcut to merge vertical lines to one horizontal line
+Open:
+
+Ctrl + ,
+
+Search settings for:
+
+find in selection
+OR,
+complete method
+ctrl h then ctrl l to find in selected then find \s*\n\s* and replace with  • 
+continuation of regexes
+Yep. What you're looking for is **multi-cursor editing based on a repeated character/pattern**.
+
+If every line has:
+
+```text
+DATA & BUSINESS ANALYSIS • ...
+CUSTOMER & USER SUPPORT • ...
+REMOTE WORK • ...
+TECHNICAL • ...
+PROFESSIONAL • ...
+```
+
+and you want to put `"`, then `,` around the category, you can automate it.
+
+### Easiest: select the repeated `•`
+
+In VSCodium:
+
+1. Put your cursor on the first `•`.
+2. Press:
+
+```text
+Ctrl + Shift + L
+```
+
+This selects **all occurrences of the current selection** and gives you a cursor at each one.
+
+So if you first select:
+
+```text
+ • 
+```
+
+you'll get multiple cursors:
+
+```text
+DATA & BUSINESS ANALYSIS[ • ]...
+CUSTOMER & USER SUPPORT[ • ]...
+REMOTE WORK[ • ]...
+TECHNICAL[ • ]...
+PROFESSIONAL[ • ]...
+```
+
+Then you can manipulate all of them simultaneously.
+
+---
+
+### But there's a catch
+
+You don't actually want to modify the `•` itself. You want:
+
+```text
+CATEGORY • skills
+```
+
+to become:
+
+```text
+"CATEGORY",skills
+```
+
+So the cleaner method is **Find/Replace with regex + Find in Selection**, because the boundary you're interested in is the first `•` on each line.
+
+For example, select all your skill lines, then:
+
+**Ctrl+H → Find in Selection (`Alt+L`) → Regex**
+
+Find:
+
+```regex
+^(.+?) • 
+```
+
+Replace:
+
+```text
+"$1",
+```
+
+That transforms **every selected line simultaneously**:
+
+```text
+DATA & BUSINESS ANALYSIS • Data Analysis & Reporting • Performance Analysis
+CUSTOMER & USER SUPPORT • Issue Resolution • User Assistance
+REMOTE WORK • Independent Work • Written Communication
+```
+
+into:
+
+```text
+"DATA & BUSINESS ANALYSIS",Data Analysis & Reporting • Performance Analysis
+"CUSTOMER & USER SUPPORT",Issue Resolution • User Assistance
+"REMOTE WORK",Independent Work • Written Communication
+```
+
+### Why `^(.+?) • ` works
+
+You're essentially telling the editor:
+
+* `^` → start of the line
+* `(.+?)` → capture everything up to the **first** occurrence
+* `•` → the separator you're looking for
+* `$1` → put that captured category back
+* `"..."` → wrap it in quotes
+* `,` → put the comma after it
+
+So you don't need to manually place five cursors at all.
+
+**This is one of those cases where regex is much cleaner than multi-cursor editing.** Once you've got `Alt+L` for *Find in Selection*, this becomes a very powerful workflow for formatting copied data.
+
+and this too
+Ahh, I see what happened. You already have the **four new skill rows**, but they are currently in this form:
+
+```python
+["DATA & BUSINESS ANALYSIS • Data Analysis & Reporting • Performance Analysis • Data Interpretation • Process Improvement • Analytical Problem Solving • Management Information"],
+```
+
+while the old rows are correctly structured as:
+
+```python
+["Customer & User Support", "Issue resolution • User assistance • Clear communication • Problem diagnosis • Escalation • Follow-up"],
+```
+
+You want to **transform the four new rows into the exact same two-column structure before deleting the old four**.
+
+### Do this
+
+Select **only these four new rows**:
+
+```text
+["DATA & BUSINESS ANALYSIS • Data Analysis & Reporting • Performance Analysis • Data Interpretation • Process Improvement • Analytical Problem Solving • Management Information"],
+
+["PROGRAMMING & DATABASES • Python • SQL • PostgreSQL / MySQL • Django • Data Processing & Automation • Database Management "],
+
+["BUSINESS INTELLIGENCE & REPORTING • Microsoft Excel • Data Visualization • Dashboard Development • Automated Reporting • Git/GitHub "],
+
+["SYSTEMS & TECHNOLOGY • Linux • Windows • Networking & TCP/IP • Server Administration • Web Applications • Cybersecurity • Technical Support"],
+```
+
+Then:
+
+**Ctrl + H → Alt + L → enable Regex**
+
+Use:
+
+**Find:**
+
+```regex
+\["(.+?) • (.+?)"\],
+```
+
+**Replace:**
+
+```text
+["$1", "$2"],
+```
+
+### Result
+
+This:
+
+```python
+["DATA & BUSINESS ANALYSIS • Data Analysis & Reporting • Performance Analysis • Data Interpretation • Process Improvement • Analytical Problem Solving • Management Information"],
+```
+
+becomes:
+
+```python
+["DATA & BUSINESS ANALYSIS", "Data Analysis & Reporting • Performance Analysis • Data Interpretation • Process Improvement • Analytical Problem Solving • Management Information"],
+```
+
+And all four become:
+
+```python
+["DATA & BUSINESS ANALYSIS", "Data Analysis & Reporting • Performance Analysis • Data Interpretation • Process Improvement • Analytical Problem Solving • Management Information"],
+
+["PROGRAMMING & DATABASES", "Python • SQL • PostgreSQL / MySQL • Django • Data Processing & Automation • Database Management"],
+
+["BUSINESS INTELLIGENCE & REPORTING", "Microsoft Excel • Data Visualization • Dashboard Development • Automated Reporting • Git/GitHub"],
+
+["SYSTEMS & TECHNOLOGY", "Linux • Windows • Networking & TCP/IP • Server Administration • Web Applications • Cybersecurity • Technical Support"],
+```
+
+**Then** you can delete the old four rows.
+
+One subtle thing: I deliberately used `(.+?)` for the first capture because you have **many `•` separators** in each line. It grabs the **first** one as the boundary between the category and its skills, while the second capture gets everything after it.
+
+That's the pattern worth remembering:
+
+```text
+^(.+?) • (.+?)$
+```
+
+means essentially:
+
+> **first part** `•` **everything else**
+
+And because your Python already has the surrounding `["` and `"]`, our regex includes those too.
