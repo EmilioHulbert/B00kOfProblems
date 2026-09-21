@@ -31359,3 +31359,5 @@ means essentially:
 > **first part** `•` **everything else**
 
 And because your Python already has the surrounding `["` and `"]`, our regex includes those too.
+
+#key to hide and show side pane in atril document viewer is f9
