@@ -31361,3 +31361,26 @@ means essentially:
 And because your Python already has the surrounding `["` and `"]`, our regex includes those too.
 
 #key to hide and show side pane in atril document viewer is f9
+
+#codium cursor placement before occurences in the middle of sentences
+In VSCodium (and VS Code), the shortcut to place cursors at all occurrences of selected text is **`Ctrl + Shift + L`** (or **`Cmd + Shift + L`** on macOS).
+
+---
+
+### Step-by-Step Instructions
+
+1. **Highlight the target text:** Double-click or select ` 20` (including the space before `20`).
+2. **Select all occurrences:** Press **`Ctrl + Shift + L`** (`Cmd + Shift + L` on macOS). This places active multi-cursors before `20` on every line.
+3. **Select the date:** Hold **`Shift`** and press **`Right Arrow`** 8 times (or hold **`Ctrl + Shift`** / **`Cmd + Shift`** and press **`Right Arrow`**) to highlight `20XX-XX`.
+4. **Cut the date:** Press **`Ctrl + X`** (`Cmd + X`).
+5. **Move to the beginning of the line:** Press **`Home`** (or **`Cmd + Left Arrow`** on macOS).
+6. **Paste:** Press **`Ctrl + V`** (`Cmd + V`), then type a space.
+
+---
+
+### Alternative Multi-Cursor Shortcuts
+
+* **`Alt + Click`** (`Option + Click` on macOS): Manually add a cursor wherever you click.
+* **`Ctrl + Alt + Down Arrow`** (`Cmd + Option + Down Arrow` on macOS): Add a cursor directly above or below your current position.
+* **`Ctrl + D`** (`Cmd + D` on macOS): Select the current word, then press it repeatedly to select occurrences one by one.
+
