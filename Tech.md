@@ -31384,3 +31384,26 @@ In VSCodium (and VS Code), the shortcut to place cursors at all occurrences of s
 * **`Ctrl + Alt + Down Arrow`** (`Cmd + Option + Down Arrow` on macOS): Add a cursor directly above or below your current position.
 * **`Ctrl + D`** (`Cmd + D` on macOS): Select the current word, then press it repeatedly to select occurrences one by one.
 
+To skip or deselect a specific matching occurrence while using multi-cursor mode in VSCodium (and VS Code), use **`Ctrl + K, Ctrl + D`** (or **`Cmd + K, Cmd + D`** on macOS).
+
+---
+
+### How to Skip an Unwanted Match
+
+Instead of selecting everything at once with `Ctrl + Shift + L`, cycle through the matches individually:
+
+1. **Highlight the target text:** Double-click `20`.
+2. **Select occurrences one by one:** Press **`Ctrl + D`** (`Cmd + D` on macOS) to select the next matching `20`.
+3. **Skip an unwanted occurrence:** When the selection lands on the unwanted `20` (like in `20+ Real World Projects`), press **`Ctrl + K`** followed by **`Ctrl + D`**.
+* *What this does:* It drops/deselects the current match and automatically moves the cursor to the next match.
+
+
+4. **Continue:** Press **`Ctrl + D`** to select remaining matches.
+
+---
+
+### Alternative: Remove an Active Cursor
+
+If you already used `Ctrl + Shift + L` and have active cursors everywhere:
+
+* **`Alt + Click`** (or **`Option + Click`** on macOS) directly on the unwanted cursor to remove just that single cursor while keeping all others active.
