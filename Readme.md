@@ -31407,3 +31407,32 @@ Instead of selecting everything at once with `Ctrl + Shift + L`, cycle through t
 If you already used `Ctrl + Shift + L` and have active cursors everywhere:
 
 * **`Alt + Click`** (or **`Option + Click`** on macOS) directly on the unwanted cursor to remove just that single cursor while keeping all others active.
+
+##Zipping command linux
+The syntax for the `zip` command is:
+
+```bash
+zip -r <output_zip_file.zip> <folder_or_file_to_zip>
+
+```
+
+In your command, the order was reversed and the folder name was missing the `64` at the end (`frp_0.58.0_windows_amd` vs `frp_0.58.0_windows_amd64`).
+
+### Direct Solution
+
+To zip the `frp_0.58.0_windows_amd` folder into an archive named `frp_0.58.0_windows_amd64.zip`, run:
+
+```bash
+zip -r frp_0.58.0_windows_amd64.zip frp_0.58.0_windows_amd
+
+```
+
+### Alternative: Zip only the contents inside the folder
+
+If you want the zip file to contain only the files (`frpc.exe`, `frpc.toml`, `LICENSE`) without the top-level directory wrapper, navigate inside and zip from there:
+
+```bash
+cd frp_0.58.0_windows_amd
+zip -r ../frp_0.58.0_windows_amd64.zip .
+
+```
