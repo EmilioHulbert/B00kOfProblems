@@ -31438,6 +31438,11 @@ zip -r ../frp_0.58.0_windows_amd64.zip .
 ```
 
 ##Virtualbox setuid permissions fix
+error is
+The zsh: IOT instruction (also known as a SIGABRT or Abort signal) tells us that VirtualBox is intentionally triggering a self-destruct mechanism during its startup checks. Because it's trying to hide its diagnostic output (2> /dev/null), we need to bypass that wrapper to see exactly why it's crashing.
+This behavior is almost always caused by a hardened runtime security mismatch. VirtualBox checks the system libraries it loads; if it finds a mismatch, it immediately aborts to prevent potential privilege escalation.
+Let's unmask the error and fix it using the steps below:
+
 The output reveals the exact root cause: Qt FATAL: FATAL: The application binary appears to be running setuid, this is a security hole.
 What is happening here is a conflict between VirtualBox's unique hardening architecture and the graphical toolkit it uses (Qt).
 VirtualBox relies on a helper binary called VirtualBox.desktop or VBoxServer to manage root elevations, while the main graphical user interface (/usr/lib/virtualbox/VirtualBox) is built with Qt. Modern versions of Qt will intentionally trigger a SIGABRT (IOT instruction) and self-destruct if they detect that their own main GUI binary has a setuid flag (which we manually applied earlier using chmod 4711). Qt does this because executing a complex graphical interface with root privileges is a major security risk.
