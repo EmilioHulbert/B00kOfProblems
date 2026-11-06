@@ -31537,3 +31537,6 @@ This will instantly list out folders like `Profile 4` or `Default` right next to
 ---
 
 What would you like to check or modify in your Chrome profile files next?
+
+#pamtester download links
+https://mirror.sovtest.net/ubuntu/ubuntu/pool/universe/p/pamtester/
