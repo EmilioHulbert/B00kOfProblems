@@ -31714,3 +31714,76 @@ busctl --user call \
 If the test succeeds, we can choose a permanent solution that preserves notifications while eliminating the broken screensaver dependency. I would prefer a proper compatibility fix or a maintained alternative notification daemon over deleting MATE components.
 
 **Run the test and tell me how long Caja takes to eject the USB.** That result determines our permanent fix.
+
+##kiros custom .bashrc file
+i want kiro to use specific .bashrc file {
+"kiroAgent.workflows.enabled": true,
+"security.workspace.trust.untrustedFiles": "open",
+"kiroAgent.trust.defaultScope": "user",
+"diffEditor.maxComputationTime": 0,
+
+"terminal.integrated.profiles.linux": {
+"bash-clean": {
+"path": "/bin/bash",
+"args": ["--noprofile", "--rcfile", "/home/user/.bashrc-kiro"]
+}
+},
+"terminal.integrated.defaultProfile.linux": "bash-clean"
+} # vi settings.json
+┌──[Tue Nov 17 03:31:11 PM]root@Z3r0S3C]─[/home/user/.config/Kiro/User]
+└──╼[ZERODIUM]#
+what must i set since i used one similar to that of codium
+Your JSON configuration is already almost identical to what Kiro expects—since Kiro is a VS Code/Code-OSS fork (just like VSCodium), it uses the exact same terminal.integrated.* settings schema.
+
+However, looking at your terminal prompt (root@Z3r0S3C inside /home/user/.config/Kiro/User), there are two critical things you must fix or verify in your settings.json for this to actually take effect:
+
+1. Fix the User Path & Profile Location (root vs user)
+
+Notice your prompt says root@Z3r0S3C, yet you are editing /home/user/.config/Kiro/User/settings.json and pointing --rcfile to /home/user/.bashrc-kiro.
+
+If you run Kiro as root: Kiro reads /root/.config/Kiro/User/settings.json, NOT /home/user/.... Editing /home/user/ will have zero effect.
+If you run Kiro as user: Keep the settings file in /home/user/.config/Kiro/User/settings.json, and make sure /home/user/.bashrc-kiro is owned by user (not root), otherwise Bash will fail to read it or throw permission errors.
+2. Disable Shell Integration Overrides (Crucial for Custom --rcfile)
+
+In VS Code/Kiro forks, Terminal Shell Integration injects its own --rcfile wrapper script at launch, which frequently overrides or ignores custom --rcfile arguments in terminal.integrated.profiles.linux.
+
+To force Kiro to respect your custom --rcfile, explicitly disable shell integration in your settings.json:
+
+json
+Copy
+{
+    "kiroAgent.workflows.enabled": true,
+    "security.workspace.trust.untrustedFiles": "open",
+    "kiroAgent.trust.defaultScope": "user",
+    "diffEditor.maxComputationTime": 0,
+
+    "terminal.integrated.shellIntegration.enabled": false,
+    "terminal.integrated.inheritEnv": false,
+
+    "terminal.integrated.profiles.linux": {
+        "bash-clean": {
+            "path": "/bin/bash",
+            "args": [
+                "--noprofile",
+                "--rcfile",
+                "/home/user/.bashrc-kiro"
+            ],
+            "overrideName": true
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash-clean"
+}
+
+(Note: If you run Kiro as root, change /home/user/.bashrc-kiro to /root/.bashrc-kiro and put this settings.json in /root/.config/Kiro/User/settings.json.)
+
+How to Verify It Worked
+Kill existing terminals: Close any open terminal tabs in Kiro (don't just hide the panel—click the trash can icon on existing terminal instances so they don't persist).
+Open a fresh terminal (Ctrl + Shift + \`).
+Check the active process and environment: Run:
+bash
+Copy
+   ps -p $$ -o args=
+
+Verification: The output must explicitly show /bin/bash --noprofile --rcfile /home/user/.bashrc-kiro (without any /resources/app/out/vs/workbench/contrib/terminal/.../shellIntegration-bash.sh wrapper).
+
+If Kiro's agent execution tool (rather than the interactive bottom terminal) is still picking up your default environment, let me know whether you launch Kiro from a desktop icon or from your terminal as root.
