@@ -31633,3 +31633,84 @@ If you launch Chrome and a specific profile is completely missing from the menu,
 #polkit permissions fix
 sudo dpkg-statoverride --update --force-all --add root root 4755 /usr/libexec/polkit-agent-helper-1
 sudo systemctl restart polkit
+
+#mate usb slow unmount fix
+**We have now connected the 25-second delay to the exact failure in the notification daemon. This is the strongest evidence we've found so far.**
+
+Look at the timestamps:
+
+| Time              | Event                                                                       |
+| ----------------- | --------------------------------------------------------------------------- |
+| 15:39:33          | Notification daemon requests `org.mate.ScreenSaver`                         |
+| 15:39:33–15:39:58 | D-Bus activation waits for the unavailable MATE Screensaver                 |
+| 15:39:58          | Activation times out; notification daemon reports a GDBus assertion failure |
+| 15:39:58.504      | Caja's previously blocked main-thread poll resumes                          |
+| 15:39:58.522      | Caja's D-Bus thread's poll also resumes                                     |
+
+That 25-second match is not a coincidence I would ignore. It strongly implicates the notification daemon's failed screensaver lookup in the delay you experience when ejecting the USB.
+
+**The fix should be to stop MATE's notification daemon from waiting for a screensaver service that you intentionally disabled—not to restore MATE Screensaver.**
+
+There is also an independently reported Debian bug with the same combination of XScreenSaver, missing MATE Screensaver, notification-daemon activation failure and GDBus assertion.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://bugs.debian.org\&sz=32)
+
+Debian Bug report logs
+
+&#x20;Your system reproduces that failure repeatedly.
+
+
+
+## **1. Let's prove the fix before making it permanent**
+
+I want to perform one controlled test: temporarily prevent MATE's notification daemon from activating.
+
+This does not uninstall anything or modify XScreenSaver, Howdy, PAM, Caja or GVFS. Desktop notifications will be unavailable during the short test.
+
+**First, back up and temporarily disable the notification activation file:**
+
+```
+sudo cp -a \
+  /usr/share/dbus-1/services/org.freedesktop.mate.Notifications.service \
+  /root/org.freedesktop.mate.Notifications.service.backup
+
+sudo mv \
+  /usr/share/dbus-1/services/org.freedesktop.mate.Notifications.service \
+  /usr/share/dbus-1/services/org.freedesktop.mate.Notifications.service.disabled
+
+busctl --user call \
+  org.freedesktop.DBus \
+  /org/freedesktop/DBus \
+  org.freedesktop.DBus ReloadConfig
+```
+
+Now eject the Toshiba USB using Caja.
+
+Observe whether the approximately 17–25-second freeze disappears.
+
+## **2. Restore notifications immediately after the test**
+
+Regardless of the result, restore the original activation file:
+
+```
+sudo mv \
+  /usr/share/dbus-1/services/org.freedesktop.mate.Notifications.service.disabled \
+  /usr/share/dbus-1/services/org.freedesktop.mate.Notifications.service
+
+busctl --user call \
+  org.freedesktop.DBus \
+  /org/freedesktop/DBus \
+  org.freedesktop.DBus ReloadConfig
+```
+
+## **3. How we interpret the result**
+
+| Result                                    | What it tells us                                                    |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| Caja ejects immediately                   | Strong confirmation that notification-daemon activation is involved |
+| Caja still freezes                        | We need to investigate another blocking component                   |
+| Notifications fail but Caja is responsive | Expected during this temporary test                                 |
+
+If the test succeeds, we can choose a permanent solution that preserves notifications while eliminating the broken screensaver dependency. I would prefer a proper compatibility fix or a maintained alternative notification daemon over deleting MATE components.
+
+**Run the test and tell me how long Caja takes to eject the USB.** That result determines our permanent fix.
