@@ -31787,3 +31787,19 @@ Copy
 Verification: The output must explicitly show /bin/bash --noprofile --rcfile /home/user/.bashrc-kiro (without any /resources/app/out/vs/workbench/contrib/terminal/.../shellIntegration-bash.sh wrapper).
 
 If Kiro's agent execution tool (rather than the interactive bottom terminal) is still picking up your default environment, let me know whether you launch Kiro from a desktop icon or from your terminal as root.
+
+#quick fix for notification-daemon
+487  apt install --reinstall -y notification-daemon
+ 7489  dpkg -L notification-daemon | grep -E "bin|libexec|lib"
+ 7490  cat << 'EOF' > /usr/share/dbus-1/services/org.freedesktop.Notifications.service\n[D-BUS Service]\nName=org.freedesktop.Notifications\nExec=/usr/lib/notification-daemon/notification-daemon\nEOF\nchmod 644 /usr/share/dbus-1/services/org.freedesktop.Notifications.service
+┌──[Tue Nov 17 3:50:10 PM][root@I
+
+ apt-cache search --names-only "notify|notification-daemon"
+ 7484  apt install -y notification-daemon
+ 7485  clear
+ 7486  ls -la /usr/share/dbus-1/services/*Notification* /home/remac/.local/share/dbus-1/services/*Notification* 2>/dev/null
+ 7487  apt install --reinstall -y notification-daemon
+ 7488  clear
+ 7489  dpkg -L notification-daemon | grep -E "bin|libexec|lib"
+ 7490  cat << 'EOF' > /usr/share/dbus-1/services/org.freedesktop.Notifications.service\n[D-BUS Service]\nName=org.freedesktop.Notifications\nExec=/usr/lib/notification-daemon/notification-daemon\nEOF\nchmod 644 /usr/share/dbus-1/services/org.freedesktop.Notifications.service
+ 7491  ls -la /usr/share/dbus-1/services/*Notification*
