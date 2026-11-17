@@ -31628,3 +31628,8 @@ Step 6: Launch Chrome Clean
 
 Relaunch Chrome from your terminal. It will instantly realize the Local State file is missing and cleanly rebuild a brand new, uncorrupted master layout. Your profiles will be active, and the error loop will be permanently broken.
 If you launch Chrome and a specific profile is completely missing from the menu, let me know. We can manually link its existing data folder (e.g., Profile 1, Profile 2) back into your clean Local State map.
+
+#polkit permissions reset/fix
+#polkit permissions fix
+sudo dpkg-statoverride --update --force-all --add root root 4755 /usr/libexec/polkit-agent-helper-1
+sudo systemctl restart polkit
