@@ -31806,3 +31806,15 @@ If Kiro's agent execution tool (rather than the interactive bottom terminal) is 
 
 #view desktop manager and window manager
 echo "DE: $XDG_CURRENT_DESKTOP | Session: $XDG_SESSION_TYPE | DM: $(basename $(cat /etc/X11/default-display-manager 2>/dev/null)) | WM: $(pgrep -xl 'marco|compiz|xfwm4|kwin' | awk '{print $2}')"
+
+#why service networking stop still leaves me with internet
+Running service networking stop stops the legacy/traditional networking service (or ifupdown scripts on Debian/Ubuntu systems), which normally applies static or traditional network interface configurations at boot or service start.
+You still have internet because NetworkManager (or another active network manager like systemd-networkd) is running independently and actively managing your interfaces, IP addresses, and routes. [1] (https://www.reddit.com/r/linux/comments/36p3hv/why_you_shouldnt_hate_and_disable_networkmanager/), [2] (https://serverfault.com/questions/429014/what-is-the-relation-between-networkmanager-and-network-service-in-fedora-rhel-c), [3] (https://github.com/omacom/omarchy/issues/1414)
+
+What service networking stop actually affects
+
+• Interfaces configured via /etc/network/interfaces: If an interface is defined there and not managed by NetworkManager, stopping networking can bring that interface down or clear its static IP/routes.
+• Legacy ifup / ifdown hooks: Scripts in /etc/network/if-down.d/ or if-post-down.d/ may run when the service stops.
+• Future reboots or manual ifup/ifdown calls: Stopping it once does not uninstall it or prevent NetworkManager from keeping your current connection alive, though running both at the same time on the same interfaces can sometimes cause conflicts. [1] (https://unix.stackexchange.com/questions/56946/why-do-i-have-to-restart-networkmanager-service-all-the-time), [2] (https://serverfault.com/questions/429014/what-is-the-relation-between-networkmanager-and-network-service-in-fedora-rhel-c)
+Users on ServerFault agree that running competing network services can cause conflicts, while users on r/linux note that NetworkManager handles desktop connections, Wi-Fi, and routing directly. [1] (https://www.reddit.com/r/linux/comments/36p3hv/why_you_shouldnt_hate_and_disable_networkmanager/), [2] (https://serverfault.com/questions/429014/what-is-the-relation-between-networkmanager-and-network-service-in-fedora-rhel-c)
+If you want to check what is currently managing your connection, share your Linux distribution and the output of nmcli device status or ip addr.
