@@ -31803,3 +31803,6 @@ If Kiro's agent execution tool (rather than the interactive bottom terminal) is 
  7489  dpkg -L notification-daemon | grep -E "bin|libexec|lib"
  7490  cat << 'EOF' > /usr/share/dbus-1/services/org.freedesktop.Notifications.service\n[D-BUS Service]\nName=org.freedesktop.Notifications\nExec=/usr/lib/notification-daemon/notification-daemon\nEOF\nchmod 644 /usr/share/dbus-1/services/org.freedesktop.Notifications.service
  7491  ls -la /usr/share/dbus-1/services/*Notification*
+
+#view desktop manager and window manager
+echo "DE: $XDG_CURRENT_DESKTOP | Session: $XDG_SESSION_TYPE | DM: $(basename $(cat /etc/X11/default-display-manager 2>/dev/null)) | WM: $(pgrep -xl 'marco|compiz|xfwm4|kwin' | awk '{print $2}')"
